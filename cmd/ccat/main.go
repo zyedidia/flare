@@ -28,6 +28,8 @@ var theme = map[string]*color.Color{
 	"string":     color.New(color.FgYellow),
 	"comment":    color.New(color.FgBlack),
 	"number":     color.New(color.FgMagenta),
+	"constant":   color.New(color.FgMagenta),
+	"preproc":    color.New(color.FgRed),
 	"annotation": color.New(color.FgCyan),
 	"operator":   color.New(),
 	"special":    color.New(color.FgMagenta),
@@ -48,6 +50,9 @@ func colorize(start int, token *memo.Capture, captures map[int]string, theme map
 		clr = color.New()
 	} else {
 		clr = theme[captures[token.Id()]]
+	}
+	if clr == nil {
+		clr = color.New()
 	}
 
 	it := token.ChildIterator(0)
@@ -97,7 +102,10 @@ func main() {
 		fatal(err)
 	}
 
-	prog := pattern.MustCompile(h.Grammar)
+	prog, err := pattern.Compile(h.Grammar)
+	if err != nil {
+		fatal(err)
+	}
 	code := vm.Encode(prog)
 
 	data, err := ioutil.ReadFile(flag.Args()[0])
