@@ -134,24 +134,3 @@ func wordMatch(words ...string) p.Pattern {
 	// TODO: chars vs alnum
 	return p.Check(p.Plus(alnum), isa.MapChecker(m))
 }
-
-func CreateHighlighter(grammar map[string]p.Pattern, names []string) p.Pattern {
-	var tokens []p.Pattern
-	for _, k := range names {
-		tokens = append(tokens, p.NonTerm(k))
-	}
-
-	grammar["top"] = p.Star(p.Memo(p.Or(
-		p.NonTerm("token"),
-		p.Cap(p.Concat(
-			p.Any(1),
-			p.Star(p.Concat(
-				p.Not(p.NonTerm("token")),
-				p.Any(1),
-			)),
-		), Other),
-	)))
-	grammar["token"] = p.Or(tokens...)
-
-	return p.Grammar("top", grammar)
-}
