@@ -63,11 +63,7 @@ func main() {
 
 	fmt.Printf("Filetype: %s\n", *lang)
 
-	l, err := flare.LoadLanguage(*lang)
-	if err != nil {
-		fatal(err)
-	}
-	h, err := l.Highlighter()
+	h, err := flare.LoadHighlighter(*lang)
 	if err != nil {
 		fatal(err)
 	}

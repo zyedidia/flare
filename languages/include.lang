@@ -1,0 +1,7 @@
+ws      <- space+
+outside <- cap{'outside', "keyword"}
+go      <- include{"go"}
+goblock <- '```go' (!'```' (go / (. (!go .)*)))* '```'?
+token   <- ws
+         / outside
+         / goblock
