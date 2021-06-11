@@ -1,5 +1,3 @@
-filetype: latex
-
 rules:
     whitespace:
         pattern: "space+"

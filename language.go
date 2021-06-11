@@ -1,24 +1,38 @@
 package flare
 
 import (
+	"embed"
 	"fmt"
+	"path/filepath"
 	"strconv"
 
+	"github.com/zyedidia/gpeg/pattern"
 	p "github.com/zyedidia/gpeg/pattern"
 	"github.com/zyedidia/gpeg/re"
+	"github.com/zyedidia/gpeg/vm"
 	"gopkg.in/yaml.v2"
 )
 
 type Language struct {
-	Filetype string
-	Rules    map[string]Rule
-	Tokens   []string
+	Rules  map[string]Rule
+	Tokens []string
 }
 
 type Rule struct {
 	Pattern string
 	Capture string
 	Words   []string
+}
+
+//go:embed languages/*.yaml
+var languages embed.FS
+
+func LoadBuiltinLanguage(name string) (*Language, error) {
+	f, err := languages.ReadFile(filepath.Join("languages", name+".yaml"))
+	if err != nil {
+		return nil, err
+	}
+	return LoadLanguage(f)
 }
 
 func LoadLanguage(data []byte) (*Language, error) {
@@ -82,8 +96,13 @@ func (l *Language) Highlighter() (*Highlighter, error) {
 	)))
 	grammar["token"] = p.Or(tokens...)
 
+	prog, err := pattern.Compile(p.Grammar("top", grammar))
+	if err != nil {
+		return nil, err
+	}
+
 	return &Highlighter{
-		Grammar:  p.Grammar("top", grammar),
-		Captures: caps,
+		code:     vm.Encode(prog),
+		captures: caps,
 	}, nil
 }

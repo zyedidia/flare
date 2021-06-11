@@ -1,5 +1,3 @@
-filetype: c
-
 rules:
     whitespace:
         pattern: "space+"

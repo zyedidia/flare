@@ -1,5 +1,3 @@
-filetype: go
-
 rules:
     whitespace:
         pattern: "space+"
