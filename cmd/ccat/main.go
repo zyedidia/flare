@@ -39,7 +39,7 @@ func fatal(msg ...interface{}) {
 }
 
 func main() {
-	lang := flag.String("lang", "", "language file")
+	lang := flag.String("lang", "", "language")
 
 	flag.Parse()
 
@@ -63,7 +63,7 @@ func main() {
 
 	fmt.Printf("Filetype: %s\n", *lang)
 
-	l, err := flare.LoadBuiltinLanguage(*lang)
+	l, err := flare.LoadLanguage(*lang)
 	if err != nil {
 		fatal(err)
 	}

@@ -1,0 +1,16 @@
+rules:
+    whitespace:
+        pattern: "space+"
+    outside:
+        pattern: >-
+            'outside'
+        capture: keyword
+    go:
+        include: go
+    goblock:
+        pattern: >-
+            '```go' (!'```' (go / (. (!go .)*)))* '```'?
+tokens:
+    - whitespace
+    - outside
+    - goblock

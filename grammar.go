@@ -121,16 +121,10 @@ var (
 
 func wordMatch(words ...string) p.Pattern {
 	m := make(map[string]struct{})
-	var chars []byte
 
 	for _, w := range words {
-		for _, c := range []byte(w) {
-			chars = append(chars, c)
-		}
-
 		m[w] = struct{}{}
 	}
 
-	// TODO: chars vs alnum
-	return p.Check(p.Plus(alnum), isa.MapChecker(m))
+	return p.Check(word, isa.MapChecker(m))
 }

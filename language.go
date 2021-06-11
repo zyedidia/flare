@@ -22,28 +22,80 @@ type Rule struct {
 	Pattern string
 	Capture string
 	Words   []string
+	Include string
 }
 
 //go:embed languages/*.yaml
-var languages embed.FS
+var builtin embed.FS
+var custom map[string]func() ([]byte, error)
 
-func LoadBuiltinLanguage(name string) (*Language, error) {
-	f, err := languages.ReadFile(filepath.Join("languages", name+".yaml"))
+func AddLanguage(name string, loader func() ([]byte, error)) {
+	custom[name] = loader
+}
+
+func LoadLanguage(name string) (*Language, error) {
+	_, ok := custom[name]
+	if ok {
+		return loadCustomLanguage(name)
+	}
+	return loadBuiltinLanguage(name)
+}
+
+func loadBuiltinLanguage(name string) (*Language, error) {
+	f, err := builtin.ReadFile(filepath.Join("languages", name+".yaml"))
 	if err != nil {
 		return nil, err
 	}
-	return LoadLanguage(f)
+	return loadYaml(f)
 }
 
-func LoadLanguage(data []byte) (*Language, error) {
+// assumes a custom language with 'name' exists
+func loadCustomLanguage(name string) (*Language, error) {
+	loader := custom[name]
+	data, err := loader()
+	if err != nil {
+		return nil, err
+	}
+	return loadYaml(data)
+}
+
+func loadYaml(data []byte) (*Language, error) {
 	l := new(Language)
 	err := yaml.Unmarshal([]byte(data), l)
 	return l, err
 }
 
 func (l *Language) Highlighter() (*Highlighter, error) {
+	token, caps, err := l.pattern(0)
+	if err != nil {
+		return nil, err
+	}
+
+	grammar := make(map[string]p.Pattern)
+	grammar["top"] = p.Star(p.Memo(p.Or(
+		token,
+		p.Concat(
+			p.Any(1),
+			p.Star(p.Concat(
+				p.Not(token),
+				p.Any(1),
+			)),
+		),
+	)))
+
+	prog, err := pattern.Compile(p.Grammar("top", grammar))
+	if err != nil {
+		return nil, err
+	}
+
+	return &Highlighter{
+		code:     vm.Encode(prog),
+		captures: caps,
+	}, nil
+}
+
+func (l *Language) pattern(capid int) (p.Pattern, map[int]string, error) {
 	caps := make(map[int]string)
-	capid := 0
 
 	grammar := map[string]p.Pattern{
 		"alpha":   alpha,
@@ -61,13 +113,27 @@ func (l *Language) Highlighter() (*Highlighter, error) {
 
 	for name, rule := range l.Rules {
 		var patt p.Pattern
-		if rule.Words == nil {
+		if rule.Pattern != "" {
 			var err error
 			patt, err = re.Compile(rule.Pattern)
 			if err != nil {
-				return nil, fmt.Errorf("%s: %s: %w", name, strconv.Quote(rule.Pattern), err)
+				return nil, nil, fmt.Errorf("%s: %s: %w", name, strconv.Quote(rule.Pattern), err)
 			}
-		} else {
+		} else if rule.Include != "" {
+			lang, err := LoadLanguage(rule.Include)
+			if err != nil {
+				return nil, nil, fmt.Errorf("%s: invalid include: %s: %w", name, rule.Include, err)
+			}
+			grammar, icaps, err := lang.pattern(capid)
+			if err != nil {
+				return nil, nil, fmt.Errorf("during include of %s: %w", rule.Include, err)
+			}
+			for range icaps {
+				caps[capid] = icaps[capid]
+				capid++
+			}
+			patt = grammar
+		} else if rule.Words != nil {
 			patt = wordMatch(rule.Words...)
 		}
 
@@ -84,25 +150,7 @@ func (l *Language) Highlighter() (*Highlighter, error) {
 		tokens = append(tokens, p.NonTerm(t))
 	}
 
-	grammar["top"] = p.Star(p.Memo(p.Or(
-		p.NonTerm("token"),
-		p.Concat(
-			p.Any(1),
-			p.Star(p.Concat(
-				p.Not(p.NonTerm("token")),
-				p.Any(1),
-			)),
-		),
-	)))
 	grammar["token"] = p.Or(tokens...)
 
-	prog, err := pattern.Compile(p.Grammar("top", grammar))
-	if err != nil {
-		return nil, err
-	}
-
-	return &Highlighter{
-		code:     vm.Encode(prog),
-		captures: caps,
-	}, nil
+	return p.Grammar("token", grammar), caps, nil
 }
