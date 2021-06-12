@@ -63,15 +63,13 @@ func main() {
 
 	fmt.Printf("Filetype: %s\n", *lang)
 
-	h, err := flare.LoadHighlighter(*lang)
+	h, err := flare.LoadHighlighter(*lang, false)
 	if err != nil {
 		fatal(err)
 	}
 
-	tbl := memo.NewTreeTable(128)
-
 	buf := &bytes.Buffer{}
-	h.Highlight(f, tbl, func(text []byte, group string) {
+	h.Highlight(f, memo.NoneTable{}, func(text []byte, group string) {
 		clr := theme[group]
 		clr.Fprint(buf, string(text))
 	})

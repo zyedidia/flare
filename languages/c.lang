@@ -5,7 +5,7 @@ block_comment <- '/*' (!'*/' .)* '*/'?
 comment       <- cap{line_comment / block_comment, "comment"}
 
 sq_str        <- 'L'? "'" (escape / (!"'" .))* "'"?
-dq_str        <- 'L'? "'" (escape / (!'"' .))* '"'?
+dq_str        <- 'L'? '"' (escape / (!'"' .))* '"'?
 escape        <- cap{'\\' ['"tnbfr\\], "special"}
 string        <- cap{sq_str / dq_str, "string"}
 
@@ -24,7 +24,7 @@ preproc <- &'#' (cap{
 } / cap{
     '#' [\t ]* 'include',
     "preproc"
-} ([\t ]* '<' (!'>' .)* '>'?)?)
+} ([\t ]* cap{'<' (!'>' .)* '>'?, "string"})?)
 
 storage_class <- words{
     'typedef', 'extern', 'static', '_Thread_local', 'auto', 'register'

@@ -18,12 +18,12 @@ func AddLanguage(name string, loader func() ([]byte, error)) {
 	custom[name] = loader
 }
 
-func LoadHighlighter(name string) (*Highlighter, error) {
+func LoadHighlighter(name string, memo bool) (*Highlighter, error) {
 	data, err := loadData(name)
 	if err != nil {
 		return nil, err
 	}
-	return loadHighlighter(data)
+	return loadHighlighter(data, memo)
 }
 
 func loadData(name string) ([]byte, error) {
@@ -33,7 +33,7 @@ func loadData(name string) ([]byte, error) {
 	return builtin.ReadFile(filepath.Join("languages", name+".lang"))
 }
 
-func loadHighlighter(data []byte) (*Highlighter, error) {
+func loadHighlighter(data []byte, memo bool) (*Highlighter, error) {
 	capid := 0
 	caps := make(map[int]string)
 
@@ -67,6 +67,22 @@ func loadHighlighter(data []byte) (*Highlighter, error) {
 		return nil, err
 	}
 
+	top := p.Or(
+		token,
+		p.Concat(
+			p.Any(1),
+			p.Star(p.Concat(
+				p.Not(token),
+				p.Any(1),
+			)),
+		),
+	)
+	if memo {
+		top = p.Memo(top)
+	}
+
+	top = p.Star(top)
+
 	grammar := map[string]p.Pattern{
 		"alpha":   alpha,
 		"alnum":   alnum,
@@ -79,17 +95,7 @@ func loadHighlighter(data []byte) (*Highlighter, error) {
 		"integer": integer,
 		"float":   float,
 		"word":    word,
-
-		"top": p.Star(p.Memo(p.Or(
-			token,
-			p.Concat(
-				p.Any(1),
-				p.Star(p.Concat(
-					p.Not(token),
-					p.Any(1),
-				)),
-			),
-		))),
+		"top":     top,
 	}
 
 	prog, err := pattern.Compile(p.Grammar("top", grammar))
