@@ -1,0 +1,116 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' (!'*/' .)* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+sq_str        <- 'L'? "'" (escape / (!"'" .))* "'"?
+dq_str        <- 'L'? "'" (escape / (!'"' .))* '"'?
+escape        <- cap{'\\' ['"tnbfr\\], "special"}
+string        <- cap{sq_str / dq_str, "string"}
+
+float_suffix   <- 'f'?
+integer_suffix <- ([uU]? words{'l', 'L', 'll', 'LL'}?) / (words{'l', 'L', 'll', 'LL'}? [uU]?)
+number         <- cap{(float float_suffix) / (integer integer_suffix), "number"}
+
+preproc_word <- words{
+    'define', 'elif', 'else', 'endif', 'error', 'if', 'ifdef', 'ifndef', 'line',
+    'pragma', 'undef', 'warning'
+}
+
+preproc <- &'#' (cap{
+    '#' [\t ]* preproc_word,
+    "preproc"
+} / cap{
+    '#' [\t ]* 'include',
+    "preproc"
+} ([\t ]* '<' (!'>' .)* '>'?)?)
+
+storage_class <- words{
+    'typedef', 'extern', 'static', '_Thread_local', 'auto', 'register'
+}
+
+type_qualifier <- words{
+    'const', 'restrict', 'volatile', '_Atomic',
+}
+
+function_specifier <- words{
+    'inline', '_Noreturn',
+}
+
+extra_keywords <- words{
+    'asm', '__asm', '__asm__', '__restrict__', '__inline', '__inline__',
+    '__attribute__', '__declspec'
+}
+
+keyword <- cap{
+    words{
+        'break', 'case', 'continue', 'default', 'do', 'else', 'enum', 'for', 'goto',
+        'if', 'return', 'switch', 'while',
+        '_Alignas', '_Generic', '_Static_assert',
+    } / storage_class / type_qualifier / function_specifier / extra_keywords,
+    "keyword"
+}
+
+errno <- words{
+    'E2BIG', 'EACCES', 'EADDRINUSE', 'EADDRNOTAVAIL', 'EAFNOSUPPORT',
+    'EAGAIN', 'EALREADY', 'EBADF', 'EBADMSG', 'EBUSY', 'ECANCELED', 'ECHILD',
+    'ECONNABORTED', 'ECONNREFUSED', 'ECONNRESET', 'EDEADLK', 'EDESTADDRREQ',
+    'EDOM', 'EDQUOT', 'EEXIST', 'EFAULT', 'EFBIG', 'EHOSTUNREACH', 'EIDRM',
+    'EILSEQ', 'EINPROGRESS', 'EINTR', 'EINVAL', 'EIO', 'EISCONN', 'EISDIR',
+    'ELOOP', 'EMFILE', 'EMLINK', 'EMSGSIZE', 'EMULTIHOP', 'ENAMETOOLONG',
+    'ENETDOWN', 'ENETRESET', 'ENETUNREACH', 'ENFILE', 'ENOBUFS', 'ENODATA',
+    'ENODEV', 'ENOENT', 'ENOEXEC', 'ENOLCK', 'ENOLINK', 'ENOMEM',
+    'ENOMSG', 'ENOPROTOOPT', 'ENOSPC', 'ENOSR', 'ENOSTR', 'ENOSYS',
+    'ENOTCONN', 'ENOTDIR', 'ENOTEMPTY', 'ENOTRECOVERABLE', 'ENOTSOCK',
+    'ENOTSUP', 'ENOTTY', 'ENXIO', 'EOPNOTSUPP', 'EOVERFLOW', 'EOWNERDEAD',
+    'EPERM', 'EPIPE', 'EPROTO', 'EPROTONOSUPPORT', 'EPROTOTYPE', 'ERANGE',
+    'EROFS', 'ESPIPE', 'ESRCH', 'ESTALE', 'ETIME', 'ETIMEDOUT', 'ETXTBSY',
+    'EWOULDBLOCK', 'EXDEV',
+}
+
+preproc_macros <- words{
+    '__DATE__', '__FILE__', '__LINE__', '__TIME__', '__func__'
+}
+
+constant <- cap{
+    words{
+        'true', 'false', 'NULL', 'CHAR_BIT', 'SIZE_MAX'
+    } / (('WINT' / 'WCHAR' / 'SIG_ATOMIC' / 'PTRDIFF') ('_MIN' / '_MAX'))
+      / ('INT' ((('_LEAST' / '_FAST')? dec_num+) / 'MAX' / 'PTR') ('_MIN' / 'MAX'))
+      / ('UINT' ((('_LEAST' / '_FAST')? dec_num+) 'MAX' / 'PTR') '_MAX')
+      / errno / preproc_macros,
+    "constant"
+}
+
+type <- cap{
+    words{
+        'bool', 'char', 'double', 'float', 'int', 'long', 'short',
+        'signed', 'struct', 'union', 'unsigned', 'void', '_Bool', '_Complex',
+        '_Imaginary', 'ptrdiff_t', 'size_t', 'max_align_t', 'wchar_t',
+        'intptr_t', 'uintptr_t', 'intmax_t', 'uintmax_t'
+    } / ('u'? 'int' ('_least' / '_fast')? dec_num+ '_t') / ([usif] dec_num+ '_t')
+      / ('__'? [usif] dec_num+),
+    "type"
+}
+
+label <- word ':'
+
+identifier <- cap{word, "identifier"}
+
+operator <- cap{
+    [+\-/*%<>~!=^&|?~:;,.()\[\]{}] / words{'sizeof', '_Alignof'},
+    "operator"
+}
+
+token <- ws
+       / comment
+       / keyword
+       / type
+       / constant
+       / operator
+       / label
+       / identifier
+       / string
+       / number
+       / preproc

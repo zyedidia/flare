@@ -1,0 +1,61 @@
+ws <- space+
+
+line_comment  <- '--' (!'\n' .)*
+block_comment <- '{-' (!'-}' .)* '-}'?
+
+comment <- cap{
+    line_comment / block_comment,
+    "comment"
+}
+
+sq_str <- "'" (escape / (!"'" .))* "'"?
+dq_str <- '"' (escape / (!'"' .))* '"'?
+escape <- cap{'\\' ['"tnbfr\\], "special"}
+string <- cap{
+    sq_str / dq_str,
+    "string"
+}
+number <- cap{
+    float / integer,
+    "number"
+}
+
+keyword <- cap{
+    words{
+        'case', 'class', 'data', 'default', 'deriving', 'do', 'else', 'if', 'import',
+        'in', 'infix', 'infixl', 'infixr', 'instance', 'let', 'module', 'newtype',
+        'of', 'then', 'type', 'where', '_', 'as', 'qualified', 'hiding'
+    },
+    "keyword"
+}
+
+hsword <- (alnum / [._'#])*
+
+identifier <- cap{
+    (alpha / '_') hsword,
+    "identifier"
+}
+
+punct <- [!-/:-@\[-'{-~]
+
+op <- ![()\[\]{}] punct
+operator <- cap{
+    op,
+    "operator"
+}
+
+upper <- [A-Z]
+
+constructor <- cap{
+    (upper hsword) / (':' (!':' op+)),
+    "type"
+}
+
+token <- ws
+       / keyword
+       / constructor
+       / identifier
+       / string
+       / comment
+       / number
+       / operator

@@ -1,0 +1,28 @@
+ws <- space+
+comment <- '/*' (!'*/' .)* '*/'?
+sq_str  <- 'u'? "'" (!"'" .)* "'"?
+dq_str  <- 'U'? '"' (!'"' .)* '"'?
+string  <- cap{
+    sq_str / dq_str,
+    "string"
+}
+
+jsonint <- [+\-]? digit+ [Ll]?
+number  <- cap{(float / jsonint), "number"}
+
+keyword <- cap{
+    words{"true", "false", "null"},
+    "keyword"
+}
+
+operator <- cap{
+    [\[\]{}:,],
+    "operator"
+}
+
+token <- ws
+       / comment
+       / string
+       / number
+       / keyword
+       / operator
