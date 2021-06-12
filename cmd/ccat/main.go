@@ -8,30 +8,12 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/fatih/color"
+	"github.com/jwalton/gchalk"
 	"github.com/zyedidia/flare"
+	"github.com/zyedidia/flare/theme"
 	"github.com/zyedidia/ftdetect"
 	"github.com/zyedidia/gpeg/memo"
 )
-
-var theme = map[string]*color.Color{
-	"":           color.New(),
-	"whitespace": color.New(),
-	"class":      color.New(color.FgBlue),
-	"keyword":    color.New(color.FgRed),
-	"type":       color.New(color.FgBlue),
-	"function":   color.New(color.FgGreen),
-	"identifier": color.New(),
-	"string":     color.New(color.FgYellow),
-	"comment":    color.New(color.FgBlack),
-	"number":     color.New(color.FgMagenta),
-	"constant":   color.New(color.FgMagenta),
-	"preproc":    color.New(color.FgRed),
-	"annotation": color.New(color.FgCyan),
-	"operator":   color.New(),
-	"special":    color.New(color.FgMagenta),
-	"other":      color.New(),
-}
 
 func fatal(msg ...interface{}) {
 	fmt.Fprintln(os.Stderr, msg...)
@@ -68,10 +50,23 @@ func main() {
 		fatal(err)
 	}
 
+	th, err := theme.LoadTheme("monokai")
+	if err != nil {
+		fatal(err)
+	}
+
 	buf := &bytes.Buffer{}
 	h.Highlight(f, memo.NoneTable{}, func(text []byte, group string) {
-		clr := theme[group]
-		clr.Fprint(buf, string(text))
+		style := th.Style(group)
+		fmt.Fprint(buf, stylize(string(text), style))
 	})
 	fmt.Print(buf.String())
+}
+
+func stylize(s string, style theme.Style) string {
+	gc := gchalk.New()
+	if style.Fg != nil {
+		gc = gc.WithRGB(style.Fg.R, style.Fg.G, style.Fg.B)
+	}
+	return gc.StyleMust()(s)
 }

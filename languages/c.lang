@@ -6,12 +6,12 @@ comment       <- cap{line_comment / block_comment, "comment"}
 
 sq_str        <- 'L'? "'" (escape / (!"'" .))* "'"?
 dq_str        <- 'L'? '"' (escape / (!'"' .))* '"'?
-escape        <- cap{'\\' ['"tnbfr\\], "special"}
-string        <- cap{sq_str / dq_str, "string"}
+escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+string        <- cap{sq_str / dq_str, "constant.string"}
 
 float_suffix   <- 'f'?
 integer_suffix <- ([uU]? words{'l', 'L', 'll', 'LL'}?) / (words{'l', 'L', 'll', 'LL'}? [uU]?)
-number         <- cap{(float float_suffix) / (integer integer_suffix), "number"}
+number         <- cap{(float float_suffix) / (integer integer_suffix), "constant.number"}
 
 preproc_word <- words{
     'define', 'elif', 'else', 'endif', 'error', 'if', 'ifdef', 'ifndef', 'line',
@@ -24,7 +24,7 @@ preproc <- &'#' (cap{
 } / cap{
     '#' [\t ]* 'include',
     "preproc"
-} ([\t ]* cap{'<' (!'>' .)* '>'?, "string"})?)
+} ([\t ]* cap{'<' (!'>' .)* '>'?, "constant.string"})?)
 
 storage_class <- words{
     'typedef', 'extern', 'static', '_Thread_local', 'auto', 'register'
@@ -100,7 +100,7 @@ identifier <- cap{word, "identifier"}
 
 operator <- cap{
     [+\-/*%<>~!=^&|?~:;,.()\[\]{}] / words{'sizeof', '_Alignof'},
-    "operator"
+    "symbol.operator"
 }
 
 token <- ws

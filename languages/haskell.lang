@@ -10,14 +10,14 @@ comment <- cap{
 
 sq_str <- "'" (escape / (!"'" .))* "'"?
 dq_str <- '"' (escape / (!'"' .))* '"'?
-escape <- cap{'\\' ['"tnbfr\\], "special"}
+escape <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
 string <- cap{
     sq_str / dq_str,
-    "string"
+    "constant.string"
 }
 number <- cap{
     float / integer,
-    "number"
+    "constant.number"
 }
 
 keyword <- cap{
@@ -41,7 +41,7 @@ punct <- [!-/:-@\[-'{-~]
 op <- ![()\[\]{}] punct
 operator <- cap{
     op,
-    "operator"
+    "symbol.operator"
 }
 
 upper <- [A-Z]

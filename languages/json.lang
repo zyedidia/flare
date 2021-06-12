@@ -4,11 +4,11 @@ sq_str  <- 'u'? "'" (!"'" .)* "'"?
 dq_str  <- 'U'? '"' (!'"' .)* '"'?
 string  <- cap{
     sq_str / dq_str,
-    "string"
+    "constant.string"
 }
 
 jsonint <- [+\-]? digit+ [Ll]?
-number  <- cap{(float / jsonint), "number"}
+number  <- cap{(float / jsonint), "constant.number"}
 
 keyword <- cap{
     words{"true", "false", "null"},
@@ -17,7 +17,7 @@ keyword <- cap{
 
 operator <- cap{
     [\[\]{}:,],
-    "operator"
+    "symbol.operator"
 }
 
 token <- ws

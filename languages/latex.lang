@@ -19,7 +19,7 @@ math <- cap{
 }
 environment <- cap{
     '\\' ('begin' / 'end') ' '* '{' word '*'? '}',
-    "class"
+    "type.class"
 }
 
 command <- cap{
@@ -29,7 +29,7 @@ command <- cap{
 
 operator <- cap{
     [&#{}\[\]],
-    "operator"
+    "symbol.operator"
 }
 
 token <- ws

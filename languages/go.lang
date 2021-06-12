@@ -8,7 +8,7 @@ keyword <- cap{
 }
 constant <- cap{
     words{"true", "false", "iota", "nil"},
-    "constant"
+    "constant.bool"
 }
 type <- cap{
     words{
@@ -31,15 +31,15 @@ identifier    <- cap{word, "identifier"}
 sq_str        <- "'" (escape / (!"'" .))* "'"?
 dq_str        <- '"' (escape / (!'"' .))* '"'?
 raw_str       <- "`" (!"`" .)* "`"?
-escape        <- cap{'\\' ['"tnbfr\\], "special"}
-string        <- cap{sq_str / dq_str / raw_str, "string"}
+escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+string        <- cap{sq_str / dq_str / raw_str, "constant.string"}
 
 line_comment  <- '//' (!'\n' .)*
 block_comment <- '/*' (!'*/' .)* '*/'?
 comment       <- cap{line_comment / block_comment, "comment"}
 
-number        <- cap{float / integer 'i'?, "number"}
-operator      <- cap{[+\-*/%&|^<>=!:;.,()\[\]{}], "operator"}
+number        <- cap{float / integer 'i'?, "constant.number"}
+operator      <- cap{[+\-*/%&|^<>=!:;.,()\[\]{}], "symbol.operator"}
 
 token <- ws
        / keyword

@@ -6,10 +6,10 @@ comment       <- cap{line_comment / block_comment, "comment"}
 
 sq_str        <- "'" (escape / (!"'" .))* "'"?
 dq_str        <- '"' (escape / (!'"' .))* '"'?
-escape        <- cap{'\\' ['"tnbfr\\], "special"}
-string        <- cap{sq_str / dq_str, "string"}
+escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+string        <- cap{sq_str / dq_str, "constant.string"}
 
-number        <- cap{(float / integer) [LlFfDd]?, "number"}
+number        <- cap{(float / integer) [LlFfDd]?, "constant.number"}
 
 keyword <- cap{
     words{
@@ -18,10 +18,16 @@ keyword <- cap{
         "goto", "if", "implements", "import", "instanceof", "interface",
         "native", "new", "package", "private", "protected", "public", "return",
         "static", "strictfp", "super", "switch", "synchronized", "this",
-        "throw", "throws", "transient", "try", "while", "volatile", "true",
-        "false", "null"
+        "throw", "throws", "transient", "try", "while", "volatile"
     },
     "keyword"
+}
+
+bool <- cap{
+    words{
+        "true", "false", "null"
+    },
+    "constant.bool"
 }
 
 type <- cap{
@@ -34,14 +40,15 @@ type <- cap{
 }
 
 identifier <- cap{word, "identifier"}
-operator   <- cap{[+\-/*%<>!=^&|?~:;.()\[\]{}], "operator"}
-annotation <- cap{'@' word, "annotation"}
+operator   <- cap{[+\-/*%<>!=^&|?~:;.()\[\]{}], "symbol.operator"}
+annotation <- cap{'@' word, "type.annotation"}
 func       <- cap{word, "function"} '('
-class      <- cap{'class', "keyword"} space+ cap{word, "class"}
+class      <- cap{'class', "keyword"} space+ cap{word, "type.class"}
 
 token <- ws
        / class
        / keyword
+       / bool
        / type
        / func
        / identifier
