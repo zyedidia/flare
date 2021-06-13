@@ -10,24 +10,32 @@ import (
 
 type HTMLStyler struct {
 	theme theme.Theme
+	class bool
 	name  string
 }
 
 func (st *HTMLStyler) Style(s, group string) string {
-	style := st.theme.Style(group)
-
-	css := ""
-	if style.Fg != nil {
-		css += fmt.Sprintf("color:rgb(%d,%d,%d);", style.Fg.R, style.Fg.G, style.Fg.B)
-	}
-	if style.Attr&theme.AttrBold != 0 {
-		css += "font-weight:bold;"
-	}
-
 	if s != "" && group != "" {
-		return fmt.Sprintf("<span class=\"%s\" style=\"%s\">%s</span>", strings.ReplaceAll(group, ".", "-"), css, html.EscapeString(s))
+		style := st.theme.Style(group)
+
+		css := ""
+		if style.Fg != nil {
+			css += fmt.Sprintf("color:%s;", style.Fg.Hex())
+		}
+		if style.Attr&theme.AttrBold != 0 {
+			css += "font-weight:bold;"
+		}
+
+		class := ""
+		if st.class {
+			class = fmt.Sprintf("class=\"%s\"", strings.ReplaceAll(group, ".", "-"))
+		}
+
+		if style != st.theme.Style("default") {
+			return fmt.Sprintf("<span %s style=\"%s\">%s</span>", class, css, html.EscapeString(s))
+		}
 	}
-	return s
+	return html.EscapeString(s)
 }
 
 func (st *HTMLStyler) Pre() string {
@@ -35,11 +43,11 @@ func (st *HTMLStyler) Pre() string {
 
 	if st.theme["default"].Fg != nil {
 		fg := st.theme["default"].Fg
-		css += fmt.Sprintf("#%s { color:rgb(%d,%d,%d); }", "hcat", fg.R, fg.G, fg.B)
+		css += fmt.Sprintf("#%s { color:%s; }", "hcat", fg.Hex())
 	}
 	if st.theme["default"].Bg != nil {
 		bg := st.theme["default"].Bg
-		css += fmt.Sprintf("#%s { background-color:rgb(%d,%d,%d); }", "hcat", bg.R, bg.G, bg.B)
+		css += fmt.Sprintf("#%s { background-color:%s; }", "hcat", bg.Hex())
 	}
 
 	css += "</style>"
