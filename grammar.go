@@ -6,54 +6,6 @@ import (
 	p "github.com/zyedidia/gpeg/pattern"
 )
 
-const (
-	Whitespace = iota
-	Class
-	Keyword
-	Type
-	Function
-	Identifier
-	String
-	Comment
-	Number
-	Annotation
-	Operator
-	Special
-	Other
-)
-
-type TokenType byte
-
-func (t TokenType) String() string {
-	switch t {
-	case Whitespace:
-		return "Whitespace"
-	case Class:
-		return "Class"
-	case Keyword:
-		return "Keyword"
-	case Type:
-		return "Type"
-	case Function:
-		return "Function"
-	case Identifier:
-		return "Identifier"
-	case String:
-		return "String"
-	case Comment:
-		return "Comment"
-	case Number:
-		return "Number"
-	case Annotation:
-		return "Annotation"
-	case Operator:
-		return "Operator"
-	case Special:
-		return "Special"
-	}
-	return "Other"
-}
-
 var (
 	alpha  = p.Set(charset.Range('A', 'Z').Add(charset.Range('a', 'z')))
 	alnum  = p.Set(charset.Range('A', 'Z').Add(charset.Range('a', 'z')).Add(charset.Range('0', '9')))
