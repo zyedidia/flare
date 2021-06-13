@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html"
 	"strings"
 
 	"github.com/zyedidia/flare/theme"
@@ -13,24 +14,24 @@ type HTMLStyler struct {
 }
 
 func (st *HTMLStyler) Style(s, group string) string {
+	style := st.theme.Style(group)
+
+	css := ""
+	if style.Fg != nil {
+		css += fmt.Sprintf("color:rgb(%d,%d,%d);", style.Fg.R, style.Fg.G, style.Fg.B)
+	}
+	if style.Attr&theme.AttrBold != 0 {
+		css += "font-weight:bold;"
+	}
+
 	if s != "" && group != "" {
-		return fmt.Sprintf("<span class=\"%s\">%s</span>", strings.ReplaceAll(group, ".", "-"), s)
+		return fmt.Sprintf("<span class=\"%s\" style=\"%s\">%s</span>", strings.ReplaceAll(group, ".", "-"), css, html.EscapeString(s))
 	}
 	return s
 }
 
 func (st *HTMLStyler) Pre() string {
 	css := "<style>"
-	for k, style := range st.theme {
-		internal := ""
-		if style.Fg != nil {
-			internal += fmt.Sprintf("color:rgb(%d,%d,%d);", style.Fg.R, style.Fg.G, style.Fg.B)
-		}
-		if style.Attr&theme.AttrBold != 0 {
-			internal += "font-weight:bold;"
-		}
-		css += fmt.Sprintf(".%s { %s } ", strings.ReplaceAll(k, ".", "-"), internal)
-	}
 
 	if st.theme["default"].Fg != nil {
 		fg := st.theme["default"].Fg
