@@ -45,11 +45,6 @@ func main() {
 		fatal(err)
 	}
 
-	lvl := gchalk.GetLevel()
-	if opts.ColorLvl != -1 {
-		lvl = gchalk.ColorLevel(opts.ColorLvl)
-	}
-
 	if len(args) == 0 {
 		args = []string{"-"}
 	}
@@ -88,19 +83,35 @@ func main() {
 			fatal(err)
 		}
 
-		buf := &bytes.Buffer{}
-		h.Highlight(f, memo.NoneTable{}, func(text []byte, group string) {
-			style := th.Style(group)
-			fmt.Fprint(buf, stylize(string(text), style, lvl))
-		})
-		fmt.Print(buf.String())
+		var styler Styler
+		if opts.Html {
+			styler = &HTMLStyler{
+				theme: th,
+				name:  lang,
+			}
+		} else {
+			styler = &GChalkStyler{
+				theme: th,
+				lvl:   gchalk.GetLevel(),
+			}
+		}
+
+		fmt.Print(highlight(h, th, f, styler))
 	}
 }
 
-func stylize(s string, style theme.Style, lvl gchalk.ColorLevel) string {
-	gc := gchalk.New(gchalk.ForceLevel(lvl))
-	if style.Fg != nil {
-		gc = gc.WithRGB(style.Fg.R, style.Fg.G, style.Fg.B)
-	}
-	return gc.StyleMust()(s)
+type Styler interface {
+	Pre() string
+	Style(s, group string) string
+	Post() string
+}
+
+func highlight(h *flare.Highlighter, th theme.Theme, f io.ReaderAt, st Styler) string {
+	buf := &bytes.Buffer{}
+	buf.WriteString(st.Pre())
+	h.Highlight(f, memo.NoneTable{}, func(text []byte, group string) {
+		fmt.Fprint(buf, st.Style(string(text), group))
+	})
+	buf.WriteString(st.Post())
+	return buf.String()
 }
