@@ -4,7 +4,7 @@ line_comment  <- '//' (!'\n' .)*
 block_comment <- '/*' (!'*/' .)* '*/'?
 comment       <- cap{line_comment / block_comment, "comment"}
 
-sq_str        <- 'L'? "'" (escape / (!"'" .))* "'"?
+sq_str        <- 'L'? "'" (escape / .) "'"?
 dq_str        <- 'L'? '"' (escape / (!'"' .))* '"'?
 raw_str       <- '#"' (!"#" .)* "#"?
 escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
@@ -64,7 +64,7 @@ operator <- cap{
 }
 
 attribute <- cap{
-    "#[" (!']' .)* "]"?,
+    '#[' (!']' .)* ']'?,
     "preproc"
 }
 
@@ -77,5 +77,5 @@ token <- ws
        / string
        / comment
        / number
-       / operator
        / attribute
+       / operator
