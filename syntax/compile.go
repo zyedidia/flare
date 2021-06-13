@@ -23,63 +23,67 @@ type CustomFns struct {
 	Cap     func(p pattern.Pattern, group string) pattern.Pattern
 	Words   func(words ...string) pattern.Pattern
 	Include func(lang string) pattern.Pattern
+	Imports map[string]pattern.Pattern
 }
 
-func compile(root *memo.Capture, s string, fns CustomFns) pattern.Pattern {
+func compile(name string, root *memo.Capture, s string, fns CustomFns) pattern.Pattern {
 	var p pattern.Pattern
 	switch root.Id() {
 	case idPattern:
-		p = compile(root.Child(0), s, fns)
+		p = compile(name, root.Child(0), s, fns)
 	case idGrammar:
 		nonterms := make(map[string]pattern.Pattern)
+		for k, v := range fns.Imports {
+			nonterms[name+k] = v
+		}
 		it := root.ChildIterator(0)
 		for c := it(); c != nil; c = it() {
-			k, v := compileDef(c, s, fns)
-			nonterms[k] = v
+			k, v := compileDef(name, c, s, fns)
+			nonterms[name+k] = v
 		}
-		p = pattern.Grammar("token", nonterms)
+		p = pattern.Grammar(name+"token", nonterms)
 	case idExpression:
 		alternations := make([]pattern.Pattern, 0, root.NumChildren())
 		it := root.ChildIterator(0)
 		for c := it(); c != nil; c = it() {
-			alternations = append(alternations, compile(c, s, fns))
+			alternations = append(alternations, compile(name, c, s, fns))
 		}
 		p = pattern.Or(alternations...)
 	case idSequence:
 		concats := make([]pattern.Pattern, 0, root.NumChildren())
 		it := root.ChildIterator(0)
 		for c := it(); c != nil; c = it() {
-			concats = append(concats, compile(c, s, fns))
+			concats = append(concats, compile(name, c, s, fns))
 		}
 		p = pattern.Concat(concats...)
 	case idPrefix:
 		c := root.Child(0)
 		switch c.Id() {
 		case idAND:
-			p = pattern.And(compile(root.Child(1), s, fns))
+			p = pattern.And(compile(name, root.Child(1), s, fns))
 		case idNOT:
-			p = pattern.Not(compile(root.Child(1), s, fns))
+			p = pattern.Not(compile(name, root.Child(1), s, fns))
 		default:
-			p = compile(root.Child(0), s, fns)
+			p = compile(name, root.Child(0), s, fns)
 		}
 	case idSuffix:
 		if root.NumChildren() == 2 {
 			c := root.Child(1)
 			switch c.Id() {
 			case idQUESTION:
-				p = pattern.Optional(compile(root.Child(0), s, fns))
+				p = pattern.Optional(compile(name, root.Child(0), s, fns))
 			case idSTAR:
-				p = pattern.Star(compile(root.Child(0), s, fns))
+				p = pattern.Star(compile(name, root.Child(0), s, fns))
 			case idPLUS:
-				p = pattern.Plus(compile(root.Child(0), s, fns))
+				p = pattern.Plus(compile(name, root.Child(0), s, fns))
 			}
 		} else {
-			p = compile(root.Child(0), s, fns)
+			p = compile(name, root.Child(0), s, fns)
 		}
 	case idPrimary:
 		switch root.Child(0).Id() {
 		case idCAP:
-			cpatt := compile(root.Child(1), s, fns)
+			cpatt := compile(name, root.Child(1), s, fns)
 			group := literal(root.Child(2), s)
 			p = fns.Cap(cpatt, group)
 		case idINCLUDE:
@@ -96,9 +100,9 @@ func compile(root *memo.Capture, s string, fns CustomFns) pattern.Pattern {
 			}
 			p = fns.Words(words...)
 		case idIdentifier, idLiteral, idClass:
-			p = compile(root.Child(0), s, fns)
+			p = compile(name, root.Child(0), s, fns)
 		case idOPEN:
-			p = compile(root.Child(1), s, fns)
+			p = compile(name, root.Child(1), s, fns)
 		case idDOT:
 			p = pattern.Any(1)
 		}
@@ -127,7 +131,7 @@ func compile(root *memo.Capture, s string, fns CustomFns) pattern.Pattern {
 		}
 		p = pattern.Set(set)
 	case idIdentifier:
-		p = pattern.NonTerm(parseId(root, s))
+		p = pattern.NonTerm(name + parseId(root, s))
 	}
 	return p
 }
@@ -178,10 +182,10 @@ func literal(root *memo.Capture, s string) string {
 	return lit.String()
 }
 
-func compileDef(root *memo.Capture, s string, fns CustomFns) (string, pattern.Pattern) {
+func compileDef(name string, root *memo.Capture, s string, fns CustomFns) (string, pattern.Pattern) {
 	id := root.Child(0)
 	exp := root.Child(1)
-	return parseId(id, s), compile(exp, s, fns)
+	return parseId(id, s), compile(name, exp, s, fns)
 }
 
 func compileSet(root *memo.Capture, s string) charset.Set {
@@ -196,7 +200,7 @@ func compileSet(root *memo.Capture, s string) charset.Set {
 	return charset.Set{}
 }
 
-func Compile(s string, fns CustomFns) (pattern.Pattern, error) {
+func Compile(name, s string, fns CustomFns) (pattern.Pattern, error) {
 	match, n, ast, errs := parser.Exec(strings.NewReader(s), memo.NoneTable{})
 	if len(errs) != 0 {
 		return nil, errs[0]
@@ -205,11 +209,11 @@ func Compile(s string, fns CustomFns) (pattern.Pattern, error) {
 		return nil, fmt.Errorf("Invalid PEG: failed at %d", n)
 	}
 
-	return compile(ast.Child(0), s, fns), nil
+	return compile(name, ast.Child(0), s, fns), nil
 }
 
-func MustCompile(s string, fns CustomFns) pattern.Pattern {
-	p, err := Compile(s, fns)
+func MustCompile(name, s string, fns CustomFns) pattern.Pattern {
+	p, err := Compile(name, s, fns)
 	if err != nil {
 		panic(err)
 	}

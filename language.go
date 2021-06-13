@@ -23,7 +23,7 @@ func LoadHighlighter(name string, memo bool) (*Highlighter, error) {
 	if err != nil {
 		return &empty, err
 	}
-	return loadHighlighter(data, memo)
+	return loadHighlighter(name, data, memo)
 }
 
 func loadData(name string) ([]byte, error) {
@@ -33,7 +33,7 @@ func loadData(name string) ([]byte, error) {
 	return builtin.ReadFile(filepath.Join("languages", name+".lang"))
 }
 
-func loadHighlighter(data []byte, memo bool) (*Highlighter, error) {
+func loadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) {
 	capid := 0
 	caps := make(map[int]string)
 
@@ -46,22 +46,37 @@ func loadHighlighter(data []byte, memo bool) (*Highlighter, error) {
 	wordsfn := func(words ...string) p.Pattern {
 		return wordMatch(words...)
 	}
+	imports := map[string]p.Pattern{
+		"alpha":   alpha,
+		"alnum":   alnum,
+		"digit":   digit,
+		"xdigit":  xdigit,
+		"space":   space,
+		"dec_num": dec_num,
+		"hex_num": hex_num,
+		"oct_num": oct_num,
+		"integer": integer,
+		"float":   float,
+		"word":    word,
+	}
 
 	var includefn func(lang string) p.Pattern
 	includefn = func(lang string) p.Pattern {
 		data, _ := loadData(lang)
-		token, _ := syntax.Compile(string(data), syntax.CustomFns{
+		token, _ := syntax.Compile(lang+"_", string(data), syntax.CustomFns{
 			Cap:     capfn,
 			Words:   wordsfn,
 			Include: includefn,
+			Imports: imports,
 		})
 		return token
 	}
 
-	token, err := syntax.Compile(string(data), syntax.CustomFns{
+	token, err := syntax.Compile(lang+"_", string(data), syntax.CustomFns{
 		Cap:     capfn,
 		Words:   wordsfn,
 		Include: includefn,
+		Imports: imports,
 	})
 	if err != nil {
 		return &empty, err
@@ -84,18 +99,7 @@ func loadHighlighter(data []byte, memo bool) (*Highlighter, error) {
 	top = p.Star(top)
 
 	grammar := map[string]p.Pattern{
-		"alpha":   alpha,
-		"alnum":   alnum,
-		"digit":   digit,
-		"xdigit":  xdigit,
-		"space":   space,
-		"dec_num": dec_num,
-		"hex_num": hex_num,
-		"oct_num": oct_num,
-		"integer": integer,
-		"float":   float,
-		"word":    word,
-		"top":     top,
+		"top": top,
 	}
 
 	prog, err := pattern.Compile(p.Grammar("top", grammar))
