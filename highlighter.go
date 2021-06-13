@@ -5,12 +5,18 @@ import (
 
 	"github.com/zyedidia/gpeg/input"
 	"github.com/zyedidia/gpeg/memo"
+	"github.com/zyedidia/gpeg/pattern"
+	p "github.com/zyedidia/gpeg/pattern"
 	"github.com/zyedidia/gpeg/vm"
 )
 
 type Highlighter struct {
 	code     vm.VMCode
 	captures map[int]string
+}
+
+var empty Highlighter = Highlighter{
+	code: vm.Encode(pattern.MustCompile(p.Star(p.Any(1)))),
 }
 
 func (h *Highlighter) Highlight(r io.ReaderAt, tbl memo.Table, draw func(text []byte, group string)) {

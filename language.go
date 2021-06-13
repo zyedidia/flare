@@ -21,7 +21,7 @@ func AddLanguage(name string, loader func() ([]byte, error)) {
 func LoadHighlighter(name string, memo bool) (*Highlighter, error) {
 	data, err := loadData(name)
 	if err != nil {
-		return nil, err
+		return &empty, err
 	}
 	return loadHighlighter(data, memo)
 }
@@ -64,7 +64,7 @@ func loadHighlighter(data []byte, memo bool) (*Highlighter, error) {
 		Include: includefn,
 	})
 	if err != nil {
-		return nil, err
+		return &empty, err
 	}
 
 	top := p.Or(
@@ -100,7 +100,7 @@ func loadHighlighter(data []byte, memo bool) (*Highlighter, error) {
 
 	prog, err := pattern.Compile(p.Grammar("top", grammar))
 	if err != nil {
-		return nil, err
+		return &empty, err
 	}
 
 	return &Highlighter{

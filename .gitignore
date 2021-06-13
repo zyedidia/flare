@@ -1,5 +1,5 @@
-/cmd/ccat/main
+/cmd/hcat/main
 /main
-/cmd/ccat/ccat
-/cmd/ccat/testdata
+/cmd/hcat/hcat
+/cmd/hcat/testdata
 todo.txt
