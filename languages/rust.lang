@@ -1,0 +1,81 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' (!'*/' .)* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+sq_str        <- 'L'? "'" (escape / (!"'" .))* "'"?
+dq_str        <- 'L'? '"' (escape / (!'"' .))* '"'?
+raw_str       <- '#"' (!"#" .)* "#"?
+escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+string        <- cap{sq_str / dq_str / raw_str, "constant.string"}
+
+number <- cap{
+    float / (dec_num / '_')+ / "0b" (dec_num / "_")+ / integer,
+    "constant.number"
+}
+
+keyword <- cap{
+    words{
+        'abstract',   'alignof',    'as',       'become',   'box',
+        'break',      'const',      'continue', 'crate',    'do',
+        'else',       'enum',       'extern',   'false',    'final',
+        'fn',         'for',        'if',       'impl',     'in',
+        'let',        'loop',       'macro',    'match',    'mod',
+        'move',       'mut',        "offsetof", 'override', 'priv',
+        'proc',       'pub',        'pure',     'ref',      'return',
+        'Self',       'self',       'sizeof',   'static',   'struct',
+        'super',      'trait',      'true',     'type',     'typeof',
+        'unsafe',     'unsized',    'use',      'virtual',  'where',
+        'while',      'yield'
+    },
+    "keyword"
+}
+
+upper   <- [A-Z]
+lower   <- [a-z]
+library <- cap{
+    upper (lower / dec_num)+,
+    "type.library"
+}
+
+func <- cap{
+    word+ '!',
+    "function"
+}
+
+type <- cap{
+    words{
+        '()', 'bool', 'isize', 'usize', 'char', 'str',
+        'u8', 'u16', 'u32', 'u64', 'i8', 'i16', 'i32', 'i64',
+        'f32','f64',
+    },
+    "type"
+}
+
+identifier <- cap{
+    word,
+    "identifier"
+}
+
+operator <- cap{
+    [+\-/*%<>!=`^~@&|?#~:;,.()\[\]{}],
+    "symbol.operator"
+}
+
+attribute <- cap{
+    "#[" (!']' .)* "]"?,
+    "preproc"
+}
+
+token <- ws
+       / keyword
+       / func
+       / library
+       / type
+       / identifier
+       / string
+       / comment
+       / number
+       / operator
+       / attribute

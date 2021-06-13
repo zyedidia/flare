@@ -28,7 +28,7 @@ func main() {
 	flagparser.Usage = "[OPTION]... [FILE]..."
 	args, err := flagparser.Parse()
 	if err != nil {
-		fatal(err)
+		os.Exit(1)
 	}
 
 	if opts.Version {
@@ -82,7 +82,11 @@ func main() {
 			}
 		}
 
-		h, _ := flare.LoadHighlighter(lang, false)
+		h, err := flare.LoadHighlighter(lang, false)
+
+		if err != nil {
+			fatal(err)
+		}
 
 		buf := &bytes.Buffer{}
 		h.Highlight(f, memo.NoneTable{}, func(text []byte, group string) {

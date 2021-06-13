@@ -1,0 +1,128 @@
+ws <- space+
+
+comment <- cap{
+    '#' (!'\n' .)*,
+    "comment"
+}
+
+# TODO: restrict to single line
+sq_str        <- 'u'? "'" (escape / (!"'" .))* "'"?
+dq_str        <- 'U'? '"' (escape / (!'"' .))* '"'?
+# TODO: use different escape
+triple_sq_str <- "'''" (escape / (!"'''" .))* "'''"?
+triple_dq_str <- '"""' (escape / (!'"""' .))* '"""'?
+# TODO: restrict to single line
+raw_sq_str    <- 'u'? 'r' "'" (!"'" .)* "'"?
+raw_dq_str    <- 'U'? 'R' '"' (!'"' .)* '"'?
+escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+
+string <- cap{
+    triple_sq_str / triple_dq_str / sq_str / dq_str / raw_sq_str / raw_dq_str,
+    "constant.string"
+}
+
+dec    <- digit+ [Ll]?
+bin    <- "0b" [01]+ ("_" [01]+)*
+oct    <- "0" [0-7]+ [Ll]?
+pyint  <- [+\-]? (bin / hex_num / oct / dec)
+number <- cap{
+    float / pyint,
+    "constant.number"
+}
+
+keyword <- cap{
+    words{
+        'async', 'await',
+        'and', 'as', 'assert', 'break', 'class', 'continue', 'def', 'del', 'elif',
+        'else', 'except', 'exec', 'finally', 'for', 'from', 'global', 'if', 'import',
+        'in', 'is', 'lambda', 'nonlocal', 'not', 'or', 'pass', 'print', 'raise',
+        'return', 'try', 'while', 'with', 'yield',
+        '__get__', '__set__', '__delete__', '__slots__',
+        '__new__', '__init__', '__del__', '__repr__', '__str__', '__cmp__',
+        '__index__', '__lt__', '__le__', '__gt__', '__ge__', '__eq__', '__ne__',
+        '__hash__', '__nonzero__', '__getattr__', '__getattribute__', '__setattr__',
+        '__delattr__', '__call__',
+        '__add__', '__sub__', '__mul__', '__div__', '__floordiv__', '__mod__',
+        '__divmod__', '__pow__', '__and__', '__xor__', '__or__', '__lshift__',
+        '__rshift__', '__nonzero__', '__neg__', '__pos__', '__abs__', '__invert__',
+        '__iadd__', '__isub__', '__imul__', '__idiv__', '__ifloordiv__', '__imod__',
+        '__ipow__', '__iand__', '__ixor__', '__ior__', '__ilshift__', '__irshift__',
+        '__int__', '__long__', '__float__', '__complex__', '__oct__', '__hex__',
+        '__coerce__',
+        '__len__', '__getitem__', '__missing__', '__setitem__', '__delitem__',
+        '__contains__', '__iter__', '__getslice__', '__setslice__', '__delslice__',
+        '__doc__', '__name__', '__dict__', '__file__', '__path__', '__module__',
+        '__bases__', '__class__', '__self__',
+        '__builtin__', '__future__', '__main__', '__import__', '__stdin__',
+        '__stdout__', '__stderr__',
+        '__debug__', '__doc__', '__import__', '__name__'
+    },
+    "keyword"
+}
+
+func <- cap{
+    words{
+        'abs', 'all', 'any', 'apply', 'basestring', 'bool', 'buffer', 'callable',
+        'chr', 'classmethod', 'cmp', 'coerce', 'compile', 'complex', 'copyright',
+        'credits', 'delattr', 'dict', 'dir', 'divmod', 'enumerate', 'eval',
+        'execfile', 'exit', 'file', 'filter', 'float', 'frozenset', 'getattr',
+        'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int', 'intern',
+        'isinstance', 'issubclass', 'iter', 'len', 'license', 'list', 'locals',
+        'long', 'map', 'max', 'min', 'object', 'oct', 'open', 'ord', 'pow',
+        'property', 'quit', 'range', 'raw_input', 'reduce', 'reload', 'repr',
+        'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod',
+        'str', 'sum', 'super', 'tuple', 'type', 'unichr', 'unicode', 'vars', 'xrange',
+        'zip'
+    },
+    "function"
+}
+
+constant <- cap{
+    words{
+        'ArithmeticError', 'AssertionError', 'AttributeError', 'BaseException',
+        'DeprecationWarning', 'EOFError', 'Ellipsis', 'EnvironmentError', 'Exception',
+        'False', 'FloatingPointError', 'FutureWarning', 'GeneratorExit', 'IOError',
+        'ImportError', 'ImportWarning', 'IndentationError', 'IndexError', 'KeyError',
+        'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'None',
+        'NotImplemented', 'NotImplementedError', 'OSError', 'OverflowError',
+        'PendingDeprecationWarning', 'ReferenceError', 'RuntimeError',
+        'RuntimeWarning', 'StandardError', 'StopIteration', 'SyntaxError',
+        'SyntaxWarning', 'SystemError', 'SystemExit', 'TabError', 'True', 'TypeError',
+        'UnboundLocalError', 'UnicodeDecodeError', 'UnicodeEncodeError',
+        'UnicodeError', 'UnicodeTranslateError', 'UnicodeWarning', 'UserWarning',
+        'ValueError', 'Warning', 'ZeroDivisionError'
+    },
+    "constant"
+}
+
+self <- cap{
+    "self",
+    "constant.self"
+}
+
+identifier <- cap{
+    word,
+    "identifier"
+}
+
+operator <- cap{
+    [!%^&*()\[\]{}\-=+/|:;.,?<>~`],
+    "symbol.operator"
+}
+
+decorator <- cap{
+    '@' (!'\n' .)*,
+    "preproc.decorator"
+}
+
+token <- ws
+       / keyword
+       / func
+       / constant
+       / self
+       / identifier
+       / comment
+       / string
+       / number
+       / decorator
+       / operator

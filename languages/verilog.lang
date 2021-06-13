@@ -1,0 +1,81 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' (!'*/' .)* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+dq_str        <- '"' (escape / (!'"' .))* '"'?
+escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+string        <- cap{dq_str, "constant.string"}
+
+bin_suffix    <- [bB] [01_xXzZ]+
+oct_suffix    <- [oO] [01234567_xXzZ]+
+dec_suffix    <- [dD] [0123456789_xXzZ]+
+hex_suffix    <- [hH] [0123456789abcdefABCDEF_xXzZ]+
+number <- cap{
+    (digit / '_')+ / "'" (bin_suffix / oct_suffix / dec_suffix / hex_suffix),
+    "constant.number"
+}
+
+keyword <- cap{
+    words{
+        'always', 'assign', 'begin', 'case', 'casex', 'casez', 'default', 'deassign',
+        'disable', 'else', 'end', 'endcase', 'endfunction', 'endgenerate',
+        'endmodule', 'endprimitive', 'endspecify', 'endtable', 'endtask', 'for',
+        'force', 'forever', 'fork', 'function', 'generate', 'if', 'initial', 'join',
+        'macromodule', 'module', 'negedge', 'posedge', 'primitive', 'repeat',
+        'release', 'specify', 'table', 'task', 'wait', 'while',
+        '`include', '`define', '`undef', '`ifdef', '`ifndef', '`else', '`endif',
+        '`timescale', '`resetall', '`signed', '`unsigned', '`celldefine',
+        '`endcelldefine', '`default_nettype', '`unconnected_drive',
+        '`nounconnected_drive', '`protect', '`endprotect', '`protected',
+        '`endprotected', '`remove_gatename', '`noremove_gatename', '`remove_netname',
+        '`noremove_netname', '`expand_vectornets', '`noexpand_vectornets',
+        '`autoexpand_vectornets',
+        'strong0', 'strong1', 'pull0', 'pull1', 'weak0', 'weak1', 'highz0', 'highz1',
+        'small', 'medium', 'large'
+    },
+    "keyword"
+}
+
+func <- cap{
+    words{
+        '$stop', '$finish', '$time', '$stime', '$realtime', '$settrace',
+        '$cleartrace', '$showscopes', '$showvars', '$monitoron', '$monitoroff',
+        '$random', '$printtimescale', '$timeformat', '$display',
+        'and', 'nand', 'or', 'nor', 'xor', 'xnor', 'buf', 'bufif0', 'bufif1', 'not',
+        'notif0', 'notif1', 'nmos', 'pmos', 'cmos', 'rnmos', 'rpmos', 'rcmos', 'tran',
+        'tranif0', 'tranif1', 'rtran', 'rtranif0', 'rtranif1', 'pullup', 'pulldown'
+    },
+    "function"
+}
+
+type <- cap{
+    words{
+        'integer', 'reg', 'time', 'realtime', 'defparam', 'parameter', 'event',
+        'wire', 'wand', 'wor', 'tri', 'triand', 'trior', 'tri0', 'tri1', 'trireg',
+        'vectored', 'scalared', 'input', 'output', 'inout',
+        'supply0', 'supply1'
+    },
+    "type"
+}
+
+identifier <- cap{
+    word,
+    "identifier"
+}
+
+operator <- cap{
+    [=~+\-/*<>%&|^~,:;()\[\]{}],
+    "symbol.operator"
+}
+
+token <- ws
+       / number
+       / keyword
+       / func
+       / type
+       / identifier
+       / string
+       / comment
+       / operator
