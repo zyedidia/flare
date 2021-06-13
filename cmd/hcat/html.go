@@ -39,19 +39,16 @@ func (st *HTMLStyler) Style(s, group string) string {
 }
 
 func (st *HTMLStyler) Pre() string {
-	css := "<style>"
-
+	css := ""
 	if st.theme["default"].Fg != nil {
 		fg := st.theme["default"].Fg
-		css += fmt.Sprintf("#%s { color:%s; }", "hcat", fg.Hex())
+		css += fmt.Sprintf("color:%s;", fg.Hex())
 	}
 	if st.theme["default"].Bg != nil {
 		bg := st.theme["default"].Bg
-		css += fmt.Sprintf("#%s { background-color:%s; }", "hcat", bg.Hex())
+		css += fmt.Sprintf("background-color:%s;", bg.Hex())
 	}
-
-	css += "</style>"
-	return css + fmt.Sprintf("\n<pre id=\"%s\" class=\"%s\">\n", "hcat", "hcat-"+st.name)
+	return fmt.Sprintf("<pre id=\"%s\" class=\"%s\" style=\"%s\">\n", "hcat", "hcat-"+st.name, css)
 }
 func (st *HTMLStyler) Post() string {
 	return "</pre>\n"
