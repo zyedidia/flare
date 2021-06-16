@@ -19,8 +19,8 @@ var empty Highlighter = Highlighter{
 	code: vm.Encode(pattern.MustCompile(p.Star(p.Any(1)))),
 }
 
-func (h *Highlighter) Highlight(r io.ReaderAt, tbl memo.Table, draw func(text []byte, group string)) {
-	match, _, ast, _ := h.code.Exec(r, tbl)
+func (h *Highlighter) Highlight(r io.ReaderAt, tbl memo.Table, draw func(text []byte, group string), i *vm.Interval) {
+	match, _, ast, _ := h.code.ExecInterval(r, tbl, i)
 	if !match {
 		return
 	}
