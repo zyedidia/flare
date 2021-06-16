@@ -1,4 +1,5 @@
 /cmd/hcat/main
+/cmd/hcat/out.html
 /main
 /cmd/hcat/hcat
 /cmd/hcat/testdata

@@ -1,0 +1,30 @@
+default:
+    fg: "#EBDBB2"
+    bg: "#282828"
+comment:
+    fg: "#928374"
+    bg: "#282828"
+constant:
+    fg: "#D3869B"
+    bg: "#282828"
+constant.string:
+    fg: "#B8BB26"
+    bg: "#282828"
+keyword:
+    fg: "#FB4934"
+    bg: "#282828"
+preproc:
+    fg: "#FB4934"
+    bg: "#282828"
+type:
+    fg: "#FB4934"
+    bg: "#282828"
+special:
+    fg: "#D79921"
+    bg: "#282828"
+underlined:
+    bg: "#282828"
+    attr: ["underline"]
+error:
+    fg: "#9D0006"
+    bg: "#282828"

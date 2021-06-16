@@ -1,0 +1,36 @@
+default:
+    fg: "#C5C8C6"
+    bg: "#1D1F21"
+comment:
+    fg: "#7C7C7C"
+    bg: "#1D1F21"
+constant:
+    fg: "#FF73FD"
+    bg: "#1D1F21"
+constant.string:
+    fg: "#A8FF60"
+    bg: "#1D1F21"
+keyword:
+    fg: "#96CBFE"
+    bg: "#1D1F21"
+preproc:
+    fg: "#62B1FE"
+    bg: "#1D1F21"
+type:
+    fg: "#C6C5FE"
+    bg: "#1D1F21"
+special:
+    fg: "#A6E22E"
+    bg: "#1D1F21"
+underlined:
+    fg: "#D33682"
+    bg: "#1D1F21"
+    attr: ["underline"]
+error:
+    fg: "#FF4444"
+    bg: "#1D1F21"
+    attr: ["bold"]
+todo:
+    fg: "#FF8844"
+    bg: "#1D1F21"
+    attr: ["bold"]

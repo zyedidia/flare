@@ -28,7 +28,7 @@ func (c *Color) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func (c Color) Hex() string {
-	return "#" + fmt.Sprintf("%2x", c.R) + fmt.Sprintf("%2x", c.G) + fmt.Sprintf("%2x", c.B)
+	return "#" + fmt.Sprintf("%02x", c.R) + fmt.Sprintf("%02x", c.G) + fmt.Sprintf("%02x", c.B)
 }
 
 func HexColor(s string) (c Color, err error) {

@@ -1,0 +1,39 @@
+default:
+    fg: "#ABB2BF"
+    bg: "#21252C"
+comment:
+    fg: "#5C6370"
+    bg: "#21252C"
+constant:
+    fg: "#E5C07B"
+    bg: "#21252C"
+constant.string:
+    fg: "#98C369"
+    bg: "#21252C"
+constant.string.escape:
+    fg: "#DDF2A4"
+    bg: "#21252C"
+error:
+    fg: "#D2A8A1"
+    bg: "#21252C"
+preproc:
+    fg: "#E0C589"
+    bg: "#21252C"
+special:
+    fg: "#E0C589"
+    bg: "#21252C"
+keyword:
+    fg: "#C678DD"
+    bg: "#21252C"
+symbol:
+    fg: "#AC885B"
+    bg: "#21252C"
+todo:
+    fg: "#8B98AB"
+    bg: "#21252C"
+type:
+    fg: "#66D9EF"
+    bg: "#21252C"
+underlined:
+    fg: "#8996A8"
+    bg: "#21252C"
