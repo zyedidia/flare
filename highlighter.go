@@ -25,7 +25,9 @@ func (h *Highlighter) Highlight(r io.ReaderAt, tbl memo.Table, draw func(text []
 		return
 	}
 
-	colorize(0, ast, h.captures, r, draw)
+	if draw != nil {
+		colorize(0, ast, h.captures, r, draw)
+	}
 }
 
 func colorize(start int, token *memo.Capture, captures map[int]string, in io.ReaderAt, draw func(text []byte, group string)) {
