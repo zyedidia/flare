@@ -5,12 +5,14 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"os"
 	"runtime"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/jwalton/gchalk"
 	"github.com/zyedidia/flare"
 	"github.com/zyedidia/flare/theme"
@@ -27,19 +29,18 @@ func fatal(msg ...interface{}) {
 
 var letters = []byte("\n \tabcdefghijklmnopqrstuvwxyz")
 
-func randbytes(n int) []byte {
-	b := make([]byte, n)
+func randbytes(b []byte) {
 	for i := range b {
 		b[i] = letters[rand.Intn(len(letters))]
 	}
-	return b
 }
 
 var display = flag.Bool("display", false, "display the final highlighted text")
 var nedits = flag.Int("n", 1000, "number of edits to perform")
 var mthreshold = flag.Int("mthreshold", 128, "memoization entry size threshold")
 var lang = flag.String("lang", "", "language to use for highlighting (autodetect if empty)")
-var mem = flag.Bool("mem", false, "print memory usage")
+var summary = flag.Bool("summary", false, "print performance summary")
+var file = flag.Bool("file", false, "send output data to file")
 
 func main() {
 	flag.Parse()
@@ -79,10 +80,37 @@ func main() {
 
 	tbl := memo.NewTreeTable(*mthreshold)
 
-	var intrvl *vm.Interval
+	var membuf io.WriteCloser
+	var timebuf io.WriteCloser
+
+	if *file {
+		membuf, err = os.Create("mem.dat")
+		if err != nil {
+			fatal(err)
+		}
+		timebuf, err = os.Create("time.dat")
+		if err != nil {
+			fatal(err)
+		}
+	} else {
+		membuf = os.Stdout
+		timebuf = os.Stdout
+	}
+
+	defer membuf.Close()
+	defer timebuf.Close()
+
+	var intrvl *vm.Interval = &vm.Interval{0, 4000}
+	text := make([]byte, 4)
+
+	h.Highlight(r, tbl, nil, intrvl)
+
+	tottime := 0.0
+	totmem := 0.0
+
 	for i := 0; i < *nedits; i++ {
 		loc := rand.Intn(r.Len())
-		text := randbytes(4)
+		randbytes(text)
 		edit := memo.Edit{
 			Start: loc,
 			End:   loc,
@@ -94,7 +122,11 @@ func main() {
 		start := time.Now()
 		tbl.ApplyEdit(edit)
 		h.Highlight(r, tbl, nil, intrvl)
-		fmt.Println(time.Since(start).Microseconds())
+		t := time.Since(start).Microseconds()
+		tottime += float64(t)
+		totmem += float64(memusage())
+		fmt.Fprintln(timebuf, t)
+		fmt.Fprintln(membuf, bToMb(memusage()))
 	}
 
 	if *display {
@@ -115,21 +147,20 @@ func main() {
 		fmt.Print(buf.String())
 	}
 
-	if *mem {
-		PrintMemUsage()
+	if *summary {
+		fmt.Printf("Summary:\n")
 		fmt.Printf("memo table size: %d\n", tbl.Size())
+		fmt.Printf("final document size: %s\n", humanize.Bytes(uint64(r.Len())))
+		fmt.Printf("avg time: %v\n", time.Microsecond*time.Duration(tottime/float64(*nedits)))
+		fmt.Printf("avg mem: %s\n", humanize.Bytes(uint64(totmem/float64(*nedits))))
 	}
 }
 
-func PrintMemUsage() {
+func memusage() uint64 {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-	fmt.Printf("Alloc = %v MiB", bToMb(m.Alloc))
-	fmt.Printf("\tTotalAlloc = %v MiB", bToMb(m.TotalAlloc))
-	fmt.Printf("\tSys = %v MiB", bToMb(m.Sys))
-	fmt.Printf("\tNumGC = %v\n", m.NumGC)
+	return m.Alloc
 }
-
 func bToMb(b uint64) uint64 {
 	return b / 1024 / 1024
 }

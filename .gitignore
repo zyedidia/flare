@@ -6,3 +6,4 @@
 /cmd/bench/testdata
 /cmd/bench/bench
 todo.txt
+*.dat
