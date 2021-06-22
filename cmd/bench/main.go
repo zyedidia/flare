@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"os"
 	"runtime"
+	"runtime/pprof"
 	"time"
 
 	"github.com/dustin/go-humanize"
@@ -41,6 +43,7 @@ var mthreshold = flag.Int("mthreshold", 128, "memoization entry size threshold")
 var lang = flag.String("lang", "", "language to use for highlighting (autodetect if empty)")
 var summary = flag.Bool("summary", false, "print performance summary")
 var file = flag.Bool("file", false, "send output data to file")
+var memprofile = flag.String("memprofile", "", "write memory profile to this file")
 
 func main() {
 	flag.Parse()
@@ -100,7 +103,7 @@ func main() {
 	defer membuf.Close()
 	defer timebuf.Close()
 
-	var intrvl *vm.Interval = &vm.Interval{0, 4000}
+	var intrvl *vm.Interval = nil
 	text := make([]byte, 4)
 
 	h.Highlight(r, tbl, nil, intrvl)
@@ -127,6 +130,17 @@ func main() {
 		totmem += float64(memusage())
 		fmt.Fprintln(timebuf, t)
 		fmt.Fprintln(membuf, bToMb(memusage()))
+	}
+	tbl.Size()
+
+	if *memprofile != "" {
+		f, err := os.Create(*memprofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		pprof.WriteHeapProfile(f)
+		f.Close()
+		return
 	}
 
 	if *display {

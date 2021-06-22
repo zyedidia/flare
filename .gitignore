@@ -7,3 +7,4 @@
 /cmd/bench/bench
 todo.txt
 *.dat
+*.out
