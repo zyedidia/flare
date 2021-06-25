@@ -8,6 +8,8 @@ github.com/zyedidia/ftdetect v0.0.0-20210226205021-01c766da7946 h1:dW5z4jWWjyOhJ
 github.com/zyedidia/ftdetect v0.0.0-20210226205021-01c766da7946/go.mod h1:EdZlkR1FBdsrJH2f+08QoLCSZ35oNMFZzPdCt5d9rYE=
 github.com/zyedidia/gpeg v0.0.0-20210616202252-85c5eb8a584c h1:5tZUp3O7pzFzJwpmZUbIbFC43NZB/b1GUSS1hvPLDGU=
 github.com/zyedidia/gpeg v0.0.0-20210616202252-85c5eb8a584c/go.mod h1:JUfbyVutLbiMWcCx6HhDyRS+D7Umm76+m0UlCykX0Zs=
+github.com/zyedidia/gpeg v0.0.0-20210620221051-ffaa3a8070e7 h1:ShI4StDos6cCkIn2zyqf2ui70tLG3G1LRMG3SJpzqto=
+github.com/zyedidia/gpeg v0.0.0-20210620221051-ffaa3a8070e7/go.mod h1:JUfbyVutLbiMWcCx6HhDyRS+D7Umm76+m0UlCykX0Zs=
 golang.org/x/sys v0.0.0-20201119102817-f84b799fce68/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210220050731-9a76102bfb43/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4 h1:EZ2mChiOa8udjfp6rRmswTbtZN/QzUQp4ptM4rnjHvc=
