@@ -18,7 +18,7 @@ func (r *HighlightResults) add(idx int, group string) {
 
 func (r *HighlightResults) Group(idx int) string {
 	if r.last >= 0 && r.last < len(r.tokens) {
-		if idx >= r.tokens[r.last].idx && r.last == len(r.tokens) {
+		if idx >= r.tokens[r.last].idx && r.last >= len(r.tokens)-1 {
 			return r.tokens[r.last].group
 		}
 		if idx >= r.tokens[r.last].idx && idx < r.tokens[r.last+1].idx {
