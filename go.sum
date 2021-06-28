@@ -6,8 +6,8 @@ github.com/jwalton/go-supportscolor v1.0.0 h1:Do3OE2y/iUibg79+QhkRE6G2evYKEv2bwi
 github.com/jwalton/go-supportscolor v1.0.0/go.mod h1:hFVUAZV2cWg+WFFC4v8pT2X/S2qUUBYMioBD9AINXGs=
 github.com/zyedidia/ftdetect v0.0.0-20210226205021-01c766da7946 h1:dW5z4jWWjyOhJ/tCV1bxPSDNdNVDJzM/kmWn1lIK1PI=
 github.com/zyedidia/ftdetect v0.0.0-20210226205021-01c766da7946/go.mod h1:EdZlkR1FBdsrJH2f+08QoLCSZ35oNMFZzPdCt5d9rYE=
-github.com/zyedidia/gpeg v0.0.0-20210628173801-1c63c1508de1 h1:l/saZ6magLk3aFLBWj7l/pkfbZ2BO4NGMVbTcHAo3mA=
-github.com/zyedidia/gpeg v0.0.0-20210628173801-1c63c1508de1/go.mod h1:JUfbyVutLbiMWcCx6HhDyRS+D7Umm76+m0UlCykX0Zs=
+github.com/zyedidia/gpeg v0.0.0-20210628175107-e9e0871ed476 h1:WGLD6fFmsYKF4Aw9Mj/4xSSzqz8j+CE0FwcWoGvgt60=
+github.com/zyedidia/gpeg v0.0.0-20210628175107-e9e0871ed476/go.mod h1:JUfbyVutLbiMWcCx6HhDyRS+D7Umm76+m0UlCykX0Zs=
 golang.org/x/sys v0.0.0-20201119102817-f84b799fce68/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210220050731-9a76102bfb43/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20210320140829-1e4c9ba3b0c4 h1:EZ2mChiOa8udjfp6rRmswTbtZN/QzUQp4ptM4rnjHvc=
