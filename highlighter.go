@@ -14,7 +14,7 @@ import (
 // captures to highlight groups. It can be used to generate highlight results
 // from a io.ReaderAt.
 type Highlighter struct {
-	code     vm.VMCode
+	code     vm.Code
 	captures map[int]string
 }
 
