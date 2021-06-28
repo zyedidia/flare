@@ -109,7 +109,7 @@ type Styler interface {
 func highlight(h *flare.Highlighter, th theme.Theme, f io.ReaderAt, st Styler) string {
 	buf := &bytes.Buffer{}
 	buf.WriteString(st.Pre())
-	h.Highlight(f, memo.NoneTable{}, func(text []byte, group string) {
+	h.HighlightFunc(f, memo.NoneTable{}, func(text []byte, group string) {
 		fmt.Fprint(buf, st.Style(string(text), group))
 	}, nil)
 	buf.WriteString(st.Post())

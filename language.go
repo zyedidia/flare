@@ -14,10 +14,14 @@ import (
 var builtin embed.FS
 var custom map[string]func() ([]byte, error)
 
+// AddLanguage adds support for a new language. The 'loader' should return the
+// highlighting grammar when called.
 func AddLanguage(name string, loader func() ([]byte, error)) {
 	custom[name] = loader
 }
 
+// LoadHighlighter compiles and loads the given highlighter. Use 'memo' if the
+// highlighter will be used in an incremental setting (editor).
 func LoadHighlighter(name string, memo bool) (*Highlighter, error) {
 	data, err := loadData(name)
 	if err != nil {
