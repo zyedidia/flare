@@ -4,8 +4,8 @@ line_comment  <- '//' (!'\n' .)*
 block_comment <- '/*' (!'*/' .)* '*/'?
 comment       <- cap{line_comment / block_comment, "comment"}
 
-sq_str        <- "'" (escape / (!"'" .))* "'"?
-dq_str        <- '"' (escape / (!'"' .))* '"'?
+sq_str        <- "'" (escape / (!['\n] .))* "'"?
+dq_str        <- '"' (escape / (!["\n] .))* '"'?
 escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
 string        <- cap{sq_str / dq_str, "constant.string"}
 
