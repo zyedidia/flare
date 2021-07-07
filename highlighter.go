@@ -11,7 +11,7 @@ import (
 )
 
 type Highlighter struct {
-	code     vm.VMCode
+	code     vm.Code
 	captures map[int]string
 }
 

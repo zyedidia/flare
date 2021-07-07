@@ -12,7 +12,7 @@ import (
 	"github.com/zyedidia/gpeg/vm"
 )
 
-var parser vm.VMCode
+var parser vm.Code
 
 func init() {
 	prog := pattern.MustCompile(pattern.Grammar("Pattern", grammar))
@@ -103,6 +103,8 @@ func compile(name string, root *memo.Capture, s string, fns CustomFns) pattern.P
 			p = compile(name, root.Child(0), s, fns)
 		case idOPEN:
 			p = compile(name, root.Child(1), s, fns)
+		case idBRACEPO:
+			p = pattern.Memo(compile(name, root.Child(1), s, fns))
 		case idDOT:
 			p = pattern.Any(1)
 		}

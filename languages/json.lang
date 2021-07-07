@@ -1,5 +1,5 @@
 ws <- space+
-comment <- '/*' (!'*/' .)* '*/'?
+comment <- cap{'/*' (!'*/' .)* '*/'?, "comment"}
 sq_str  <- 'u'? "'" (!['\n] .)* "'"?
 dq_str  <- 'U'? '"' (!["\n] .)* '"'?
 string  <- cap{

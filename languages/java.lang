@@ -1,7 +1,7 @@
 ws <- space+
 
 line_comment  <- '//' (!'\n' .)*
-block_comment <- '/*' (!'*/' .)* '*/'?
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
 comment       <- cap{line_comment / block_comment, "comment"}
 
 sq_str        <- "'" (escape / (!['\n] .))* "'"?

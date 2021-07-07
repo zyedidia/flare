@@ -44,8 +44,10 @@ var lang = flag.String("lang", "", "language to use for highlighting (autodetect
 var summary = flag.Bool("summary", false, "print performance summary")
 var file = flag.Bool("file", false, "send output data to file")
 var memprofile = flag.String("memprofile", "", "write memory profile to this file")
+var cluster = flag.Int("cluster", 1, "edit cluster size")
 
 func main() {
+	rand.Seed(42)
 	flag.Parse()
 
 	if len(flag.Args()) <= 0 {
@@ -106,32 +108,42 @@ func main() {
 	var intrvl *vm.Interval = nil
 	text := make([]byte, 4)
 
+	st := time.Now()
 	h.Highlight(r, tbl, nil, intrvl)
+	t := time.Since(st).Microseconds()
+	fmt.Fprintln(timebuf, t)
+	fmt.Fprintln(membuf, bToMb(memusage()))
 
 	tottime := 0.0
 	totmem := 0.0
 
-	for i := 0; i < *nedits; i++ {
-		loc := rand.Intn(r.Len())
-		randbytes(text)
-		edit := memo.Edit{
-			Start: loc,
-			End:   loc,
-			Len:   len(text),
+	for i := 0; i < *nedits / *cluster; i++ {
+		loc := rand.Intn(r.Len() - 4)
+
+		for j := 0; j < *cluster; j++ {
+			length := rand.Intn(4)
+			txtsz := rand.Intn(4)
+			randbytes(text)
+			toinsert := text[:txtsz]
+			edit := memo.Edit{
+				Start: loc,
+				End:   loc + length,
+				Len:   len(toinsert),
+			}
+
+			r.Remove(loc, loc+length)
+			r.Insert(loc, toinsert)
+
+			start := time.Now()
+			tbl.ApplyEdit(edit)
+			h.Highlight(r, tbl, nil, intrvl)
+			t := time.Since(start).Microseconds()
+			tottime += float64(t)
+			totmem += float64(memusage())
+			fmt.Fprintln(timebuf, t)
+			fmt.Fprintln(membuf, bToMb(memusage()))
 		}
-
-		r.Insert(loc, text)
-
-		start := time.Now()
-		tbl.ApplyEdit(edit)
-		h.Highlight(r, tbl, nil, intrvl)
-		t := time.Since(start).Microseconds()
-		tottime += float64(t)
-		totmem += float64(memusage())
-		fmt.Fprintln(timebuf, t)
-		fmt.Fprintln(membuf, bToMb(memusage()))
 	}
-	tbl.Size()
 
 	if *memprofile != "" {
 		f, err := os.Create(*memprofile)
@@ -163,6 +175,8 @@ func main() {
 
 	if *summary {
 		fmt.Printf("Summary:\n")
+		runtime.GC()
+		fmt.Println("memo table memory:", humanize.Bytes(memusage()))
 		fmt.Printf("memo table size: %d\n", tbl.Size())
 		fmt.Printf("final document size: %s\n", humanize.Bytes(uint64(r.Len())))
 		fmt.Printf("avg time: %v\n", time.Microsecond*time.Duration(tottime/float64(*nedits)))
