@@ -1,7 +1,7 @@
 ws <- space+
-comment <- '/*' (!'*/' .)* '*/'?
-sq_str  <- 'u'? "'" (!"'" .)* "'"?
-dq_str  <- 'U'? '"' (!'"' .)* '"'?
+comment <- cap{'/*' (!'*/' .)* '*/'?, "comment"}
+sq_str  <- 'u'? "'" (!['\n] .)* "'"?
+dq_str  <- 'U'? '"' (!["\n] .)* '"'?
 string  <- cap{
     sq_str / dq_str,
     "constant.string"

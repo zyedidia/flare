@@ -85,6 +85,7 @@ const (
 	idCAP
 	idWORDS
 	idINCLUDE
+	idBRACEPO
 )
 
 var grammar = map[string]p.Pattern{
@@ -159,6 +160,11 @@ var grammar = map[string]p.Pattern{
 			p.NonTerm("OPEN"),
 			p.NonTerm("Expression"),
 			p.NonTerm("CLOSE"),
+		),
+		p.Concat(
+			p.NonTerm("BRACEPO"),
+			p.NonTerm("Expression"),
+			p.NonTerm("BRACEPC"),
 		),
 		p.NonTerm("Literal"),
 		p.NonTerm("Class"),
@@ -282,6 +288,14 @@ var grammar = map[string]p.Pattern{
 	),
 	"BRACEC": p.Concat(
 		p.Literal("}"),
+		p.NonTerm("Spacing"),
+	),
+	"BRACEPO": p.Cap(p.Concat(
+		p.Literal("{{"),
+		p.NonTerm("Spacing"),
+	), idBRACEPO),
+	"BRACEPC": p.Concat(
+		p.Literal("}}"),
 		p.NonTerm("Spacing"),
 	),
 	"SLASH": p.Concat(

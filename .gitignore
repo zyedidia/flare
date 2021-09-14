@@ -3,4 +3,8 @@
 /main
 /cmd/hcat/hcat
 /cmd/hcat/testdata
+/cmd/bench/testdata
+/cmd/bench/bench
 todo.txt
+*.dat
+*.out
