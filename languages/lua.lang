@@ -1,0 +1,123 @@
+ws <- space+
+
+longstring    <- '[' ref{"="*, "eq"} '[' (!(']' back{"eq"} ']') .)* (']' back{"eq"} ']')?
+line_comment  <- '--' (!'\n' .)*
+block_comment <- '--' longstring
+
+comment <- cap{
+    block_comment / line_comment,
+    "comment"
+}
+
+sq_str        <- "'" (escape / (!"'" .))* "'"?
+dq_str        <- '"' (escape / (!'"' .))* '"'?
+escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+string        <- cap{sq_str / dq_str / longstring, "constant.string"}
+
+lua_integer <- '-'? (hex_num / dec_num)
+number <- cap{
+    float / lua_integer,
+    "constant.number"
+}
+
+keyword <- cap{
+    words{
+        'and', 'break', 'do', 'else', 'elseif', 'end', 'for', 'function',
+        'goto', 'if', 'in', 'local', 'not', 'or', 'repeat', 'return', 'then',
+        'until', 'while'
+    },
+    "keyword"
+}
+
+func <- cap{
+    words{
+        'assert', 'collectgarbage', 'dofile', 'error', 'getmetatable', 'ipairs',
+        'load', 'loadfile', 'next', 'pairs', 'pcall', 'print', 'rawequal', 'rawget',
+        'rawset', 'require', 'select', 'setmetatable', 'tonumber', 'tostring', 'type',
+        'xpcall', 'rawlen'
+    },
+    "function"
+}
+
+deprecated_func <- cap{words{
+    'getfenv', 'loadstring', 'module', 'setfenv', 'unpack'
+}, "function"}
+
+constant <- cap{
+    words{
+        '_G', '_VERSION', '_ENV', 'nil', 'true', 'false'
+    },
+    "constant"
+}
+
+library <- cap{
+    words{
+        'coroutine', 'coroutine.create', 'coroutine.resume', 'coroutine.running',
+        'coroutine.status', 'coroutine.wrap', 'coroutine.yield',
+        'coroutine.isyieldable',
+        'package', 'package.cpath', 'package.loaded', 'package.loadlib',
+        'package.path', 'package.preload',
+        'package.config', 'package.searchers', 'package.searchpath',
+        'utf8', 'utf8.char', 'utf8.charpattern', 'utf8.codepoint', 'utf8.codes',
+        'utf8.len', 'utf8.offset',
+        'string', 'string.byte', 'string.char', 'string.dump', 'string.find',
+        'string.format', 'string.gmatch', 'string.gsub', 'string.len', 'string.lower',
+        'string.match', 'string.rep', 'string.reverse', 'string.sub', 'string.upper',
+        'string.pack', 'string.packsize', 'string.unpack',
+        'table', 'table.concat', 'table.insert', 'table.remove', 'table.sort',
+        'table.pack', 'table.unpack',
+        'table.move',
+        'math', 'math.abs', 'math.acos', 'math.asin', 'math.atan', 'math.ceil',
+        'math.cos', 'math.deg', 'math.exp', 'math.floor', 'math.fmod', 'math.huge',
+        'math.log', 'math.max', 'math.min', 'math.modf', 'math.pi', 'math.rad',
+        'math.random', 'math.randomseed', 'math.sin', 'math.sqrt', 'math.tan',
+        'math.maxinteger', 'math.mininteger', 'math.tointeger', 'math.type',
+        'math.ult',
+        'io', 'io.close', 'io.flush', 'io.input', 'io.lines', 'io.open', 'io.output',
+        'io.popen', 'io.read', 'io.stderr', 'io.stdin', 'io.stdout', 'io.tmpfile',
+        'io.type', 'io.write',
+        'os', 'os.clock', 'os.date', 'os.difftime', 'os.execute', 'os.exit',
+        'os.getenv', 'os.remove', 'os.rename', 'os.setlocale', 'os.time',
+        'os.tmpname',
+        'debug', 'debug.debug', 'debug.gethook', 'debug.getinfo', 'debug.getlocal',
+        'debug.getmetatable', 'debug.getregistry', 'debug.getupvalue',
+        'debug.sethook', 'debug.setlocal', 'debug.setmetatable', 'debug.setupvalue',
+        'debug.traceback',
+        'debug.getuservalue', 'debug.setuservalue', 'debug.upvalueid',
+        'debug.upvaluejoin',
+    },
+    "function.library"
+}
+
+deprecated_library <- cap{
+    words{
+        'package.loaders', 'package.seeall',
+        'table.maxn',
+        'math.log10',
+        'math.atan2', 'math.cosh', 'math.frexp', 'math.ldexp', 'math.pow',
+        'math.sinh', 'math.tanh',
+        'bit32', 'bit32.arshift', 'bit32.band', 'bit32.bnot', 'bit32.bor',
+        'bit32.btest', 'bit32.extract', 'bit32.lrotate', 'bit32.lshift',
+        'bit32.replace', 'bit32.rrotate', 'bit32.rshift', 'bit32.xor',
+        'debug.getfenv', 'debug.setfenv'
+    },
+    "function.library"
+}
+
+identifier <- word
+
+label <- '::' word '::'
+
+operator <- [+\-*/%^#=<>&|~;:,.{}\[\]()]
+
+token <- ws
+       / keyword
+       / (func / deprecated_func)
+       / constant
+       / (library / deprecated_library)
+       / identifier
+       / string
+       / comment
+       / number
+       / label
+       / operator

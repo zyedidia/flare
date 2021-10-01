@@ -78,5 +78,10 @@ func wordMatch(words ...string) p.Pattern {
 		m[w] = struct{}{}
 	}
 
+	word = p.Concat(
+		p.Or(alpha, p.Literal("_")),
+		p.Star(p.Or(alnum, p.Literal("_"), p.Literal("."))),
+	)
+
 	return p.Check(word, isa.MapChecker(m))
 }
