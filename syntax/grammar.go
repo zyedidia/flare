@@ -16,6 +16,8 @@ import (
 // Primary    <- CAP BRACEO Expression COMMA String BRACEC
 //             / WORDS BRACEO (!BRACEC (String COMMA?))* BRACEC
 //             / INCLUDE BRACEO String BRACEC
+//             / REF BRACEO Expression COMMA String BRACEC
+//             / BACK BRACEO String BRACEC
 //             / Identifier !LEFTARROW
 //             / '(' Expression ')'
 //             / Literal / Class
@@ -50,6 +52,8 @@ import (
 // CAP        <- 'cap' Spacing_
 // WORDS      <- 'words' Spacing_
 // INCLUDE    <- 'include' Spacing_
+// REF        <- 'ref' Spacing_
+// BACK       <- 'back' Spacing_
 // COMMA      <- ',' Spacing_
 //
 // Spacing_   <- (Space_ / Comment_)*
@@ -85,6 +89,8 @@ const (
 	idCAP
 	idWORDS
 	idINCLUDE
+	idREF
+	idBACK
 	idBRACEPO
 )
 
@@ -148,6 +154,20 @@ var grammar = map[string]p.Pattern{
 		),
 		p.Concat(
 			p.NonTerm("INCLUDE"),
+			p.NonTerm("BRACEO"),
+			p.NonTerm("Literal"),
+			p.NonTerm("BRACEC"),
+		),
+		p.Concat(
+			p.NonTerm("REF"),
+			p.NonTerm("BRACEO"),
+			p.NonTerm("Expression"),
+			p.NonTerm("COMMA"),
+			p.NonTerm("Literal"),
+			p.NonTerm("BRACEC"),
+		),
+		p.Concat(
+			p.NonTerm("BACK"),
 			p.NonTerm("BRACEO"),
 			p.NonTerm("Literal"),
 			p.NonTerm("BRACEC"),
@@ -318,6 +338,14 @@ var grammar = map[string]p.Pattern{
 		p.Literal("include"),
 		p.NonTerm("Spacing"),
 	), idINCLUDE),
+	"REF": p.Cap(p.Concat(
+		p.Literal("ref"),
+		p.NonTerm("Spacing"),
+	), idREF),
+	"BACK": p.Cap(p.Concat(
+		p.Literal("back"),
+		p.NonTerm("Spacing"),
+	), idBACK),
 	"COMMA": p.Concat(
 		p.Literal(","),
 		p.NonTerm("Spacing"),

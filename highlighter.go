@@ -16,6 +16,7 @@ import (
 type Highlighter struct {
 	code     vm.Code
 	captures map[int]string
+	backrefs map[int]string
 }
 
 var empty Highlighter = Highlighter{

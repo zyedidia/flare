@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/zyedidia/flare/syntax"
+	"github.com/zyedidia/gpeg/isa"
 	"github.com/zyedidia/gpeg/pattern"
 	p "github.com/zyedidia/gpeg/pattern"
 	"github.com/zyedidia/gpeg/vm"
@@ -39,7 +40,9 @@ func loadData(name string) ([]byte, error) {
 
 func loadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) {
 	capid := 0
+	refid := 0
 	caps := make(map[int]string)
+	refs := make(map[string]int)
 
 	capfn := func(patt p.Pattern, group string) p.Pattern {
 		patt = p.Cap(patt, capid)
@@ -49,6 +52,16 @@ func loadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) 
 	}
 	wordsfn := func(words ...string) p.Pattern {
 		return wordMatch(words...)
+	}
+	br := isa.NewBackRef()
+	reffn := func(patt p.Pattern, group string) p.Pattern {
+		patt = p.CheckFlags(patt, br, refid, int(isa.RefDef))
+		refs[group] = refid
+		refid++
+		return patt
+	}
+	backfn := func(ref string) p.Pattern {
+		return p.CheckFlags(&p.EmptyNode{}, br, refs[ref], int(isa.RefUse))
 	}
 	imports := map[string]p.Pattern{
 		"alpha":   alpha,
@@ -71,6 +84,8 @@ func loadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) 
 			Cap:     capfn,
 			Words:   wordsfn,
 			Include: includefn,
+			Ref:     reffn,
+			Back:    backfn,
 			Imports: imports,
 		})
 		return token
@@ -80,6 +95,8 @@ func loadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) 
 		Cap:     capfn,
 		Words:   wordsfn,
 		Include: includefn,
+		Ref:     reffn,
+		Back:    backfn,
 		Imports: imports,
 	})
 	if err != nil {

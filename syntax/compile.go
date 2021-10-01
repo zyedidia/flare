@@ -23,6 +23,8 @@ type CustomFns struct {
 	Cap     func(p pattern.Pattern, group string) pattern.Pattern
 	Words   func(words ...string) pattern.Pattern
 	Include func(lang string) pattern.Pattern
+	Ref     func(p pattern.Pattern, group string) pattern.Pattern
+	Back    func(group string) pattern.Pattern
 	Imports map[string]pattern.Pattern
 }
 
@@ -86,6 +88,13 @@ func compile(name string, root *memo.Capture, s string, fns CustomFns) pattern.P
 			cpatt := compile(name, root.Child(1), s, fns)
 			group := literal(root.Child(2), s)
 			p = fns.Cap(cpatt, group)
+		case idREF:
+			cpatt := compile(name, root.Child(1), s, fns)
+			group := literal(root.Child(2), s)
+			p = fns.Ref(cpatt, group)
+		case idBACK:
+			ref := literal(root.Child(1), s)
+			p = fns.Back(ref)
 		case idINCLUDE:
 			lang := literal(root.Child(1), s)
 			p = fns.Include(lang)
