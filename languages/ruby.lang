@@ -12,8 +12,7 @@ sq_str        <- "'" (escape / (!"'" .))* "'"?
 dq_str        <- '"' (escape / (!'"' .))* '"'?
 escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
 
-heredoc <- '<<' [\-~%]? (ref{word, "doc"} / ("'" ref{word, "doc"} "'"))
-           !(back{"doc"} .)* back{"doc"}?
+heredoc <- '<<' [\-~%]? (ref{word, "doc"}) (!back{"doc"} .)* back{"doc"}?
 
 regex_str <- '/' (!'/' .)* '/'?
 
