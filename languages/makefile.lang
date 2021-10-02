@@ -1,0 +1,75 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+keyword <- cap{'!'? words{
+  # GNU Make conditionals.
+  'ifeq', 'ifneq', 'ifdef', 'ifndef', 'else', 'endif',
+  # Other conditionals.
+  'if', 'elseif', 'elseifdef', 'elseifndef',
+  # Directives and other keywords.
+  'define', 'endef', 'export', 'include', 'override', 'private', 'undefine',
+  'unexport', 'vpath'
+}, "keyword"}
+
+func <- cap{words{
+  # Functions for String Substitution and Analysis.
+  'subst', 'patsubst', 'strip', 'findstring', 'filter', 'filter-out', 'sort',
+  'word', 'wordlist', 'words', 'firstword', 'lastword',
+  # Functions for File Names.
+  'dir', 'notdir', 'suffix', 'basename', 'addsuffix', 'addprefix', 'join',
+  'wildcard', 'realpath', 'abspath',
+  # Functions for Conditionals.
+  'if', 'or', 'and',
+  # Miscellaneous Functions.
+  'foreach', 'call', 'value', 'eval', 'origin', 'flavor', 'shell',
+  # Functions That Control Make.
+  'error', 'warning', 'info'
+}, "function"}
+
+word_char <- !(space / [:#=(){}]) .
+assign <- [:+?]? '='
+expanded_var <- '$' ('(' word_char+ ')' / '{' word_char+ '}')
+auto_var <- '$' [@%<?^+|*]
+special_var <- words{
+  'MAKEFILE_LIST', '.DEFAULT_GOAL', 'MAKE_RESTARTS', '.RECIPEPREFIX',
+  '.VARIABLES', '.FEATURES', '.INCLUDE_DIRS',
+  'GPATH', 'MAKECMDGOALS', 'MAKESHELL', 'SHELL', 'VPATH'
+} &(space* assign)
+implicit_var <- words{
+  # Some common variables.
+  'AR', 'AS', 'CC', 'CXX', 'CPP', 'FC', 'M2C', 'PC', 'CO', 'GET', 'LEX', 'YACC',
+  'LINT', 'MAKEINFO', 'TEX', 'TEXI2DVI', 'WEAVE', 'CWEAVE', 'TANGLE', 'CTANGLE',
+  'RM',
+  # Some common flag variables.
+  'ARFLAGS', 'ASFLAGS', 'CFLAGS', 'CXXFLAGS', 'COFLAGS', 'CPPFLAGS', 'FFLAGS',
+  'GFLAGS', 'LDFLAGS', 'LFLAGS', 'YFLAGS', 'PFLAGS', 'RFLAGS', 'LINTFLAGS',
+  # Other.
+  'DESTDIR', 'MAKE', 'MAKEFLAGS', 'MAKEOVERRIDES', 'MFLAGS'
+} &(space* assign)
+
+computed_var <- cap{'$' [({] func, "symbol.operator"}
+variable <- cap{
+	expanded_var / auto_var / special_var / implicit_var,
+	"type.variable"
+} / computed_var
+
+special_target <- cap{words{
+	'.PHONY', '.SUFFIXES', '.DEFAULT', '.PRECIOUS', '.INTERMEDIATE', '.SECONDARY',
+	'.SECONDEXPANSION', '.DELETE_ON_ERROR', '.IGNORE', '.LOW_RESOLUTION_TIME',
+	'.SILENT', '.EXPORT_ALL_VARIABLES', '.NOTPARALLEL', '.ONESHELL', '.POSIX'
+}, "special"}
+normal_target <- cap{(!(space / [:#=]) .)+, "constant"}
+
+target <- (special_target / normal_target) space* &(':' !'=')
+
+identifier <- cap{word_char+, "identifier"}
+operator <- cap{assign / [:$(){}], "symbol.operator"}
+
+token <- ws
+       / keyword
+	   / target
+	   / variable
+	   / operator
+	   / identifier
+	   / comment

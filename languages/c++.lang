@@ -1,0 +1,29 @@
+ws <- space+
+
+keyword <- cap{words{
+  'asm', 'auto', 'break', 'case', 'catch', 'class', 'const', 'const_cast',
+  'continue', 'default', 'delete', 'do', 'dynamic_cast', 'else', 'explicit',
+  'export', 'extern', 'false', 'for', 'friend', 'goto', 'if', 'inline',
+  'mutable', 'namespace', 'new', 'operator', 'private', 'protected', 'public',
+  'register', 'reinterpret_cast', 'return', 'sizeof', 'static', 'static_cast',
+  'switch', 'template', 'this', 'throw', 'true', 'try', 'typedef', 'typeid',
+  'typename', 'using', 'virtual', 'volatile', 'while',
+  # Operators
+  'and', 'and_eq', 'bitand', 'bitor', 'compl', 'not', 'not_eq', 'or', 'or_eq',
+  'xor', 'xor_eq',
+  # C++11
+  'alignas', 'alignof', 'constexpr', 'decltype', 'final', 'noexcept',
+  'override', 'static_assert', 'thread_local'
+}, "keyword"}
+
+type <- cap{words{
+  'bool', 'char', 'double', 'enum', 'float', 'int', 'long', 'short', 'signed',
+  'struct', 'union', 'unsigned', 'void', 'wchar_t',
+  # C++11
+  'char16_t', 'char32_t', 'nullptr'
+}, "type"}
+
+token <- ws
+       / keyword
+       / type
+       / include{"c"}

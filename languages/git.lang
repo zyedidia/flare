@@ -1,0 +1,30 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+keyword <- cap{words{
+  'p', 'pick',
+  'r', 'reword',
+  'e', 'edit',
+  's', 'squash',
+  'f', 'fixup',
+  'x', 'exec',
+  'd', 'drop',
+  'b', 'break',
+  'l', 'label',
+  't', 'reset',
+  'm', 'merge',
+}, "keyword"}
+
+commit <- cap{[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]+, "constant.number"}
+
+issue <- cap{'#' integer, "constant"}
+
+message <- cap{(!'\n' (issue / .))+, "constant.string"}
+
+token <- ws
+       / comment
+       / keyword
+       / commit
+       / issue
+       / message
