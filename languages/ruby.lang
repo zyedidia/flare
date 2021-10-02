@@ -1,0 +1,71 @@
+ws <- space+
+
+line_comment <- '#' (!'\n' .)*
+block_comment <- '=begin' (!('\n' '=end') .)* ('\n' '=end')?
+comment <- cap{
+    block_comment / line_comment,
+    "comment"
+}
+
+cmd_str <- '`' (!'`' .)* '`'?
+sq_str        <- "'" (escape / (!"'" .))* "'"?
+dq_str        <- '"' (escape / (!'"' .))* '"'?
+escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+
+heredoc <- '<<' [\-~%]? (ref{word, "doc"} / ("'" ref{word, "doc"} "'"))
+           !(back{"doc"} .)* back{"doc"}?
+
+regex_str <- '/' (!'/' .)* '/'?
+
+string <- cap{(sq_str / dq_str / heredoc / cmd_str) 'f'?, "constant.string"}
+        / cap{regex_str, "constant.string.regex"}
+
+word_char <- alnum / [_!?]
+
+dec <- digit+ ('_' digit+)* [ri]?
+bin <- '0b' [01]+ ('_' [01]+)*
+integer <- [+\-]? (bin / hex_num / oct_num / dec)
+numeric_literal <- '?' (!space .) !word_char
+number <- cap{
+    float [ri]? / integer / numeric_literal,
+    "constant.number"
+}
+
+# TODO: include '?!' in word chars
+keyword <- cap{words{
+  'BEGIN', 'END', 'alias', 'and', 'begin', 'break', 'case', 'class', 'def',
+  'defined', 'do', 'else', 'elsif', 'end', 'ensure', 'false', 'for', 'if',
+  'in', 'module', 'next', 'nil', 'not', 'or', 'redo', 'rescue', 'retry',
+  'return', 'self', 'super', 'then', 'true', 'undef', 'unless', 'until', 'when',
+  'while', 'yield', '__FILE__', '__LINE__'
+}, "keyword"}
+
+func <- cap{words{
+  'at_exit', 'autoload', 'binding', 'caller', 'catch', 'chop', 'chop', 'chomp',
+  'chomp', 'eval', 'exec', 'exit', 'exit', 'extend', 'fail', 'fork', 'format', 'gets',
+  'global_variables', 'gsub', 'gsub', 'include', 'iterator', 'lambda', 'load',
+  'local_variables', 'loop', 'module_function', 'open', 'p', 'print', 'printf', 'proc', 'putc',
+  'puts', 'raise', 'rand', 'readline', 'readlines', 'require', 'require_relative', 'select',
+  'sleep', 'split', 'sprintf', 'srand', 'sub', 'sub', 'syscall', 'system',
+  'test', 'trace_var', 'trap', 'untrace_var'
+}, "function"} ![.:|]
+
+rword <- (alpha / '_') word_char*
+identifier <- cap{rword, "identifier"}
+
+global_var <- '$' (rword / [!@L+`'=~/\\,.;<>_*"$?:]) / digit / '-' [0FadiIKlpvw]
+class_var <- '@@' rword
+inst_var <- '@' rword
+variable <- cap{global_var / class_var / inst_var, "type.variable"}
+
+operator <- cap{[!%^&*()\[\]{}\-=+/|:;.,?<>~], "symbol.operator"}
+
+token <- ws
+       / keyword
+       / func
+       / identifier
+       / comment
+       / string
+       / number
+       / variable
+       / operator

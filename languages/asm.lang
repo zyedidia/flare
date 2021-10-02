@@ -1,0 +1,28 @@
+ws <- space+
+
+comment <- ';' (!'\n' .)*
+
+sq_str        <- "'" (escape / (!['\n] .))* "'"?
+dq_str        <- '"' (escape / (!["\n] .))* '"'?
+escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+string        <- cap{sq_str / dq_str, "constant.string"}
+
+label <- cap{'.' word, "preproc"}
+register <- '%' cap{word, "type.register"}
+extra <- '@' cap{word, "special"}
+instruction <- cap{(alpha / '_')+, "identifier"}
+number <- cap{'$'? (float / hex_num / xdigit+ / integer [hqb]?), "constant.number"}
+constant <- cap{word, "constant"} &('(' / '@')
+
+operator <- cap{[+\-/*%<>!=^&|~:,()\[\]], "symbol.operator"}
+
+token <- ws
+       / label
+       / register
+       / extra
+       / constant
+       / instruction
+       / number
+       / string
+       / comment
+       / operator
