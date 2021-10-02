@@ -80,7 +80,7 @@ func wordMatch(words ...string) p.Pattern {
 
 	word = p.Concat(
 		p.Or(alpha, p.Literal("_")),
-		p.Star(p.Or(alnum, p.Literal("_"), p.Literal("."))),
+		p.Star(p.Or(alnum, p.Literal("_"), p.Literal("."), p.Literal("-"))),
 	)
 
 	return p.Check(word, isa.MapChecker(m))
