@@ -9,21 +9,22 @@ dq_str <- '"' (str_escape / group / (!'"' .))* '"'?
 str_escape <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
 string <- cap{range / sq_str / dq_str, "constant.string"}
 
-group <- cap{"keyword", "keyword"}
-       / cap{"type", "type"}
-       / cap{"default", "default"}
-       / cap{"comment", "comment"}
-       / cap{"constant.string.char", "constant.string.char"}
-       / cap{"constant.string.escape", "constant.string.escape"}
-       / cap{"constant.string", "constant.string"}
-       / cap{"constant", "constant"}
-       / cap{"symbol.tag", "symbol.tag"}
-       / cap{"preproc", "preproc"}
-       / cap{"function", "function"}
-       / cap{"special", "special"}
-       / cap{"underlined", "underlined"}
-       / cap{"error", "error"}
-       / cap{"todo", "todo"}
+group <- cap{words{"keyword"}, "keyword"}
+       / cap{words{"type"}, "type"}
+       / cap{words{"default"}, "default"}
+       / cap{words{"comment"}, "comment"}
+       / cap{words{"constant.string.char"}, "constant.string.char"}
+       / cap{words{"constant.string.escape"}, "constant.string.escape"}
+       / cap{words{"constant.number"}, "constant.number"}
+       / cap{words{"constant.string"}, "constant.string"}
+       / cap{words{"constant"}, "constant"}
+       / cap{words{"symbol.tag"}, "symbol.tag"}
+       / cap{words{"preproc"}, "preproc"}
+       / cap{words{"function"}, "function"}
+       / cap{words{"special"}, "special"}
+       / cap{words{"underlined"}, "underlined"}
+       / cap{words{"error"}, "error"}
+       / cap{words{"todo"}, "todo"}
 
 function <- cap{words{
     "cap", "words", "include", "ref", "back"
