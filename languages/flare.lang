@@ -1,0 +1,41 @@
+ws <- space+
+
+comment <- "#" (!"\n" .)*
+
+range  <- '[' (range_escape / (!']' .))* ']'?
+range_escape <- cap{'\\' [\-\[\]\\], "constant.string.escape"}
+sq_str <- "'" (str_escape / group / (!"'" .))* "'"?
+dq_str <- '"' (str_escape / group / (!'"' .))* '"'?
+str_escape <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+string <- cap{range / sq_str / dq_str, "constant.string"}
+
+group <- cap{"keyword", "keyword"}
+       / cap{"type", "type"}
+       / cap{"default", "default"}
+       / cap{"comment", "comment"}
+       / cap{"constant.string.char", "constant.string.char"}
+       / cap{"constant.string.escape", "constant.string.escape"}
+       / cap{"constant.string", "constant.string"}
+       / cap{"constant", "constant"}
+       / cap{"symbol.tag", "symbol.tag"}
+       / cap{"preproc", "preproc"}
+       / cap{"function", "function"}
+       / cap{"special", "special"}
+       / cap{"underlined", "underlined"}
+       / cap{"error", "error"}
+       / cap{"todo", "todo"}
+
+function <- cap{words{
+    "cap", "words", "include", "ref", "back"
+}, "function"}
+
+operator <- cap{"<-", "symbol.operator"}
+
+type <- cap{word &(space* "<-"), "type"}
+
+token <- ws
+       / function
+       / type
+       / string
+       / comment
+       / operator
