@@ -1,0 +1,74 @@
+ws <- space+
+
+comment <- cap{"<!--" (!"-->" .)* "-->"?, "comment"}
+
+sq_str <- "'" (escape / (!"'" .))* "'"?
+dq_str <- '"' (escape / (!'"' .))* '"'?
+escape <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+string <- cap{sq_str / dq_str, "constant.string"}
+
+in_tag <- &((!'><' .)* '>')
+
+number <- cap{digit+ '%'?, "constant.number"} in_tag
+
+js <- include{"javascript"}
+css <- include{"css"}
+
+js_tag <- cap{'<script', "keyword.element"} (attribute / string / (!'>' .))* cap{'>', "keyword.element"} (!'</script>' (js / (. (!js .)*)))* cap{'</script>', "keyword.element"}?
+css_tag <- cap{'<style', "keyword.element"} (attribute / string / (!'>' .))* cap{'>', "keyword.element"} (!'</style>' (css / (. (!css .)*)))* cap{'</style>', "keyword.element"}?
+any_tag <- cap{'<' '/'? (known_element / word), "keyword.element"} (attribute / string / (!'>' .))* cap{'>', "keyword.element"}
+
+known_element <- words{
+  'a', 'abbr', 'address', 'area', 'article', 'aside', 'audio', 'b', 'base',
+  'bdi', 'bdo', 'blockquote', 'body', 'br', 'button', 'canvas', 'caption',
+  'cite', 'code', 'col', 'colgroup', 'content', 'data', 'datalist', 'dd',
+  'decorator', 'del', 'details', 'dfn', 'div', 'dl', 'dt', 'element', 'em',
+  'embed', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2',
+  'h3', 'h4', 'h5', 'h6', 'head', 'header', 'hr', 'html', 'i', 'iframe', 'img',
+  'input', 'ins', 'kbd', 'keygen', 'label', 'legend', 'li', 'link', 'main',
+  'map', 'mark', 'menu', 'menuitem', 'meta', 'meter', 'nav', 'noscript',
+  'object', 'ol', 'optgroup', 'option', 'output', 'p', 'param', 'pre',
+  'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'script', 'section',
+  'select', 'shadow', 'small', 'source', 'spacer', 'spacer', 'span', 'strong',
+  'style', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'template',
+  'textarea', 'tfoot', 'th', 'thead', 'time', 'title', 'tr', 'track', 'u', 'ul',
+  'var', 'video', 'wbr'
+}
+
+known_attribute <- words{
+  'accept', 'accept-charset', 'accesskey', 'action', 'align', 'alt', 'async',
+  'autocomplete', 'autofocus', 'autoplay', 'bgcolor', 'border', 'buffered',
+  'challenge', 'charset', 'checked', 'cite', 'class', 'code', 'codebase',
+  'color', 'cols', 'colspan', 'content', 'contenteditable', 'contextmenu',
+  'controls', 'coords', 'data', 'data-', 'datetime', 'default', 'defer', 'dir',
+  'dirname', 'disabled', 'download', 'draggable', 'dropzone', 'enctype', 'for',
+  'form', 'headers', 'height', 'hidden', 'high', 'href', 'hreflang',
+  'http-equiv', 'icon', 'id', 'ismap', 'itemprop', 'keytype', 'kind', 'label',
+  'lang', 'language', 'list', 'loop', 'low', 'manifest', 'max', 'maxlength',
+  'media', 'method', 'min', 'multiple', 'name', 'novalidate', 'open', 'optimum',
+  'pattern', 'ping', 'placeholder', 'poster', 'preload', 'pubdate',
+  'radiogroup', 'readonly', 'rel', 'required', 'reversed', 'role', 'rows',
+  'rowspan', 'sandbox', 'spellcheck', 'scope', 'scoped', 'seamless', 'selected',
+  'shape',   'size', 'sizes', 'span', 'src', 'srcdoc', 'srclang', 'start',
+  'step', 'style', 'summary', 'tabindex', 'target', 'title', 'type', 'usemap',
+  'value', 'width', 'wrap'
+} / (('data-' / 'aria-') (alnum / '-')+)
+unknown_attribute <- word
+attribute <- cap{(known_attribute / unknown_attribute) &(space* '='), "type.attribute"}
+
+tag_close <- cap{'/'? '>', "keyword.element"}
+
+equals <- cap{"=", "symbol.operator"} in_tag
+
+entity <- cap{"&" (!(space / ';') .)* ';', "preproc"}
+
+doctype <- cap{"<!" words{"DOCTYPE"} (!'>' .)+ '>', "special"}
+
+token <- ws
+       / comment
+       / doctype
+       / js_tag
+       / css_tag
+       / any_tag
+       / number
+       / entity

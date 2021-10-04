@@ -1,0 +1,38 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' (!'*/' .)* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+sq_str <- "'" (escape / (![\n'] .))* "'"?
+dq_str <- '"' (escape / (![\n"] .))* '"'?
+template_str <- '`' (escape / (![\n`] .))* '`'?
+escape <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+# TODO: regex_str
+string <- cap{sq_str / dq_str / template_str, "constant.string"}
+
+number <- float / integer
+
+keyword <- cap{words{
+  'abstract', 'async', 'await', 'boolean', 'break', 'byte', 'case', 'catch',
+  'char', 'class', 'const', 'continue', 'debugger', 'default', 'delete',
+  'do', 'double', 'else', 'enum', 'export', 'extends', 'false', 'final',
+  'finally', 'float', 'for', 'function', 'get', 'goto', 'if', 'implements',
+  'import', 'in', 'instanceof', 'int', 'interface', 'let', 'long', 'native',
+  'new', 'null', 'of', 'package', 'private', 'protected', 'public', 'return',
+  'set', 'short', 'static', 'super', 'switch', 'synchronized', 'this',
+  'throw', 'throws', 'transient', 'true', 'try', 'typeof', 'var', 'void',
+  'volatile', 'while', 'with', 'yield'
+}, "keyword"}
+
+identifier <- cap{word, "identifier"}
+
+operator <- cap{[+\-/*%^!=&|?:;,.()\[\]{}<>], "symbol.operator"}
+
+token <- ws
+       / keyword
+       / identifier
+       / comment
+       / number
+       / string
+       / operator

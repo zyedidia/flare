@@ -1,0 +1,58 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' (!'*/' .)* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+sq_str <- "'" (escape / (![\n'] .))* "'"?
+dq_str <- '"' (escape / (![\n"] .))* '"'?
+escape <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+ml_str <- '@'? '"' (!'"' .)* '"'?
+string <- cap{sq_str / dq_str / ml_str, "constant.string"}
+
+number <- cap{(float / integer) [lLdDfFmM]?, "constant.number"}
+
+preproc_word <- words{
+  'define', 'elif', 'else', 'endif', 'error', 'if', 'line', 'undef', 'warning',
+  'region', 'endregion'
+}
+
+preproc <- cap{
+    '#' [\t ]* preproc_word ((!'\n' .)+ / space (!'\n' .)*),
+    "preproc"
+}
+
+keyword <- cap{words{
+  'class', 'delegate', 'enum', 'event', 'interface', 'namespace', 'struct',
+  'using', 'abstract', 'const', 'explicit', 'extern', 'fixed', 'implicit',
+  'internal', 'lock', 'out', 'override', 'params', 'partial', 'private',
+  'protected', 'public', 'ref', 'sealed', 'static', 'readonly', 'unsafe',
+  'virtual', 'volatile', 'add', 'as', 'assembly', 'base', 'break', 'case',
+  'catch', 'checked', 'continue', 'default', 'do', 'else', 'finally', 'for',
+  'foreach', 'get', 'goto', 'if', 'in', 'is', 'new', 'remove', 'return', 'set',
+  'sizeof', 'stackalloc', 'super', 'switch', 'this', 'throw', 'try', 'typeof',
+  'unchecked', 'value', 'void', 'while', 'yield'
+}, "keyword"}
+
+constant <- cap{words{
+  'null', 'true', 'false'
+}, "constant"}
+
+type <- cap{words{
+  'bool', 'byte', 'char', 'decimal', 'double', 'float', 'int', 'long', 'object',
+  'operator', 'sbyte', 'short', 'string', 'uint', 'ulong', 'ushort'
+}, "type"}
+
+identifier <- cap{word, "identifier"}
+
+operator <- cap{[~!.,:;+\-*/<>=\\^|&%?()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / keyword
+       / type
+       / identifier
+       / string
+       / comment
+       / number
+       / preproc
+       / operator
