@@ -1,6 +1,6 @@
 ws <- space+
 
-comment <- cap{"<!--" (!"-->" .)* "-->"?, "comment"}
+html <- include{"html"}
 
 link_name <- "[" cap{(link_escape / (!"]" .))*, "underlined.link"} "]"?
 link_escape <- cap{'\\' ']', "constant.string.escape"}
@@ -32,8 +32,8 @@ javablock <- '```java' (!'```' (java / (. (!java .)*)))* '```'?
 pythonblock <- '```python' (!'```' (python / (. (!python .)*)))* '```'?
 rubyblock <- '```ruby' (!'```' (ruby / (. (!ruby .)*)))* '```'?
 rustblock <- '```rust' (!'```' (rust / (. (!rust .)*)))* '```'?
-shellblock <- '```sh' (!'```' (shell / (. (!shell .)*)))* '```'?
-texblock <- ('```latex' / '```{=latex}') (!'```' (latex / (. (!latex .)*)))* '```'?
+shellblock <- '```' ('sh' / 'bash') (!'```' (shell / (. (!shell .)*)))* '```'?
+texblock <- '```' ('latex' / '{=latex}') (!'```' (latex / (. (!latex .)*)))* '```'?
 
 block <- '```' (!"\n" .)* (!'```' .)* '```'?
 
@@ -42,7 +42,7 @@ code <- goblock / cblock / javablock / pythonblock / rubyblock / rustblock / she
 token <- ws
        / header
        / href
-       / comment
+       / html
        / keyword
        / string
        / latex

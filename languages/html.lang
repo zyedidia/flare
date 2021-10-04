@@ -16,7 +16,7 @@ css <- include{"css"}
 
 js_tag <- cap{'<script', "keyword.element"} (attribute / string / (!'>' .))* cap{'>', "keyword.element"} (!'</script>' (js / (. (!js .)*)))* cap{'</script>', "keyword.element"}?
 css_tag <- cap{'<style', "keyword.element"} (attribute / string / (!'>' .))* cap{'>', "keyword.element"} (!'</style>' (css / (. (!css .)*)))* cap{'</style>', "keyword.element"}?
-any_tag <- cap{'<' '/'? (known_element / word), "keyword.element"} (attribute / string / (!'>' .))* cap{'>', "keyword.element"}
+any_tag <- cap{'<' '/'? (known_element / word), "keyword.element"} (attribute / string / (!('/'? '>') .))* cap{'/'? '>', "keyword.element"}
 
 known_element <- words{
   'a', 'abbr', 'address', 'area', 'article', 'aside', 'audio', 'b', 'base',
