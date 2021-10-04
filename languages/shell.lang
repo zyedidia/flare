@@ -1,0 +1,39 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+sq_str        <- "'" (!"'" .)* "'"?
+dq_str        <- '"' (escape / (!'"' .))* '"'?
+ex_str        <- '`' (escape / (!'`' .))* '`'?
+escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+
+heredoc <- '<<' [\-~%]? (ref{word, "doc"}) (!back{"doc"} .)* back{"doc"}?
+
+string <- cap{sq_str / dq_str / ex_str / heredoc, "constant.string"}
+
+number <- float / integer
+
+keyword <- cap{words{
+  'if', 'then', 'elif', 'else', 'fi', 'case', 'in', 'esac', 'while', 'for',
+  'do', 'done', 'continue', 'local', 'return', 'select', 'export', 'alias',
+  # Operators.
+  '-a', '-b', '-c', '-d', '-e', '-f', '-g', '-h', '-k', '-p', '-r', '-s', '-t',
+  '-u', '-w', '-x', '-O', '-G', '-L', '-S', '-N', '-nt', '-ot', '-ef', '-o',
+  '-z', '-n', '-eq', '-ne', '-lt', '-le', '-gt', '-ge'
+}, "keyword"}
+
+identifier <- cap{word, "identifier"}
+
+var_range <- '{' (![\n}] .)* '}'?
+variable <- cap{'$' ([!#?*@$] / digit+ / word / var_range), "type.variable"}
+
+operator <- cap{[=!<>+\-/*^&|~.,:;?()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / keyword
+       / identifier
+       / string
+       / comment
+       / number
+       / variable
+       / operator

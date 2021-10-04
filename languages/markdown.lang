@@ -1,5 +1,7 @@
 ws <- space+
 
+comment <- cap{"<!--" (!"-->" .)* "-->"?, "comment"}
+
 link_name <- "[" cap{(link_escape / (!"]" .))*, "underlined.link"} "]"?
 link_escape <- cap{'\\' ']', "constant.string.escape"}
 link_url <- "(" cap{(url_escape / (!")" .))*, "special"} ")"?
@@ -11,7 +13,7 @@ header <- cap{"#"+, "comment.header"} cap{(!"\n" .)*, "preproc"}
 sq_str        <- "'" (escape / (!"'" .))* "'"?
 dq_str        <- '"' (escape / (!'"' .))* '"'?
 escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
-string        <- cap{sq_str / dq_str, "constant.string"}
+string        <- cap{dq_str, "constant.string"}
 
 keyword <- cap{[\-*<>], "keyword"}
 
@@ -21,6 +23,7 @@ java <- include{"java"}
 python <- include{"python"}
 ruby <- include{"ruby"}
 rust <- include{"rust"}
+shell <- include{"shell"}
 latex <- include{"latex"}
 
 goblock <- '```go' (!'```' (go / (. (!go .)*)))* '```'?
@@ -29,17 +32,18 @@ javablock <- '```java' (!'```' (java / (. (!java .)*)))* '```'?
 pythonblock <- '```python' (!'```' (python / (. (!python .)*)))* '```'?
 rubyblock <- '```ruby' (!'```' (ruby / (. (!ruby .)*)))* '```'?
 rustblock <- '```rust' (!'```' (rust / (. (!rust .)*)))* '```'?
-
-math <- '$$' (!'$$' (latex / (. (!latex .)*)))* '$$'?
+shellblock <- '```sh' (!'```' (shell / (. (!shell .)*)))* '```'?
+texblock <- ('```latex' / '```{=latex}') (!'```' (latex / (. (!latex .)*)))* '```'?
 
 block <- '```' (!"\n" .)* (!'```' .)* '```'?
 
-code <- goblock / cblock / javablock / pythonblock / rubyblock / rustblock / block
+code <- goblock / cblock / javablock / pythonblock / rubyblock / rustblock / shellblock / texblock / block
 
 token <- ws
        / header
        / href
+       / comment
        / keyword
        / string
-       / math
+       / latex
        / code
