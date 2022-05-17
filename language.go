@@ -1,19 +1,20 @@
 package flare
 
 import (
-	"embed"
-	"path/filepath"
+	"fmt"
 
 	"github.com/zyedidia/flare/syntax"
 	"github.com/zyedidia/gpeg/isa"
-	"github.com/zyedidia/gpeg/pattern"
 	p "github.com/zyedidia/gpeg/pattern"
 	"github.com/zyedidia/gpeg/vm"
 )
 
-//go:embed languages/*.lang
-var builtin embed.FS
+var builtin func(name string) ([]byte, error)
 var custom map[string]func() ([]byte, error)
+
+func SetLoader(loader func(name string) ([]byte, error)) {
+	builtin = loader
+}
 
 // AddLanguage adds support for a new language. The 'loader' should return the
 // highlighting grammar when called.
@@ -35,7 +36,10 @@ func loadData(name string) ([]byte, error) {
 	if loader, ok := custom[name]; ok {
 		return loader()
 	}
-	return builtin.ReadFile(filepath.Join("languages", name+".lang"))
+	if builtin != nil {
+		return builtin(name)
+	}
+	return nil, fmt.Errorf("no highlighter for language: %s", name)
 }
 
 func loadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) {
@@ -123,7 +127,7 @@ func loadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) 
 		"top": top,
 	}
 
-	prog, err := pattern.Compile(p.Grammar("top", grammar))
+	prog, err := p.Compile(p.Grammar("top", grammar))
 	if err != nil {
 		return &empty, err
 	}
