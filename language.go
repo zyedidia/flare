@@ -22,14 +22,14 @@ func AddLanguage(name string, loader func() ([]byte, error)) {
 	custom[name] = loader
 }
 
-// LoadHighlighter compiles and loads the given highlighter. Use 'memo' if the
-// highlighter will be used in an incremental setting (editor).
-func LoadHighlighter(name string, memo bool) (*Highlighter, error) {
+// LoadHighlighterBuiltin compiles and loads the given highlighter. Use 'memo'
+// if the highlighter will be used in an incremental setting (editor).
+func LoadHighlighterBuiltin(name string, memo bool) (*Highlighter, error) {
 	data, err := loadData(name)
 	if err != nil {
 		return &empty, err
 	}
-	return loadHighlighter(name, data, memo)
+	return LoadHighlighter(name, data, memo)
 }
 
 func loadData(name string) ([]byte, error) {
@@ -42,7 +42,8 @@ func loadData(name string) ([]byte, error) {
 	return nil, fmt.Errorf("no highlighter for language: %s", name)
 }
 
-func loadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) {
+// LoadHighlighter loads a highlighter from some data.
+func LoadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) {
 	capid := 0
 	refid := 0
 	caps := make(map[int]string)
