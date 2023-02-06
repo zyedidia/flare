@@ -32,7 +32,7 @@ func main() {
 	}
 
 	if opts.Version {
-		fmt.Println("hcat version", Version)
+		fmt.Println("flare version", Version)
 	}
 
 	if opts.Help {
@@ -77,7 +77,7 @@ func main() {
 			}
 		}
 
-		h, err := flare.LoadHighlighter(lang, false)
+		h, err := flare.LoadHighlighterBuiltin(lang, false)
 
 		if err != nil {
 			fatal(err)

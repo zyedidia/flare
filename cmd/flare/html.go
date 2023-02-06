@@ -48,7 +48,7 @@ func (st *HTMLStyler) Pre() string {
 		bg := st.theme["default"].Bg
 		css += fmt.Sprintf("background-color:%s;", bg.Hex())
 	}
-	return fmt.Sprintf("<pre id=\"%s\" class=\"%s\" style=\"%s\">\n", "hcat", "hcat-"+st.name, css)
+	return fmt.Sprintf("<pre id=\"%s\" class=\"%s\" style=\"%s\">\n", "flare", "flare-"+st.name, css)
 }
 func (st *HTMLStyler) Post() string {
 	return "</pre>\n"

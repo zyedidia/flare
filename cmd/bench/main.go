@@ -78,7 +78,7 @@ func main() {
 		}
 	}
 
-	h, err := flare.LoadHighlighter(hlang, true)
+	h, err := flare.LoadHighlighterBuiltin(hlang, true)
 	if err != nil {
 		fatal(err)
 	}

@@ -12,5 +12,5 @@ Features:
 * Fairly efficient.
 * Can format highlighted code as HTML output.
 
-See the `hcat` program in `./cmd/hcat` for an example that can highlight code files at the terminal
+See the `flare` program in `./cmd/flare` for an example that can highlight code files at the terminal
 or output highlighted HTML.
