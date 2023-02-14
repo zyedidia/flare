@@ -1,12 +1,12 @@
 ws <- space+
 
-line_comment  <- '//' (!'\n' .)*
+line_comment  <- '//' (![\n\r] .)*
 block_comment <- '/*' (!'*/' .)* '*/'?
 comment       <- cap{line_comment / block_comment, "comment"}
 
-sq_str <- "'" (escape / (![\n'] .))* "'"?
-dq_str <- '"' (escape / (![\n"] .))* '"'?
-template_str <- '`' (escape / (![\n`] .))* '`'?
+sq_str <- "'" (escape / (![\n\r'] .))* "'"?
+dq_str <- '"' (escape / (![\n\r"] .))* '"'?
+template_str <- '`' (escape / (![\n\r`] .))* '`'?
 escape <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
 # TODO: regex_str
 string <- cap{sq_str / dq_str / template_str, "constant.string"}
