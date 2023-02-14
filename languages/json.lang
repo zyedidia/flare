@@ -1,14 +1,26 @@
-ws <- space+
-comment <- cap{'/*' (!'*/' .)* '*/'?, "comment"}
-sq_str  <- 'u'? "'" (!['\n] .)* "'"?
-dq_str  <- 'U'? '"' (!["\n] .)* '"'?
+# based on https://www.rfc-editor.org/rfc/rfc7159 and https://spec.json5.org
+
+multi_line_comment <- cap{'//' (![\n\r] .)*, "comment"}
+single_line_comment <- cap{'/*' (!'*/' .)* '*/'?  , "comment"}
+comment <- multi_line_comment / single_line_comment
+
+escape_sequence <- cap{'\\' (!([ux] / digit) . / 'u' xdigit xdigit xdigit xdigit / 'x' xdigit xdigit / digit digit? digit?), "constant.specialChar" }
+single_quote_string <- "'" (![\\'\n\r] . / escape_sequence)* "'"
+double_quote_string <- '"' (![\\"\n\r] . / escape_sequence)* '"'
 string  <- cap{
-    sq_str / dq_str,
+    single_quote_string / double_quote_string,
     "constant.string"
 }
 
-jsonint <- [+\-]? digit+ [Ll]?
-number  <- cap{(float / jsonint), "constant.number"}
+numeric_literal <- ('0' [xX] xdigit+ / "." digit+ / digit+ ("." digit*)? ) ([eE] [+\-]? digit+ )? / cap{
+    words{"Infinity", "NaN"},
+    "keyword"
+}
+
+number <- cap{
+    [+\-]? numeric_literal,
+    "constant.number"
+}
 
 keyword <- cap{
     words{"true", "false", "null"},
@@ -20,8 +32,7 @@ operator <- cap{
     "symbol.operator"
 }
 
-token <- ws
-       / comment
+token <- comment
        / string
        / number
        / keyword
