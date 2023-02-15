@@ -25,6 +25,9 @@ func (st *HTMLStyler) Style(s, group string) string {
 		if style.Attr&theme.AttrBold != 0 {
 			css += "font-weight:bold;"
 		}
+		if style.Attr&theme.AttrUnderline != 0 {
+			css += "text-decoration:underline;"
+		}
 
 		class := ""
 		if st.class {
