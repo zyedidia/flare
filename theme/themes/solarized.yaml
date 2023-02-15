@@ -3,39 +3,27 @@ default:
     bg: "#002833"
 comment:
     fg: "#586E75"
-    bg: "#002833"
 constant:
     fg: "#2AA198"
-    bg: "#002833"
 constant.string.escape:
     fg: "#DC322F"
-    bg: "#002833"
 statement:
     fg: "#859900"
-    bg: "#002833"
 keyword:
     fg: "#859900"
-    bg: "#002833"
 preproc:
     fg: "#CB4B16"
-    bg: "#002833"
 type:
     fg: "#B58900"
-    bg: "#002833"
 type.extended:
     fg: "#839496"
-    bg: "#002833"
 special:
     fg: "#268BD2"
-    bg: "#002833"
 underlined:
     fg: "#D33682"
-    bg: "#002833"
 error:
     fg: "#CB4B16"
-    bg: "#002833"
     attr: ["bold"]
 todo:
     fg: "#D33682"
-    bg: "#002833"
     attr: ["bold"]
