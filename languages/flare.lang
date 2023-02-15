@@ -4,8 +4,8 @@ comment <- "#" (!"\n" .)*
 
 range  <- '[' (range_escape / (!']' .))* ']'?
 range_escape <- cap{'\\' [\-\[\]\\], "constant.string.escape"}
-sq_str <- "'" (str_escape / group / (!"'" .))* "'"?
-dq_str <- '"' (str_escape / group / (!'"' .))* '"'?
+sq_str <- "'" (group &"'" / (str_escape / (!"'" .))*) "'"?
+dq_str <- '"' (group &'"' / (str_escape / (!'"' .))*) '"'?
 str_escape <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
 string <- cap{range / sq_str / dq_str, "constant.string"}
 
@@ -30,7 +30,7 @@ function <- cap{words{
     "cap", "words", "include", "ref", "back"
 }, "function"}
 
-operator <- cap{"<-", "symbol.operator"}
+operator <- cap{"<-" / [*?/.!&+\-], "symbol.operator"}
 
 type <- cap{word &(space* "<-"), "type"}
 
