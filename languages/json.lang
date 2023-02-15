@@ -1,12 +1,12 @@
 # based on https://www.rfc-editor.org/rfc/rfc7159 and https://spec.json5.org
 
-multi_line_comment <- cap{'//' (![\n\r] .)*, "comment"}
+multi_line_comment <- cap{'//' (![\n] .)*, "comment"}
 single_line_comment <- cap{'/*' (!'*/' .)* '*/'?  , "comment"}
 comment <- multi_line_comment / single_line_comment
 
 escape_sequence <- cap{'\\' (!([ux] / digit) . / 'u' xdigit xdigit xdigit xdigit / 'x' xdigit xdigit / digit digit? digit?), "constant.string.escape" }
-single_quote_string <- "'" (![\\'\n\r] . / escape_sequence)* "'"
-double_quote_string <- '"' (![\\"\n\r] . / escape_sequence)* '"'
+single_quote_string <- "'" (![\\'\n] . / escape_sequence)* "'"
+double_quote_string <- '"' (![\\"\n] . / escape_sequence)* '"'
 string  <- cap{
     single_quote_string / double_quote_string,
     "constant.string"
