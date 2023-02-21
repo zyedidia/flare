@@ -168,7 +168,7 @@ func parseChar(char string) byte {
 			}
 		}
 
-		i, _ := strconv.ParseInt(string(char[1:]), 8, 8)
+		i, _ := strconv.ParseUint(string(char[1:]), 8, 8)
 		return byte(i)
 	default:
 		return char[0]
