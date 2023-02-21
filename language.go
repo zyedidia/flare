@@ -108,21 +108,33 @@ func LoadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) 
 		return &empty, err
 	}
 
-	top := p.Or(
-		token,
-		p.Concat(
-			p.Any(1),
-			p.Star(p.Concat(
-				p.Not(token),
-				p.Any(1),
-			)),
-		),
-	)
-	if memo {
-		top = p.Memo(top)
+	var top p.Pattern = nil
+
+	switch t := token.(type) {
+		case *p.GrammarNode:
+			nonterm, ok := t.Defs[lang+"_top"]
+			if ok {
+				top = nonterm
+			}
 	}
 
-	top = p.Star(top)
+	if top == nil {
+		top = p.Or(
+			token,
+			p.Concat(
+				p.Any(1),
+				p.Star(p.Concat(
+					p.Not(token),
+					p.Any(1),
+				)),
+			),
+		)
+		if memo {
+			top = p.Memo(top)
+		}
+
+		top = p.Star(top)
+	}
 
 	grammar := map[string]p.Pattern{
 		"top": top,
