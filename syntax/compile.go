@@ -40,7 +40,7 @@ func compile(root *memo.Capture, s string, fns CustomFns) pattern.Pattern {
 		}
 		it := root.ChildIterator(0)
 		for c := it(); c != nil; c = it() {
-			k, v := compileDef( c, s, fns)
+			k, v := compileDef(c, s, fns)
 			nonterms[k] = v
 		}
 		p = pattern.Grammar("token", nonterms)
