@@ -85,7 +85,7 @@ func LoadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) 
 	var includefn func(lang string) p.Pattern
 	includefn = func(lang string) p.Pattern {
 		data, _ := loadData(lang)
-		token, _ := syntax.Compile(lang+"_", string(data), syntax.CustomFns{
+		token, _ := syntax.Compile(string(data), syntax.CustomFns{
 			Cap:     capfn,
 			Words:   wordsfn,
 			Include: includefn,
@@ -96,7 +96,7 @@ func LoadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) 
 		return token
 	}
 
-	token, err := syntax.Compile(lang+"_", string(data), syntax.CustomFns{
+	token, err := syntax.Compile(string(data), syntax.CustomFns{
 		Cap:     capfn,
 		Words:   wordsfn,
 		Include: includefn,
