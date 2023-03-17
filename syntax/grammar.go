@@ -250,6 +250,17 @@ var grammar = map[string]p.Pattern{
 			p.Set(charset.New([]byte{'n', 'r', 't', '\'', '"', '[', ']', '\\', '-'})),
 		),
 		p.Concat(
+			p.Literal("\\x"),
+			p.Set(charset.Range('0', '9').
+				Add(charset.Range('a', 'f')).
+				Add(charset.Range('A', 'F')),
+			),
+			p.Set(charset.Range('0', '9').
+				Add(charset.Range('a', 'f')).
+				Add(charset.Range('A', 'F')),
+			),
+		),
+		p.Concat(
 			p.Literal("\\"),
 			p.Set(charset.Range('0', '2')),
 			p.Set(charset.Range('0', '7')),

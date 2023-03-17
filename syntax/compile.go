@@ -168,6 +168,11 @@ func parseChar(char string) byte {
 			}
 		}
 
+		if char[1] == 'x' {
+			i, _ := strconv.ParseUint(string(char[2:]), 16, 8)
+			return byte(i)
+		}
+
 		i, _ := strconv.ParseUint(string(char[1:]), 8, 8)
 		return byte(i)
 	default:
