@@ -1,8 +1,7 @@
-/cmd/hcat/main
-/cmd/hcat/out.html
-/main
-/cmd/hcat/hcat
-/cmd/hcat/testdata
+/cmd/flare/out.html
+/flare
+/cmd/flare/flare
+/cmd/flare/testdata
 /cmd/bench/testdata
 /cmd/bench/bench
 todo.txt

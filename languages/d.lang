@@ -1,0 +1,72 @@
+ws <- space+
+
+keyword <- cap{words{
+  'abstract', 'align', 'asm', 'assert', 'auto', 'body', 'break', 'case', 'cast', 'catch', 'const',
+  'continue', 'debug', 'default', 'delete', 'deprecated', 'do', 'else', 'extern', 'export', 'false',
+  'final', 'finally', 'for', 'foreach', 'foreach_reverse', 'goto', 'if', 'import', 'immutable',
+  'in', 'inout', 'invariant', 'is', 'lazy', 'macro', 'mixin', 'new', 'nothrow', 'null', 'out',
+  'override', 'pragma', 'private', 'protected', 'public', 'pure', 'ref', 'return', 'scope',
+  'shared', 'static', 'super', 'switch', 'synchronized', 'this', 'throwtrue', 'try', 'typeid',
+  'typeof', 'unittest', 'version', 'virtual', 'volatile', 'while', 'with', '__gshared', '__thread',
+  '__traits', '__vector', '__parameters'
+}, "keyword"}
+
+type <- cap{words{
+  'alias', 'bool', 'byte', 'cdouble', 'cent', 'cfloat', 'char', 'class', 'creal', 'dchar',
+  'delegate', 'double', 'enum', 'float', 'function', 'idouble', 'ifloat', 'int', 'interface',
+  'ireal', 'long', 'module', 'package', 'ptrdiff_t', 'real', 'short', 'size_t', 'struct',
+  'template', 'typedef', 'ubyte', 'ucent', 'uint', 'ulong', 'union', 'ushort', 'void', 'wchar',
+  'string', 'wstring', 'dstring', 'hash_t', 'equals_t'
+}, "type"}
+
+constant <- cap{words{
+  '__FILE__', '__LINE__', '__DATE__', '__EOF__', '__TIME__', '__TIMESTAMP__', '__VENDOR__',
+  '__VERSION__', '__FUNCTION__', '__PRETTY_FUNCTION__', '__MODULE__'
+}, "constant"}
+
+version <- cap{words{
+  'AArch64', 'AIX', 'all', 'Alpha', 'Alpha_HardFloat', 'Alpha_SoftFloat', 'Android', 'ARM',
+  'ARM_HardFloat', 'ARM_SoftFloat', 'ARM_SoftFP', 'ARM_Thumb', 'assert', 'BigEndian', 'BSD',
+  'Cygwin', 'D_Coverage', 'D_Ddoc', 'D_HardFloat', 'DigitalMars', 'D_InlineAsm_X86',
+  'D_InlineAsm_X86_64', 'D_LP64', 'D_NoBoundsChecks', 'D_PIC', 'DragonFlyBSD', 'D_SIMD',
+  'D_SoftFloat', 'D_Version2', 'D_X32', 'FreeBSD', 'GNU', 'Haiku', 'HPPA', 'HPPA64', 'Hurd', 'IA64',
+  'LDC', 'linux', 'LittleEndian', 'MIPS32', 'MIPS64', 'MIPS_EABI', 'MIPS_HardFloat', 'MIPS_N32',
+  'MIPS_N64', 'MIPS_O32', 'MIPS_O64', 'MIPS_SoftFloat', 'NetBSD', 'none', 'OpenBSD', 'OSX', 'Posix',
+  'PPC', 'PPC64', 'PPC_HardFloat', 'PPC_SoftFloat', 'S390', 'S390X', 'SDC', 'SH', 'SH64', 'SkyOS',
+  'Solaris', 'SPARC', 'SPARC64', 'SPARC_HardFloat', 'SPARC_SoftFloat', 'SPARC_V8Plus', 'SysV3',
+  'SysV4', 'unittest', 'Win32', 'Win64', 'Windows', 'X86', 'X86_64'
+}, "constant.version"}
+
+line_comment   <- '//' (!'\n' .)*
+block_comment  <- '/*' (!'*/' .)* '*/'?
+nested_comment <- '/+' ((!'/+' !'+/' .) / nested_comment)* '+/'?
+comment        <- cap{line_comment / block_comment / nested_comment, "comment"}
+
+sq_str        <- "'" (escape / (!"'" .))* "'"?
+dq_str        <- '"' (escape / (!'"' .))* '"'?
+escape        <- cap{'\\' ['"tnbfr\\], "constant.string.escape"}
+string        <- cap{sq_str / dq_str, "constant.string"}
+
+float_suffix   <- 'f'?
+integer_suffix <- ([uU]? words{'l', 'L', 'll', 'LL'}?) / (words{'l', 'L', 'll', 'LL'}? [uU]?)
+number         <- cap{(float float_suffix) / (integer integer_suffix), "constant.number"}
+
+attribute <- cap{'@' word+, "attribute"}
+
+operator <- cap{
+    [+\-/*%<>~!=^&|?~:;,.()\[\]{}],
+    "symbol.operator"
+}
+
+identifier    <- cap{word, "identifier"}
+
+token <- ws
+       / keyword
+       / constant
+       / type
+       / string
+       / attribute
+       / identifier
+       / comment
+       / number
+       / operator
