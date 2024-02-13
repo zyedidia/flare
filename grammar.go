@@ -25,7 +25,6 @@ var (
 	)
 
 	integer = p.Concat(
-		p.Optional(p.Set(charset.New([]byte{'+', '-'}))),
 		p.Or(
 			hex_num,
 			oct_num,
