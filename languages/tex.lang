@@ -1,0 +1,143 @@
+# TeX/LaTeX. BibTeX is included here because .bib files are detected as tex.
+
+ws        <- space+
+par_break <- '\n' [ \t]* '\n'
+
+lbrace <- cap{'{', "symbol.operator"}
+rbrace <- cap{'}', "symbol.operator"}
+lbrack <- cap{'[', "symbol.operator"}
+rbrack <- cap{']', "symbol.operator"}
+
+begin  <- cap{'\\' words{'begin'}, "keyword"}
+end    <- cap{'\\' words{'end'}, "keyword"}
+cs     <- '\\' [a-zA-Z@]+ '*'?
+
+# comments: '%' to end of line, and the 'comment' environment
+comment     <- cap{'%' (!'\n' .)*, "comment"}
+comment_env <- cap{'\\begin' space* '{comment}'
+                   (!('\\end' space* '{comment}') .)*
+                   '\\end' space* '{comment}', "comment"}
+
+# escapes and other backslashed non-letters
+linebreak <- cap{'\\\\' '*'?, "constant.string.escape"}
+escape    <- cap{'\\' [%$&#_{}~ ^'"`=.,;:!/|\-], "constant.string.escape"}
+param     <- cap{'#'+ [1-9], "constant"}
+
+# arguments: [optional], {balanced group}, and the braced argument of a command
+group    <- lbrace (comment / escape / param / command / group / (!'}' .))* rbrace
+opt_arg  <- lbrack (comment / escape / param / command / group / (!(']' / par_break) .))* rbrack
+opt_args <- (space* opt_arg)* space*
+arg      <- (comment / escape / param / command / group / (!('}' / par_break) .))*
+
+# verbatim text is left alone: no rules apply inside it
+verb_name <- words{
+    'verbatim', 'Verbatim', 'BVerbatim', 'LVerbatim', 'semiverbatim', 'alltt',
+    'lstlisting', 'minted', 'filecontents'
+} '*'?
+verbatim  <- begin space* lbrace ref{cap{verb_name, "type.class"}, "venv"} rbrace
+             (!('\\end' space* '{' back{"venv"} '}') .)*
+             end space* lbrace cap{back{"venv"}, "type.class"} rbrace
+verb      <- cap{'\\' words{'verb'} '*'? / '\\' words{'lstinline', 'mintinline'}, "keyword"}
+             cap{ref{[^ \t\na-zA-Z*{}], "vdelim"} (!back{"vdelim"} !'\n' .)* back{"vdelim"}, "constant.string"}
+
+# math: $...$, $$...$$, \(...\), \[...\] and the math environments. Commands
+# are still highlighted inside, everything else is marked as math.
+math_name <- words{
+    'align', 'aligned', 'alignat', 'alignedat', 'array', 'Bmatrix', 'bmatrix',
+    'cases', 'dgroup', 'displaymath', 'dmath', 'empheq', 'eqnarray', 'equation',
+    'flalign', 'gather', 'gathered', 'IEEEeqnarray', 'math', 'matrix',
+    'multline', 'pmatrix', 'smallmatrix', 'split', 'subequations', 'Vmatrix',
+    'vmatrix'
+} '*'?
+math_item   <- comment / linebreak / escape / param / link / command / .
+inline_item <- comment / linebreak / escape / param / link / command / (!par_break .)
+math_dd  <- cap{'$$', "type"} cap{(!'$$' inline_item)*, "constant"} cap{'$$', "type"}
+math_d   <- cap{'$', "type"} cap{(!'$' inline_item)*, "constant"} cap{'$', "type"}
+math_par <- cap{'\\(', "type"} cap{(!'\\)' math_item)*, "constant"} cap{'\\)', "type"}
+math_brk <- cap{'\\[', "type"} cap{(!'\\]' math_item)*, "constant"} cap{'\\]', "type"}
+math_env <- begin space* lbrace ref{cap{math_name, "type.class"}, "menv"} rbrace
+            cap{(!('\\end' space* '{' back{"menv"} '}') math_item)*, "constant"}
+            end space* lbrace cap{back{"menv"}, "type.class"} rbrace
+
+# \begin{...} and \end{...} of any other environment
+env_name    <- [a-zA-Z] [a-zA-Z0-9@_\-]* '*'?
+environment <- (begin / end) space* (lbrace cap{env_name, "type.class"} rbrace)?
+
+# sectioning commands, with their titles
+section_name <- words{
+    'part', 'chapter', 'section', 'subsection', 'subsubsection', 'paragraph',
+    'subparagraph', 'addpart', 'addchap', 'addsec', 'title', 'subtitle',
+    'frametitle', 'framesubtitle'
+} '*'?
+section <- cap{'\\' section_name, "special"} opt_args
+           (lbrace cap{arg, "preproc"} rbrace)?
+
+# commands taking a file, package or class name
+file_name <- words{
+    'documentclass', 'documentstyle', 'usepackage', 'RequirePackage',
+    'RequirePackageWithOptions', 'LoadClass', 'LoadClassWithOptions',
+    'ProvidesPackage', 'ProvidesClass', 'ProvidesFile', 'NeedsTeXFormat',
+    'input', 'include', 'includeonly', 'includegraphics', 'lstinputlisting',
+    'inputminted', 'subfile', 'import', 'subimport', 'bibliography',
+    'bibliographystyle', 'addbibresource', 'usetikzlibrary', 'graphicspath',
+    'DeclareGraphicsExtensions'
+}
+file <- cap{'\\' file_name, "preproc"} opt_args
+        (lbrace cap{arg, "constant.string"} rbrace)?
+
+# definitions, with the name of the command or environment being defined
+def_name <- words{
+    'newcommand', 'renewcommand', 'providecommand', 'DeclareRobustCommand',
+    'newenvironment', 'renewenvironment', 'newtheorem', 'DeclareMathOperator',
+    'def', 'gdef', 'edef', 'xdef', 'let', 'newif', 'newcount', 'newcounter',
+    'newlength', 'newdimen', 'newbox', 'newsavebox', 'newtoks', 'newread',
+    'newwrite'
+}
+def <- cap{'\\' def_name '*'?, "preproc"} space*
+       (lbrace space* cap{cs / env_name, "function"} space* rbrace / cap{cs, "function"})?
+
+# cross references, citations and urls
+link_name <- words{
+    'label', 'ref', 'eqref', 'pageref', 'autoref', 'nameref', 'cref', 'Cref',
+    'vref', 'cite', 'citep', 'citet', 'citeauthor', 'citeyear', 'citealp',
+    'citealt', 'nocite', 'bibitem', 'url', 'href', 'path', 'nolinkurl'
+} '*'?
+link <- cap{'\\' link_name, "keyword"} opt_args
+        (lbrace cap{(escape / (!('}' / '\n') .))*, "underlined.link"} rbrace)?
+
+command  <- cap{cs, "keyword"}
+operator <- cap{[&#~^_{}\[\]], "symbol.operator"}
+
+# BibTeX entries
+bib_name <- words{
+    'article', 'book', 'booklet', 'collection', 'comment', 'conference',
+    'electronic', 'inbook', 'incollection', 'inproceedings', 'manual',
+    'mastersthesis', 'misc', 'online', 'patent', 'phdthesis', 'preamble',
+    'proceedings', 'standard', 'string', 'techreport', 'thesis', 'unpublished'
+}
+bib_key   <- [^,{}"= \t\n]+
+bib_field <- cap{[a-zA-Z] [a-zA-Z0-9\-_]* &(space* '='), "type.attribute"}
+             space* '=' space* bib_value?
+bib_str   <- cap{'"' (escape / (!'"' .))* '"', "constant.string"}
+bib_num   <- cap{digit+, "constant.number"}
+bib_value <- bib_str / bib_num / cap{group, "constant.string"}
+bib_item  <- comment / bib_field / bib_str / escape / command / group / (!'}' .)
+bib_entry <- cap{'@' bib_name, "keyword"}
+             space* lbrace (space* cap{bib_key, "underlined.link"} &(space* [,=]))?
+             bib_item* rbrace?
+
+# everything starting with a backslash is grouped behind a single test so that
+# ordinary text does not have to be tried against each rule in turn
+backslash <- &'\\' (comment_env / verbatim / verb
+                  / math_env / math_par / math_brk
+                  / environment / section / file / def / link
+                  / linebreak / escape / command)
+
+token <- ws
+       / comment
+       / backslash
+       / math_dd
+       / math_d
+       / param
+       / bib_entry
+       / operator

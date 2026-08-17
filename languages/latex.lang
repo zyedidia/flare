@@ -1,41 +1,4 @@
-ws <- space+
+# LaTeX is highlighted by the tex grammar, which is the name .tex, .bib and
+# .cls files are detected as.
 
-line_comment  <- '%' (!'\n' .)*
-block_comment <- '\\begin' ' '* '{comment}' (!('\\end' ' '* '{comment}') .) ('\\end' ' '* '{comment}')?
-comment       <- cap{block_comment / line_comment, "comment"}
-section_name  <- words{
-    'part', 'chapter', 'section', 'subsection', 'subsubsection', 'paragraph',
-    'subparagraph'
-}
-section   <- cap{'\\' section_name '*'?, "special"}
-math_word <- words{
-    'align', 'displaymath', 'eqnarray', 'equation', 'gather', 'math', 'multline'
-}
-
-math_begin_end <- ('begin' / 'end') ' '* '{' math_word '*'? '}'
-math <- cap{
-    '$' / '\\' ([\[\]()] / math_begin_end),
-    "type"
-}
-environment <- cap{
-    '\\' ('begin' / 'end') ' '* '{' word '*'? '}',
-    "type.class"
-}
-
-command <- cap{
-    '\\' (alpha+ / [#$&~_^%{}]),
-    "keyword"
-}
-
-operator <- cap{
-    [&#{}\[\]],
-    "symbol.operator"
-}
-
-token <- ws
-       / comment
-       / math
-       / environment
-       / section
-       / command
-       / operator
+token <- include{"tex"}
