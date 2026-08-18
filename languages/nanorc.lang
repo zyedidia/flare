@@ -1,0 +1,50 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape <- cap{'\\' ., "constant.string.escape"}
+sq_str <- "'" (escape / (!['\n] .))* "'"?
+dq_str <- '"' (escape / (!["\n] .))* '"'?
+string <- cap{sq_str / dq_str, "constant.string.regex"}
+
+keyword <- cap{words{
+    'set', 'unset', 'bind', 'unbind', 'include', 'syntax', 'header', 'magic',
+    'comment', 'formatter', 'linter', 'tabgives', 'extendsyntax', 'color',
+    'icolor', 'start', 'end'
+}, "keyword"}
+
+color <- cap{words{
+    'black', 'blue', 'brightblack', 'brightblue', 'brightcyan', 'brightgreen',
+    'brightmagenta', 'brightred', 'brightwhite', 'brightyellow', 'cyan',
+    'green', 'grey', 'gray', 'lightblack', 'lightblue', 'lightcyan',
+    'lightgreen', 'lightmagenta', 'lightred', 'lightwhite', 'lightyellow',
+    'magenta', 'normal', 'pink', 'purple', 'red', 'white', 'yellow', 'bold',
+    'italic', 'underline', 'reverse'
+}, "constant"}
+
+option <- cap{words{
+    'afterends', 'allow_insecure_backup', 'atblanks', 'autoindent', 'backup',
+    'backupdir', 'boldtext', 'brackets', 'breaklonglines', 'casesensitive',
+    'constantshow', 'cutfromcursor', 'emptyline', 'fill', 'guidestripe',
+    'historylog', 'indicator', 'jumpyscrolling', 'linenumbers', 'locking',
+    'matchbrackets', 'minibar', 'mouse', 'multibuffer', 'noconvert',
+    'nohelp', 'nonewlines', 'operatingdir', 'positionlog', 'preserve',
+    'punct', 'quickblank', 'quotestr', 'rawsequences', 'rebinddelete',
+    'regexp', 'saveonexit', 'showcursor', 'smarthome', 'softwrap',
+    'speller', 'stateflags', 'tabsize', 'tabstospaces', 'trimblanks',
+    'unix', 'whitespace', 'wordbounds', 'wordchars', 'zap', 'zero'
+}, "type.attribute"}
+
+number     <- cap{integer, "constant.number"} !(alnum / '_')
+key        <- cap{'^' . / 'M-' . / 'F' digit+ / 'Sh-' (!space .)+, "special"}
+identifier <- cap{(alnum / [_\-.])+, "identifier"}
+
+token <- ws
+       / comment
+       / string
+       / keyword
+       / option
+       / color
+       / key
+       / number
+       / identifier

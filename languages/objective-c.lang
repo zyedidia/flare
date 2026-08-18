@@ -1,0 +1,60 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+preproc <- cap{'#' [ \t]* words{
+    'define', 'elif', 'else', 'endif', 'error', 'if', 'ifdef', 'ifndef',
+    'import', 'include', 'line', 'pragma', 'undef', 'warning'
+}, "preproc"}
+
+escape <- cap{'\\' (['"\\abfnrtv0?] / 'x' xdigit+ / [0-7][0-7]?[0-7]?), "constant.string.escape"}
+sq_str <- "'" (escape / (!['\n] .))* "'"?
+dq_str <- '@'? '"' (escape / (!["\n] .))* '"'?
+string <- cap{dq_str, "constant.string"} / cap{sq_str, "constant.string.char"}
+
+number <- cap{(float / hex_num / integer) [uUlLfF]*, "constant.number"} !(alnum / '_')
+
+directive <- cap{'@' words{
+    'interface', 'implementation', 'protocol', 'end', 'private', 'protected',
+    'public', 'package', 'property', 'synthesize', 'dynamic', 'class',
+    'selector', 'encode', 'synchronized', 'try', 'catch', 'finally', 'throw',
+    'autoreleasepool', 'optional', 'required', 'import', 'defs', 'compatibility_alias'
+}, "keyword"}
+
+keyword <- cap{words{
+    'auto', 'break', 'case', 'const', 'continue', 'default', 'do', 'else',
+    'enum', 'extern', 'for', 'goto', 'if', 'inline', 'register', 'restrict',
+    'return', 'sizeof', 'static', 'struct', 'switch', 'typedef', 'union',
+    'volatile', 'while', 'in', 'out', 'inout', 'bycopy', 'byref', 'oneway',
+    'self', 'super', 'atomic', 'nonatomic', 'strong', 'weak', 'copy', 'assign',
+    'retain', 'readonly', 'readwrite', 'nullable', 'nonnull', 'instancetype'
+}, "keyword"}
+
+type <- cap{words{
+    'BOOL', 'Class', 'IMP', 'SEL', 'char', 'double', 'float', 'id', 'int',
+    'long', 'short', 'signed', 'unsigned', 'void', 'NSInteger', 'NSUInteger',
+    'CGFloat', 'NSString', 'NSArray', 'NSDictionary', 'NSNumber', 'NSObject',
+    'NSError', 'NSData', 'NSSet', 'NSMutableArray', 'NSMutableDictionary'
+} / [A-Z] [A-Z] (alnum / '_')*, "type"}
+
+bool <- cap{words{'YES', 'NO', 'nil', 'Nil', 'NULL', 'true', 'false'}, "constant.bool"}
+
+message    <- cap{word ':', "function"} &(space / [@"\[(a-zA-Z0-9_])
+func       <- cap{word, "function"} &([ \t]* '(')
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / preproc
+       / string
+       / directive
+       / bool
+       / keyword
+       / type
+       / func
+       / identifier
+       / number
+       / operator

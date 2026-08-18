@@ -1,0 +1,55 @@
+ws <- space+
+
+doc_comment   <- '##' (!'\n' .)*
+block_comment <- '#[' {{(!']#' .)}}* ']#'?
+line_comment  <- '#' (!'\n' .)*
+comment       <- cap{doc_comment / block_comment / line_comment, "comment"}
+
+escape  <- cap{'\\' (['"\\abcefnrtvlp] / 'x' xdigit xdigit / digit+), "constant.string.escape"}
+tri_str <- '"""' (!'"""' .)* '"""'?
+raw_str <- [rR] '"' (!["\n] .)* '"'?
+dq_str  <- '"' (escape / (!["\n] .))* '"'?
+char    <- cap{"'" (escape / (!['\n] .)) "'", "constant.string.char"}
+string  <- cap{tri_str / raw_str / dq_str, "constant.string"}
+
+number <- cap{(float / hex_num / integer) ("'" (alnum)+)?, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'addr', 'and', 'as', 'asm', 'bind', 'block', 'break', 'case', 'cast',
+    'concept', 'const', 'continue', 'converter', 'defer', 'discard', 'distinct',
+    'div', 'do', 'elif', 'else', 'end', 'enum', 'except', 'export', 'finally',
+    'for', 'from', 'func', 'if', 'import', 'in', 'include', 'interface', 'is',
+    'isnot', 'iterator', 'let', 'macro', 'method', 'mixin', 'mod', 'nil',
+    'not', 'notin', 'object', 'of', 'or', 'out', 'proc', 'ptr', 'raise', 'ref',
+    'return', 'shl', 'shr', 'static', 'template', 'try', 'tuple', 'type',
+    'using', 'var', 'when', 'while', 'xor', 'yield'
+}, "keyword"}
+
+type <- cap{words{
+    'bool', 'byte', 'char', 'cstring', 'float', 'float32', 'float64', 'int',
+    'int8', 'int16', 'int32', 'int64', 'natural', 'openarray', 'pointer',
+    'positive', 'seq', 'set', 'string', 'uint', 'uint8', 'uint16', 'uint32',
+    'uint64', 'array', 'range', 'varargs', 'auto', 'any', 'void'
+} / [A-Z] (alnum / '_')*, "type"}
+
+bool   <- cap{words{'true', 'false', 'nil', 'on', 'off'}, "constant.bool"}
+pragma <- cap{'{.' (!'.}' .)* '.}', "preproc"}
+
+define <- cap{'proc' / 'func' / 'method' / 'iterator' / 'macro' / 'template' / 'converter', "keyword"}
+          space+ cap{word / '`' (!'`' .)* '`', "function"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/<>=!&|^~?@:;,.()\[\]{}$%], "symbol.operator"}
+
+token <- ws
+       / comment
+       / pragma
+       / string
+       / char
+       / define
+       / bool
+       / keyword
+       / type
+       / identifier
+       / number
+       / operator

@@ -1,0 +1,36 @@
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+comment <- '\n' [ \t]* cap{('-#' / '/') (!'\n' .)*, "comment"}
+
+doctype <- '\n' cap{'!!!' (!'\n' .)*, "preproc"}
+
+tag   <- cap{'%' (alnum / [_\-:])+, "keyword.element"}
+class <- cap{'.' (alnum / [_\-])+, "type.attribute"}
+id    <- cap{'#' (alnum / [_\-])+, "special"}
+
+filter <- '\n' [ \t]* cap{':' (alnum / '_')+ &([ \t]* '\n'), "preproc"}
+
+ruby_line <- '\n' [ \t]* cap{[=\-~] (!'\n' .)*, "constant"}
+ruby_inline <- cap{'#{' (!'}' .)* '}', "type.variable"}
+
+escape <- cap{'\\' ., "constant.string.escape"}
+sq_str <- "'" (escape / (!['\n] .))* "'"?
+dq_str <- '"' (escape / ruby_inline / (!["\n] .))* '"'?
+string <- cap{sq_str / dq_str, "constant.string"}
+
+symbol   <- cap{':' (alnum / '_')+, "constant"}
+operator <- cap{['=>{}(),\[\]] / '=>', "symbol.operator"}
+
+token <- comment
+       / doctype
+       / filter
+       / ruby_line
+       / ws
+       / tag
+       / class
+       / id
+       / string
+       / ruby_inline
+       / symbol
+       / operator

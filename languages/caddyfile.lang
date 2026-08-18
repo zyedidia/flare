@@ -1,0 +1,47 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+placeholder <- cap{'{' (alnum / [_.$\[\]><\-]) (!'}' .)* '}', "type.variable"}
+env         <- cap{'{$' (!'}' .)* '}', "type.variable"}
+
+escape <- cap{'\\' ., "constant.string.escape"}
+dq_str <- '"' (escape / placeholder / (!["] .))* '"'?
+bt_str <- '`' (!'`' .)* '`'?
+string <- cap{dq_str / bt_str, "constant.string"}
+
+number <- cap{float / integer ([kKmMgG] [bB]? / [smhd])?, "constant.number"} !(alnum / '_')
+
+matcher <- cap{'@' (alnum / [_\-.])+, "special"}
+
+directive <- cap{words{
+    'abort', 'acme_server', 'basicauth', 'basic_auth', 'bind', 'encode',
+    'error', 'file_server', 'forward_auth', 'handle', 'handle_errors',
+    'handle_path', 'header', 'import', 'log', 'map', 'metrics', 'method',
+    'php_fastcgi', 'push', 'redir', 'request_body', 'request_header',
+    'respond', 'reverse_proxy', 'rewrite', 'root', 'route', 'skip_log',
+    'templates', 'tls', 'tracing', 'try_files', 'uri', 'vars'
+}, "keyword"}
+
+global <- cap{words{
+    'admin', 'auto_https', 'debug', 'default_sni', 'email', 'grace_period',
+    'http_port', 'https_port', 'local_certs', 'order', 'servers', 'storage'
+}, "type.attribute"}
+
+site     <- cap{('http://' / 'https://')? (alnum / [*.\-]) (alnum / [*.\-])* (':' digit+)?, "underlined.link"} &([ \t,]* ('{' / ',' / '\n'))
+
+identifier <- cap{(alnum / [_.\-/])+, "identifier"}
+operator   <- cap{[{}=,] / '<' / '>', "symbol.operator"}
+
+token <- ws
+       / comment
+       / env
+       / placeholder
+       / string
+       / matcher
+       / directive
+       / global
+       / site
+       / number
+       / identifier
+       / operator

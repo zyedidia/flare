@@ -1,0 +1,3 @@
+# patch uses the diff grammar
+
+token <- include{"diff"}

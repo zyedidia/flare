@@ -1,0 +1,36 @@
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+comment <- '\n' cap{'//' (!'\n' .)*, "comment"}
+block_comment <- '\n' cap{'////' (!'////' .)* '////'?, "comment"}
+
+title   <- '\n' cap{'='+ &' ' (!'\n' .)*, "preproc"}
+attr    <- '\n' cap{':' (!(':' / '\n') .)+ ':', "type.attribute"}
+anchor  <- cap{'[[' (!']]' .)* ']]', "special"}
+option  <- '\n' cap{'[' (!('\n' / ']') .)* ']', "type.annotation"}
+delim   <- '\n' cap{('----' '-'* / '====' '='* / '____' '_'* / '****' '*'* / '....' '.'* / '++++' '+'* / '||||' '|'*) &([ \t]* '\n'), "keyword"}
+
+bullet <- '\n' [ \t]* cap{[*\-.]+ &' ' / digit+ '.' &' ', "keyword"}
+
+mono   <- cap{'`' (!('`' / '\n') .)+ '`', "constant.string"}
+strong <- cap{'*' (!('*' / '\n') .)+ '*', "constant"}
+emph   <- cap{'_' (!('_' / '\n') .)+ '_', "constant"}
+macro  <- cap{(alnum / [_\-+])+ ':' (!('\n' / '[') .)* '[' (!']' .)* ']', "underlined.link"}
+subst  <- cap{'{' (alnum / [_\-])+ '}', "type.variable"}
+cell   <- cap{'|' &(space / !.), "symbol.operator"}
+
+token <- block_comment
+       / comment
+       / title
+       / attr
+       / delim
+       / option
+       / bullet
+       / ws
+       / anchor
+       / macro
+       / mono
+       / strong
+       / emph
+       / subst
+       / cell

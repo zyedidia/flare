@@ -1,0 +1,20 @@
+# Unified and context diffs. The rules match a whole line at a time, starting
+# from the newline that precedes it, so that '+' and '-' are only significant
+# at the start of a line.
+
+header <- '\n' cap{('diff ' / '--- ' / '+++ ' / '*** ' / 'index ' / 'new file' /
+                    'deleted file' / 'old mode' / 'new mode' / 'similarity ' /
+                    'rename ' / 'copy ' / 'Binary ' / 'Only in ')
+                   (!'\n' .)*, "preproc"}
+hunk   <- '\n' cap{('@@' / '***' / '---') (!'\n' .)*, "special"}
+added  <- '\n' cap{'+' (!'\n' .)*, "constant.string"}
+removed<- '\n' cap{'-' (!'\n' .)*, "error"}
+changed<- '\n' cap{'!' (!'\n' .)*, "constant"}
+nonl   <- '\n' cap{'\\ ' (!'\n' .)*, "comment"}
+
+token <- header
+       / hunk
+       / nonl
+       / added
+       / removed
+       / changed

@@ -1,0 +1,56 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape  <- cap{'\\' (['"\\$bfnrt] / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+interp  <- cap{'$' (word ('.' word)* / '{' (!'}' .)* '}'), "type.variable"}
+tri_sq  <- "'''" (!"'''" .)* "'''"?
+tri_dq  <- '"""' (escape / interp / (!'"""' .))* '"""'?
+sq_str  <- "'" (escape / (!['\n] .))* "'"?
+dq_str  <- '"' (escape / interp / (!["\n] .))* '"'?
+slashy  <- '/' (escape / (!('/' / '\n') .))+ '/'
+string  <- cap{tri_sq / tri_dq / sq_str / dq_str, "constant.string"}
+regex   <- cap{'~' slashy, "constant.string.regex"}
+
+number <- cap{(float / hex_num / integer) [lLfFdDgGiI]?, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'abstract', 'as', 'assert', 'break', 'case', 'catch', 'class', 'const',
+    'continue', 'def', 'default', 'do', 'else', 'enum', 'extends', 'final',
+    'finally', 'for', 'goto', 'if', 'implements', 'import', 'in', 'instanceof',
+    'interface', 'new', 'package', 'private', 'protected', 'public', 'return',
+    'static', 'super', 'switch', 'synchronized', 'this', 'threadsafe', 'throw',
+    'throws', 'trait', 'transient', 'try', 'volatile', 'while', 'it', 'with',
+    'traits'
+}, "keyword"}
+
+type <- cap{words{
+    'boolean', 'byte', 'char', 'double', 'float', 'int', 'long', 'short',
+    'void', 'BigDecimal', 'BigInteger', 'Boolean', 'Byte', 'Character',
+    'Double', 'Float', 'Integer', 'List', 'Long', 'Map', 'Number', 'Object',
+    'Set', 'Short', 'String'
+} / [A-Z] (alnum / '_')*, "type"}
+
+bool       <- cap{words{'true', 'false', 'null'}, "constant.bool"}
+annotation <- cap{'@' word, "type.annotation"}
+class      <- cap{'class' / 'interface' / 'trait' / 'enum', "keyword"} space+ cap{word, "type.class"}
+func       <- cap{word, "function"} &([ \t]* '(')
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / regex
+       / string
+       / annotation
+       / class
+       / bool
+       / keyword
+       / type
+       / func
+       / identifier
+       / number
+       / operator

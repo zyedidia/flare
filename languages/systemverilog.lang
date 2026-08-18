@@ -1,0 +1,3 @@
+# systemverilog uses the verilog grammar
+
+token <- include{"verilog"}

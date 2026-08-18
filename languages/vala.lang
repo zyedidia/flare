@@ -1,0 +1,54 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape  <- cap{'\\' (['"\\abfnrtv0$] / 'x' xdigit+ / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+interp  <- cap{'$' (word / '(' (!')' .)* ')'), "type.variable"}
+verb    <- '"""' (!'"""' .)* '"""'?
+sq_str  <- "'" (escape / (!['\n] .))* "'"?
+dq_str  <- '@'? '"' (escape / interp / (!["\n] .))* '"'?
+string  <- cap{verb / dq_str, "constant.string"} / cap{sq_str, "constant.string.char"}
+
+number <- cap{(float / hex_num / integer) [uUlLfF]*, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'abstract', 'as', 'async', 'base', 'break', 'case', 'catch', 'class',
+    'const', 'construct', 'continue', 'default', 'delegate', 'delete', 'do',
+    'dynamic', 'else', 'ensures', 'enum', 'errordomain', 'extern', 'finally',
+    'for', 'foreach', 'get', 'global', 'if', 'in', 'inline', 'interface',
+    'internal', 'is', 'lock', 'namespace', 'new', 'out', 'override', 'owned',
+    'params', 'private', 'protected', 'public', 'ref', 'requires', 'return',
+    'set', 'signal', 'sizeof', 'static', 'struct', 'switch', 'this', 'throw',
+    'throws', 'try', 'typeof', 'unowned', 'using', 'value', 'var', 'virtual',
+    'weak', 'while', 'yield'
+}, "keyword"}
+
+type <- cap{words{
+    'bool', 'char', 'double', 'float', 'int', 'int8', 'int16', 'int32',
+    'int64', 'long', 'short', 'size_t', 'ssize_t', 'string', 'uchar', 'uint',
+    'uint8', 'uint16', 'uint32', 'uint64', 'ulong', 'unichar', 'ushort',
+    'void', 'va_list'
+} / [A-Z] (alnum / '_')*, "type"}
+
+bool      <- cap{words{'true', 'false', 'null'}, "constant.bool"}
+attribute <- cap{'[' [A-Z] (alnum / '_')* (!']' .)* ']', "type.annotation"}
+class     <- cap{'class' / 'interface' / 'struct' / 'enum' / 'namespace', "keyword"} space+ cap{(alnum / [_.])+, "type.class"}
+func      <- cap{word, "function"} &([ \t]* '(')
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / attribute
+       / class
+       / bool
+       / keyword
+       / type
+       / func
+       / identifier
+       / number
+       / operator

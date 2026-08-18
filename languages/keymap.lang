@@ -1,0 +1,31 @@
+# xmodmap and console keymap files
+
+ws <- space+
+
+comment <- cap{[!#] (!'\n' .)*, "comment"}
+
+keyword <- cap{words{
+    'keycode', 'keysym', 'clear', 'add', 'remove', 'pointer', 'plain', 'shift',
+    'altgr', 'control', 'alt', 'shiftl', 'shiftr', 'ctrll', 'ctrlr', 'capsshift',
+    'include', 'compose', 'strings', 'string', 'as', 'usual', 'to', 'alt_is_meta',
+    'charset', 'keymaps'
+}, "keyword"}
+
+modifier <- cap{words{
+    'Lock', 'Mod1', 'Mod2', 'Mod3', 'Mod4', 'Mod5', 'Control', 'Shift'
+}, "type"}
+
+string <- cap{'"' (!["\n] .)* '"'?, "constant.string"}
+number <- cap{'0x' xdigit+ / integer, "constant.number"} !(alnum / '_')
+
+symbol     <- cap{(alpha / '_') (alnum / [_+\-])*, "identifier"}
+operator   <- cap{[=,+\-], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / keyword
+       / modifier
+       / number
+       / symbol
+       / operator

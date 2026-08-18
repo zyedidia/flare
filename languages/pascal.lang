@@ -1,0 +1,86 @@
+ws <- space+
+
+block_comment <- '{' (!'}' .)* '}'? / '(*' {{(!'*)' .)}}* '*)'?
+line_comment  <- '//' (!'
+' .)*
+comment       <- cap{line_comment / block_comment, "comment"}
+
+directive <- cap{('{$' / '(*$') (!('}' / '*)') .)* ('}' / '*)')?, "preproc"}
+
+string <- cap{"'" ("''" / (!['
+] .))* "'"? / '#' digit+, "constant.string"}
+
+number <- cap{'$' xdigit+ / float / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'and', 'array', 'as', 'at', 'asm', 'begin', 'case', 'class', 'const',
+    'constructor', 'destructor', 'dispinterface', 'div', 'do', 'downto', 'else',
+    'end', 'except', 'exports', 'file', 'final', 'finalization', 'finally',
+    'for', 'function', 'goto', 'if', 'implementation', 'in', 'inherited',
+    'initialization', 'inline', 'interface', 'is', 'label', 'mod', 'not',
+    'object', 'of', 'on', 'or', 'out', 'packed', 'procedure', 'program',
+    'property', 'raise', 'record', 'repeat', 'resourcestring', 'set', 'sealed',
+    'shl', 'shr', 'static', 'string', 'then', 'threadvar', 'to', 'try', 'type',
+    'unit', 'unsafe', 'until', 'uses', 'var', 'while', 'with', 'xor',
+    'absolute', 'abstract', 'assembler', 'automated', 'cdecl', 'contains',
+    'default', 'deprecated', 'dispid', 'dynamic', 'export', 'external', 'far',
+    'forward', 'implements', 'index', 'library', 'local', 'message', 'name',
+    'namespaces', 'near', 'nodefault', 'overload', 'override', 'package',
+    'pascal', 'platform', 'private', 'protected', 'public', 'published', 'read',
+    'readonly', 'register', 'reintroduce', 'requires', 'resident', 'safecall',
+    'stdcall', 'stored', 'varargs', 'virtual', 'write', 'writeonly', 'false',
+    'nil', 'self', 'true', 'AND', 'ARRAY', 'AS', 'AT', 'ASM', 'BEGIN', 'CASE',
+    'CLASS', 'CONST', 'CONSTRUCTOR', 'DESTRUCTOR', 'DISPINTERFACE', 'DIV', 'DO',
+    'DOWNTO', 'ELSE', 'END', 'EXCEPT', 'EXPORTS', 'FILE', 'FINAL',
+    'FINALIZATION', 'FINALLY', 'FOR', 'FUNCTION', 'GOTO', 'IF',
+    'IMPLEMENTATION', 'IN', 'INHERITED', 'INITIALIZATION', 'INLINE',
+    'INTERFACE', 'IS', 'LABEL', 'MOD', 'NOT', 'OBJECT', 'OF', 'ON', 'OR', 'OUT',
+    'PACKED', 'PROCEDURE', 'PROGRAM', 'PROPERTY', 'RAISE', 'RECORD', 'REPEAT',
+    'RESOURCESTRING', 'SET', 'SEALED', 'SHL', 'SHR', 'STATIC', 'STRING', 'THEN',
+    'THREADVAR', 'TO', 'TRY', 'TYPE', 'UNIT', 'UNSAFE', 'UNTIL', 'USES', 'VAR',
+    'WHILE', 'WITH', 'XOR', 'ABSOLUTE', 'ABSTRACT', 'ASSEMBLER', 'AUTOMATED',
+    'CDECL', 'CONTAINS', 'DEFAULT', 'DEPRECATED', 'DISPID', 'DYNAMIC', 'EXPORT',
+    'EXTERNAL', 'FAR', 'FORWARD', 'IMPLEMENTS', 'INDEX', 'LIBRARY', 'LOCAL',
+    'MESSAGE', 'NAME', 'NAMESPACES', 'NEAR', 'NODEFAULT', 'OVERLOAD',
+    'OVERRIDE', 'PACKAGE', 'PASCAL', 'PLATFORM', 'PRIVATE', 'PROTECTED',
+    'PUBLIC', 'PUBLISHED', 'READ', 'READONLY', 'REGISTER', 'REINTRODUCE',
+    'REQUIRES', 'RESIDENT', 'SAFECALL', 'STDCALL', 'STORED', 'VARARGS',
+    'VIRTUAL', 'WRITE', 'WRITEONLY', 'FALSE', 'NIL', 'SELF', 'TRUE'
+}, "keyword"}
+
+type <- cap{words{
+    'shortint', 'byte', 'char', 'smallint', 'integer', 'word', 'longint',
+    'cardinal', 'boolean', 'bytebool', 'wordbool', 'longbool', 'real', 'single',
+    'double', 'extended', 'comp', 'currency', 'pointer', 'SHORTINT', 'BYTE',
+    'CHAR', 'SMALLINT', 'INTEGER', 'WORD', 'LONGINT', 'CARDINAL', 'BOOLEAN',
+    'BYTEBOOL', 'WORDBOOL', 'LONGBOOL', 'REAL', 'SINGLE', 'DOUBLE', 'EXTENDED',
+    'COMP', 'CURRENCY', 'POINTER'
+}, "type"}
+
+builtin <- cap{words{
+    'chr', 'ord', 'succ', 'pred', 'abs', 'round', 'trunc', 'sqr', 'sqrt',
+    'arctan', 'cos', 'sin', 'exp', 'ln', 'odd', 'eof', 'eoln', 'CHR', 'ORD',
+    'SUCC', 'PRED', 'ABS', 'ROUND', 'TRUNC', 'SQR', 'SQRT', 'ARCTAN', 'COS',
+    'SIN', 'EXP', 'LN', 'ODD', 'EOF', 'EOLN'
+}, "function.builtin"}
+
+bool <- cap{words{'true', 'false', 'nil', 'True', 'False', 'Nil', 'TRUE', 'FALSE', 'NIL'}, "constant.bool"}
+
+define <- cap{words{'procedure', 'function', 'program', 'unit', 'PROCEDURE', 'FUNCTION', 'PROGRAM', 'UNIT'}, "keyword"}
+          space+ cap{word ('.' word)*, "function"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/<>=@^.,:;()\[\]], "symbol.operator"}
+
+token <- ws
+       / directive
+       / comment
+       / string
+       / define
+       / bool
+       / keyword
+       / type
+       / builtin
+       / identifier
+       / number
+       / operator

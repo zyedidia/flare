@@ -1,0 +1,3 @@
+# zsh uses the shell grammar
+
+token <- include{"shell"}

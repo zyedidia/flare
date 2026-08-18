@@ -1,0 +1,55 @@
+ws <- space+
+
+comment <- cap{';' (!'\n' .)* / '#_', "comment"}
+
+escape <- cap{'\\' (["\\bfnrt] / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+dq_str <- '"' (escape / (!["] .))* '"'?
+string <- cap{dq_str, "constant.string"}
+regex  <- cap{'#"' (escape / (!["] .))* '"'?, "constant.string.regex"}
+char   <- cap{'\\' (words{'newline', 'space', 'tab', 'formfeed', 'backspace', 'return'} / 'u' xdigit xdigit xdigit xdigit / .), "constant.string.char"}
+
+number <- cap{(float / hex_num / integer) [MN]? / integer '/' integer, "constant.number"} !(alnum / [_\-])
+
+symbol_char <- alnum / [*+!\-_'?<>=/.:#&%]
+keyword     <- cap{':' ':'? symbol_char+, "constant"}
+
+special <- cap{words{
+    'def', 'defn', 'defn-', 'defmacro', 'defmulti', 'defmethod', 'defprotocol',
+    'defrecord', 'deftype', 'definterface', 'defstruct', 'defonce', 'declare',
+    'ns', 'fn', 'let', 'letfn', 'if', 'if-not', 'if-let', 'when', 'when-not',
+    'when-let', 'when-first', 'cond', 'condp', 'case', 'do', 'loop', 'recur',
+    'throw', 'try', 'catch', 'finally', 'var', 'quote', 'set!', 'new',
+    'monitor-enter', 'monitor-exit', 'import', 'require', 'use', 'refer',
+    'in-ns', 'binding', 'doseq', 'dotimes', 'for', 'while', 'lazy-seq',
+    'delay', 'future', 'and', 'or', 'not', 'comment', 'doto', 'proxy',
+    'reify', 'extend', 'extend-type', 'extend-protocol'
+}, "keyword"}
+
+builtin <- cap{words{
+    'apply', 'assoc', 'atom', 'concat', 'conj', 'cons', 'contains?', 'count',
+    'deref', 'dissoc', 'distinct', 'drop', 'empty?', 'every?', 'filter',
+    'first', 'get', 'group-by', 'identity', 'interleave', 'interpose', 'into',
+    'keys', 'keyword', 'last', 'list', 'map', 'mapcat', 'max', 'merge', 'min',
+    'name', 'next', 'nth', 'partition', 'peek', 'pop', 'pr', 'print',
+    'println', 'range', 'reduce', 'remove', 'repeat', 'rest', 'reverse',
+    'second', 'seq', 'set', 'some', 'sort', 'sort-by', 'str', 'swap!', 'take',
+    'update', 'vals', 'vec', 'vector', 'zipmap'
+}, "function.builtin"}
+
+bool <- cap{words{'true', 'false', 'nil'}, "constant.bool"}
+
+identifier <- cap{symbol_char+, "identifier"}
+operator   <- cap{[()\[\]{}'`~@^#], "symbol.operator"}
+
+token <- ws
+       / comment
+       / regex
+       / string
+       / char
+       / keyword
+       / bool
+       / special
+       / builtin
+       / identifier
+       / number
+       / operator

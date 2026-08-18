@@ -1,0 +1,67 @@
+# Vim script
+
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+comment <- '\n' [ \t]* cap{'"' (!'\n' .)*, "comment"}
+
+escape <- cap{'\\' ., "constant.string.escape"}
+sq_str <- "'" ("''" / (!['\n] .))* "'"?
+dq_str <- '"' (escape / (!["\n] .))* '"'?
+string <- cap{sq_str / dq_str, "constant.string"}
+
+number <- cap{'0x' xdigit+ / float / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'au', 'augroup', 'autocmd', 'break', 'call', 'catch', 'continue', 'delcommand',
+    'delfunction', 'echo', 'echoerr', 'echohl', 'echomsg', 'echon', 'else',
+    'elseif', 'endfor', 'endfunction', 'endif', 'endtry', 'endwhile', 'execute',
+    'finally', 'finish', 'for', 'function', 'if', 'in', 'let', 'lockvar',
+    'normal', 'return', 'set', 'setlocal', 'silent', 'source', 'syntax',
+    'throw', 'try', 'unlet', 'unlockvar', 'while', 'command', 'highlight',
+    'map', 'nmap', 'vmap', 'imap', 'xmap', 'omap', 'smap', 'cmap', 'noremap',
+    'nnoremap', 'vnoremap', 'inoremap', 'xnoremap', 'cnoremap', 'unmap',
+    'colorscheme', 'filetype', 'runtime', 'packadd', 'abbreviate'
+}, "keyword"}
+
+builtin <- cap{words{
+    'add', 'append', 'argc', 'argv', 'bufexists', 'bufname', 'bufnr', 'char2nr',
+    'col', 'complete', 'confirm', 'copy', 'count', 'cursor', 'empty', 'escape',
+    'eval', 'exists', 'expand', 'extend', 'filter', 'finddir', 'findfile',
+    'fnamemodify', 'get', 'getcwd', 'getline', 'getpos', 'has', 'has_key',
+    'hlexists', 'index', 'input', 'insert', 'isdirectory', 'items', 'join',
+    'keys', 'len', 'line', 'map', 'match', 'matchstr', 'mode', 'nr2char',
+    'printf', 'range', 'remove', 'repeat', 'reverse', 'search', 'setline',
+    'shellescape', 'sort', 'split', 'strlen', 'strpart', 'submatch',
+    'substitute', 'synID', 'synIDattr', 'system', 'tolower', 'toupper',
+    'type', 'values', 'winheight', 'winnr', 'winwidth'
+}, "function.builtin"}
+
+variable <- cap{[abgltvws] ':' word / '&' word / '@' . / '$' word, "type.variable"}
+
+option <- cap{'no'? words{
+    'autoindent', 'autoread', 'background', 'backspace', 'backup', 'cindent',
+    'clipboard', 'cursorline', 'encoding', 'expandtab', 'foldmethod',
+    'hidden', 'hlsearch', 'ignorecase', 'incsearch', 'laststatus', 'list',
+    'number', 'relativenumber', 'ruler', 'scrolloff', 'shiftwidth',
+    'showcmd', 'smartcase', 'smartindent', 'softtabstop', 'spell',
+    'splitbelow', 'splitright', 'swapfile', 'tabstop', 'termguicolors',
+    'textwidth', 'undofile', 'wrap', 'wrapscan'
+}, "type.attribute"}
+
+func <- cap{'function' '!'?, "keyword"} space+ cap{(alnum / [_:#.])+, "function"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- comment
+       / ws
+       / string
+       / func
+       / keyword
+       / builtin
+       / option
+       / variable
+       / identifier
+       / number
+       / operator

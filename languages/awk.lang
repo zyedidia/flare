@@ -1,0 +1,51 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape <- cap{'\\' (['"\\/abfnrtv] / digit digit digit / 'x' xdigit xdigit), "constant.string.escape"}
+dq_str <- '"' (escape / (!["\n] .))* '"'?
+string <- cap{dq_str, "constant.string"}
+regex  <- cap{'/' (escape / (!('/' / '\n') .))+ '/', "constant.string.regex"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'BEGIN', 'END', 'break', 'continue', 'delete', 'do', 'else', 'exit', 'for',
+    'function', 'getline', 'if', 'in', 'next', 'nextfile', 'print', 'printf',
+    'return', 'while', 'switch', 'case', 'default'
+}, "keyword"}
+
+builtin <- cap{words{
+    'atan2', 'close', 'cos', 'exp', 'fflush', 'gensub', 'gsub', 'index', 'int',
+    'length', 'log', 'match', 'mktime', 'rand', 'sin', 'split', 'sprintf',
+    'sqrt', 'srand', 'strftime', 'strtonum', 'sub', 'substr', 'system',
+    'systime', 'tolower', 'toupper'
+}, "function.builtin"}
+
+variable <- cap{words{
+    'ARGC', 'ARGIND', 'ARGV', 'CONVFMT', 'ENVIRON', 'ERRNO', 'FIELDWIDTHS',
+    'FILENAME', 'FNR', 'FPAT', 'FS', 'IGNORECASE', 'NF', 'NR', 'OFMT', 'OFS',
+    'ORS', 'PROCINFO', 'RLENGTH', 'RS', 'RSTART', 'RT', 'SUBSEP'
+}, "type.variable"}
+
+field <- cap{'$' (digit+ / word / '(' / '0'), "type.variable"}
+
+func <- cap{'function', "keyword"} space+ cap{word, "function"}
+call <- cap{word, "function"} &('(')
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / regex
+       / func
+       / keyword
+       / builtin
+       / variable
+       / field
+       / call
+       / identifier
+       / number
+       / operator

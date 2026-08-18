@@ -1,0 +1,37 @@
+# m4 configuration files, as used by sendmail
+
+ws <- space+
+
+comment <- cap{words{'dnl'} (!'\n' .)*, "comment"}
+
+quoted <- cap{'`' (!"'" .)* "'"?, "constant.string"}
+dq_str <- cap{'"' (!["\n] .)* '"'?, "constant.string"}
+
+number <- cap{integer, "constant.number"} !(alnum / '_')
+
+macro <- cap{words{
+    'define', 'divert', 'divnum', 'dumpdef', 'errprint', 'eval', 'ifdef',
+    'ifelse', 'include', 'incr', 'index', 'len', 'm4exit', 'm4wrap',
+    'maketemp', 'popdef', 'pushdef', 'shift', 'sinclude', 'substr',
+    'syscmd', 'sysval', 'traceoff', 'traceon', 'translit', 'undefine',
+    'undivert'
+}, "keyword"}
+
+builtin <- cap{words{
+    'OSTYPE', 'DOMAIN', 'FEATURE', 'MAILER', 'MASQUERADE_AS', 'VERSIONID',
+    'EXPOSED_USER', 'LOCAL_CONFIG', 'LOCAL_RULE_0', 'LOCAL_RULESETS',
+    'MAILER_DEFINITIONS', 'HACK', 'confDOMAIN_NAME', 'confAUTH_OPTIONS'
+}, "function.builtin"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[(),], "symbol.operator"}
+
+token <- ws
+       / comment
+       / quoted
+       / dq_str
+       / macro
+       / builtin
+       / identifier
+       / number
+       / operator

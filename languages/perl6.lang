@@ -1,0 +1,64 @@
+# Raku (formerly Perl 6)
+
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+pod     <- '\n' cap{'=' alpha (!('\n=end' / !.) .)* ('\n=end' (!'\n' .)*)?, "comment"}
+comment <- cap{'#`' ('(' (!')' .)* ')' / '{' (!'}' .)* '}' / '[' (!']' .)* ']') / '#' (!'\n' .)*, "comment"}
+
+escape   <- cap{'\\' ., "constant.string.escape"}
+variable <- cap{[$@%&] [*.!^:?=~]? ('{' (!'}' .)* '}' / (alpha / '_') (alnum / [_\-'])*), "type.variable"}
+sq_str   <- "'" (escape / (!['] .))* "'"?
+dq_str   <- '"' (escape / variable / (!["] .))* '"'?
+qw_str   <- ('q' / 'qq' / 'qw' / 'Q') [ \t]* ('(' (!')' .)* ')'? / '{' (!'}' .)* '}'? / '[' (!']' .)* ']'? / '<' (!'>' .)* '>'? / '/' (!'/' .)* '/'?)
+angle    <- '<' (!('>' / '\n') .)+ '>'
+string   <- cap{qw_str / sq_str / dq_str, "constant.string"}
+regex    <- cap{('m' / 'rx' / 's' / 'tr') [/{(] (escape / (!([/})] / '\n') .))* [/})] (escape / (!([/})] / '\n') .))* [/})]? [gimsxc]*, "constant.string.regex"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / [_\-])
+
+keyword <- cap{words{
+    'BEGIN', 'CATCH', 'CHECK', 'CONTROL', 'END', 'ENTER', 'FIRST', 'INIT',
+    'KEEP', 'LAST', 'LEAVE', 'NEXT', 'POST', 'PRE', 'START', 'TEMP', 'UNDO',
+    'and', 'andthen', 'anon', 'augment', 'but', 'class', 'constant', 'default',
+    'does', 'else', 'elsif', 'enum', 'for', 'gather', 'given', 'grammar',
+    'has', 'if', 'import', 'is', 'last', 'let', 'loop', 'macro', 'method',
+    'module', 'multi', 'my', 'need', 'next', 'not', 'once', 'only', 'or',
+    'orelse', 'our', 'proto', 'quietly', 'redo', 'regex', 'repeat', 'require',
+    'return', 'role', 'rule', 'say', 'state', 'sub', 'submethod', 'subset',
+    'supersede', 'take', 'temp', 'token', 'try', 'unit', 'unless', 'until',
+    'use', 'when', 'while', 'with', 'without', 'xor', 'X', 'Z'
+}, "keyword"}
+
+type <- cap{words{
+    'Any', 'Array', 'Bag', 'Bool', 'Callable', 'Complex', 'Cool', 'Date',
+    'DateTime', 'Duration', 'Failure', 'Hash', 'IO', 'Instant', 'Int',
+    'Iterable', 'Junction', 'List', 'Map', 'Match', 'Mu', 'Nil', 'Num',
+    'Numeric', 'Pair', 'Parcel', 'Positional', 'Proxy', 'Range', 'Rat',
+    'Real', 'Regex', 'Seq', 'Set', 'Signature', 'Str', 'Stringy', 'Sub',
+    'Supply', 'Version', 'Whatever'
+} / [A-Z] (alnum / '_')*, "type"}
+
+bool <- cap{words{'True', 'False', 'Nil', 'Any', 'self'}, "constant.bool"}
+
+define <- cap{'sub' / 'method' / 'multi' / 'class' / 'role' / 'grammar' / 'token' / 'rule' / 'regex', "keyword"}
+          space+ cap{(alpha / '_') (alnum / [_\-:])*, "function"}
+
+adverb     <- cap{':' (alnum / [_\-])+, "type.attribute"}
+identifier <- cap{(alpha / '_') (alnum / [_\-'])*, "identifier"}
+operator   <- cap{'~~' / '==>' / '<==' / [+\-*/%<>!=&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- pod
+       / ws
+       / comment
+       / regex
+       / string
+       / variable
+       / define
+       / bool
+       / keyword
+       / type
+       / adverb
+       / identifier
+       / number
+       / operator

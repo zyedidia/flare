@@ -1,0 +1,27 @@
+# The ColorTest file, which shows each color name in its own color
+
+ws <- space+
+
+color <- cap{words{'black'}, "black"}
+       / cap{words{'red'}, "red"}
+       / cap{words{'green'}, "green"}
+       / cap{words{'yellow'}, "yellow"}
+       / cap{words{'blue'}, "blue"}
+       / cap{words{'magenta'}, "magenta"}
+       / cap{words{'cyan'}, "cyan"}
+       / cap{words{'white'}, "white"}
+       / cap{words{'brightblack'}, "brightblack"}
+       / cap{words{'brightred'}, "brightred"}
+       / cap{words{'brightgreen'}, "brightgreen"}
+       / cap{words{'brightyellow'}, "brightyellow"}
+       / cap{words{'brightblue'}, "brightblue"}
+       / cap{words{'brightmagenta'}, "brightmagenta"}
+       / cap{words{'brightcyan'}, "brightcyan"}
+       / cap{words{'brightwhite'}, "brightwhite"}
+       / cap{words{'PLAIN'}, "default"}
+
+number <- cap{integer, "constant.number"}
+
+token <- ws
+       / color
+       / number

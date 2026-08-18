@@ -1,0 +1,65 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape  <- cap{'\\' (['"\\abfnrtv] / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+tri_dq  <- '"""' (!'"""' .)* '"""'?
+sq_str  <- "'" (escape / (!['\n] .))* "'"?
+dq_str  <- '"' (escape / (!["\n] .))* '"'?
+string  <- cap{tri_dq / sq_str / dq_str, "constant.string"}
+node    <- cap{[$%] ('"' (!'"' .)* '"' / (alnum / [_/])+), "type.variable"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'and', 'as', 'assert', 'await', 'break', 'breakpoint', 'class',
+    'class_name', 'const', 'continue', 'elif', 'else', 'enum', 'extends',
+    'for', 'func', 'if', 'in', 'is', 'match', 'not', 'or', 'pass', 'preload',
+    'return', 'self', 'signal', 'static', 'super', 'var', 'while', 'yield',
+    'export', 'onready', 'setget', 'tool', 'remote', 'master', 'puppet',
+    'sync', 'void'
+}, "keyword"}
+
+annotation <- cap{'@' word, "type.annotation"}
+
+type <- cap{words{
+    'bool', 'int', 'float', 'String', 'StringName', 'NodePath', 'Vector2',
+    'Vector2i', 'Vector3', 'Vector3i', 'Transform2D', 'Transform3D', 'Plane',
+    'Quaternion', 'AABB', 'Basis', 'Color', 'RID', 'Object', 'Array',
+    'Dictionary', 'Callable', 'Signal', 'PackedByteArray', 'PackedInt32Array',
+    'PackedFloat32Array', 'PackedStringArray', 'PackedVector2Array',
+    'PackedVector3Array', 'PackedColorArray', 'Node', 'Node2D', 'Node3D',
+    'Control', 'Resource', 'Variant'
+} / [A-Z] (alnum / '_')*, "type"}
+
+bool <- cap{words{'true', 'false', 'null', 'PI', 'TAU', 'INF', 'NAN'}, "constant.bool"}
+
+builtin <- cap{words{
+    'abs', 'acos', 'asin', 'atan', 'atan2', 'ceil', 'clamp', 'cos', 'deg_to_rad',
+    'exp', 'floor', 'fmod', 'inverse_lerp', 'is_equal_approx', 'lerp', 'log',
+    'max', 'min', 'move_toward', 'pow', 'print', 'printerr', 'print_debug',
+    'push_error', 'push_warning', 'rad_to_deg', 'randf', 'randi', 'range',
+    'round', 'sign', 'sin', 'smoothstep', 'snapped', 'sqrt', 'str', 'tan',
+    'typeof', 'weakref', 'len'
+}, "function.builtin"}
+
+func  <- cap{'func', "keyword"} space+ cap{word, "function"}
+class <- cap{'class_name' / 'class', "keyword"} space+ cap{word, "type.class"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / node
+       / annotation
+       / func
+       / class
+       / bool
+       / keyword
+       / type
+       / builtin
+       / identifier
+       / number
+       / operator

@@ -1,0 +1,28 @@
+ws <- space+
+
+flag      <- cap{'#,' (!'\n' .)*, "preproc"}
+reference <- cap{'#:' (!'\n' .)*, "special"}
+extracted <- cap{'#.' (!'\n' .)*, "comment.doc"}
+obsolete  <- cap{'#~' (!'\n' .)*, "comment"}
+comment   <- cap{'#' (!'\n' .)*, "comment"}
+
+escape <- cap{'\\' (['"\\abfnrtv] / 'x' xdigit+ / [0-7][0-7]?[0-7]?), "constant.string.escape"}
+string <- cap{'"' (escape / (!["\n] .))* '"'?, "constant.string"}
+
+keyword <- cap{words{
+    'msgid', 'msgid_plural', 'msgstr', 'msgctxt', 'domain'
+}, "keyword"}
+
+index    <- cap{'[' digit+ ']', "constant.number"}
+operator <- cap{[\[\]], "symbol.operator"}
+
+token <- ws
+       / flag
+       / reference
+       / extracted
+       / obsolete
+       / comment
+       / keyword
+       / index
+       / string
+       / operator

@@ -1,0 +1,19 @@
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+header <- '\n'? cap{words{
+    'FILTER', 'CLIENT-HEADER-FILTER', 'SERVER-HEADER-FILTER',
+    'CLIENT-HEADER-TAGGER', 'SERVER-HEADER-TAGGER', 'EXTERNAL-FILTER'
+} ':', "keyword"} [ \t]* cap{(!(space / '\n') .)+, "function"} cap{(!'\n' .)*, "comment"}
+
+subst <- cap{[sS] [/|@#,] ('\\' . / (!('\\' / '\n') .))* [/|@#,] ('\\' . / (!('\\' / '\n') .))* [/|@#,]? [gimsxUD]*, "constant.string.regex"}
+
+operator <- cap{[;{}], "symbol.operator"}
+
+token <- comment
+       / header
+       / ws
+       / subst
+       / operator

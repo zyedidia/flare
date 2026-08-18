@@ -1,0 +1,47 @@
+ws <- space+
+
+block_comment <- '#[[' (!']]' .)* ']]'?
+line_comment  <- '#' (!'\n' .)*
+comment       <- cap{block_comment / line_comment, "comment"}
+
+escape     <- cap{'\\' ['"\\ntr$;], "constant.string.escape"}
+bracket    <- '[[' (!']]' .)* ']]'?
+dq_str     <- '"' (escape / variable / (!'"' .))* '"'?
+string     <- cap{bracket, "constant.string"} / cap{'"', "constant.string"} (escape / variable / cap{(!('"' / '\\' / '$') .)+, "constant.string"})* cap{'"', "constant.string"}?
+
+variable   <- cap{'$' words{'ENV', 'CACHE'}? '{' (variable / (!('}' / '\n') .))* '}', "type.variable"}
+genexpr    <- cap{'$<', "symbol.operator"}
+
+keyword <- cap{words{
+    'if', 'elseif', 'else', 'endif', 'foreach', 'endforeach', 'while',
+    'endwhile', 'function', 'endfunction', 'macro', 'endmacro', 'block',
+    'endblock', 'break', 'continue', 'return',
+    'IF', 'ELSEIF', 'ELSE', 'ENDIF', 'FOREACH', 'ENDFOREACH', 'WHILE',
+    'ENDWHILE', 'FUNCTION', 'ENDFUNCTION', 'MACRO', 'ENDMACRO', 'BLOCK',
+    'ENDBLOCK', 'BREAK', 'CONTINUE', 'RETURN'
+}, "keyword"}
+
+bool <- cap{words{
+    'ON', 'OFF', 'TRUE', 'FALSE', 'YES', 'NO', 'on', 'off', 'true', 'false',
+    'yes', 'no', 'NOTFOUND'
+}, "constant.bool"}
+
+property <- cap{[A-Z] [A-Z0-9_]* [A-Z0-9], "constant"} !(alnum / '_')
+
+command    <- cap{word, "function"} &([ \t]* '(')
+identifier <- cap{word, "identifier"}
+number     <- cap{float / integer, "constant.number"} !(alnum / '_')
+operator   <- cap{[()$<>=], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / variable
+       / keyword
+       / command
+       / bool
+       / property
+       / identifier
+       / number
+       / genexpr
+       / operator

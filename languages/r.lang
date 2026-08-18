@@ -1,0 +1,42 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape <- cap{'\\' (['"\\nrtbfav0] / 'x' xdigit xdigit / 'u' xdigit+), "constant.string.escape"}
+sq_str <- "'" (escape / (!['] .))* "'"?
+dq_str <- '"' (escape / (!["] .))* '"'?
+raw    <- [rR] ('"(' (!')"' .)* ')"'? / "'(" (!")'" .)* ")'"?)
+string <- cap{raw / sq_str / dq_str, "constant.string"}
+
+number <- cap{(float / hex_num / integer) [iL]?, "constant.number"} !(alnum / [._])
+
+keyword <- cap{words{
+    'if', 'else', 'repeat', 'while', 'function', 'for', 'in', 'next', 'break',
+    'return', 'switch', 'invisible', 'library', 'require', 'attach', 'detach',
+    'source'
+}, "keyword"}
+
+constant <- cap{words{
+    'TRUE', 'FALSE', 'NULL', 'NA', 'NA_integer_', 'NA_real_', 'NA_character_',
+    'Inf', 'NaN', 'T', 'F'
+}, "constant.bool"}
+
+type <- cap{words{
+    'array', 'character', 'complex', 'data.frame', 'double', 'factor',
+    'function', 'integer', 'list', 'logical', 'matrix', 'numeric', 'vector'
+}, "type"}
+
+func     <- cap{(word / '.' word) ('.' word)*, "function"} &([ \t]* '(')
+variable <- cap{(alpha / '.') (alnum / [._])*, "identifier"}
+operator <- cap{'%' (!('%' / '\n') .)* '%' / [+\-*/^<>=!&|~?@$:;,()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / constant
+       / keyword
+       / type
+       / func
+       / variable
+       / number
+       / operator

@@ -1,0 +1,47 @@
+ws <- space+
+
+block_comment <- '/*' (!'*/' .)* '*/'?
+line_comment  <- ('//' / '*') (!'\n' .)*
+comment       <- cap{block_comment / line_comment, "comment"}
+
+macro  <- cap{'`' (!'`' .)* "'" / '$' ('{' (!'}' .)* '}' / word), "type.variable"}
+string <- cap{'"' (!["\n] .)* '"'? / '`"' (!'"' "'" .)* '"' "'", "constant.string"}
+
+number <- cap{float / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'if', 'else', 'foreach', 'forvalues', 'while', 'continue', 'break', 'exit',
+    'program', 'end', 'version', 'set', 'local', 'global', 'scalar', 'matrix',
+    'tempvar', 'tempname', 'tempfile', 'capture', 'quietly', 'noisily',
+    'return', 'ereturn', 'sreturn', 'syntax', 'args', 'confirm', 'assert',
+    'preserve', 'restore', 'sort', 'by', 'bysort', 'in', 'of', 'to', 'using'
+}, "keyword"}
+
+command <- cap{words{
+    'append', 'browse', 'by', 'clear', 'collapse', 'compress', 'correlate',
+    'count', 'describe', 'destring', 'display', 'drop', 'duplicates', 'edit',
+    'egen', 'encode', 'estimates', 'expand', 'export', 'generate', 'graph',
+    'histogram', 'import', 'infile', 'insheet', 'keep', 'label', 'list',
+    'logit', 'merge', 'mvdecode', 'order', 'outsheet', 'probit', 'regress',
+    'rename', 'replace', 'reshape', 'save', 'scatter', 'summarize', 'tabulate',
+    'test', 'twoway', 'use', 'xtreg'
+}, "function.builtin"}
+
+type <- cap{words{
+    'byte', 'int', 'long', 'float', 'double', 'str', 'strL'
+}, "type"}
+
+option     <- cap{',' [ \t]* word, "type.attribute"}
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/^<>=!&|~,.:;()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / macro
+       / keyword
+       / command
+       / type
+       / identifier
+       / number
+       / operator

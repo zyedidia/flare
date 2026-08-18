@@ -1,0 +1,32 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+keyword <- cap{words{
+    'ADD', 'ARG', 'AS', 'CMD', 'COPY', 'ENTRYPOINT', 'ENV', 'EXPOSE', 'FROM',
+    'HEALTHCHECK', 'LABEL', 'MAINTAINER', 'ONBUILD', 'RUN', 'SHELL',
+    'STOPSIGNAL', 'USER', 'VOLUME', 'WORKDIR',
+    'add', 'arg', 'as', 'cmd', 'copy', 'entrypoint', 'env', 'expose', 'from',
+    'healthcheck', 'label', 'maintainer', 'onbuild', 'run', 'shell',
+    'stopsignal', 'user', 'volume', 'workdir'
+}, "keyword"}
+
+escape   <- cap{'\\' ['"\\nrt$], "constant.string.escape"}
+sq_str   <- "'" (!['\n] .)* "'"?
+dq_str   <- '"' (escape / (!["\n] .))* '"'?
+string   <- cap{sq_str / dq_str, "constant.string"}
+
+variable <- cap{'$' ('{' (!('}' / '\n') .)* '}' / word), "type.variable"}
+number   <- cap{integer, "constant.number"}
+continue <- cap{'\\' &('\n' / [ \t]* '\n'), "constant.string.escape"}
+
+operator <- cap{[=:,\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / keyword
+       / string
+       / variable
+       / continue
+       / number
+       / operator

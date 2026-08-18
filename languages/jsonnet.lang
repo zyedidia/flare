@@ -1,0 +1,36 @@
+ws <- space+
+
+line_comment  <- ('//' / '#') (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape  <- cap{'\\' (['"\\/bfnrt] / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+text_dq <- '|||' (!'|||' .)* '|||'?
+sq_str  <- "'" (escape / (!['\n] .))* "'"?
+dq_str  <- '"' (escape / (!["\n] .))* '"'?
+string  <- cap{text_dq / sq_str / dq_str, "constant.string"}
+
+number <- cap{float / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'assert', 'else', 'error', 'for', 'function', 'if', 'import', 'importstr',
+    'importbin', 'in', 'local', 'super', 'tailstrict', 'then'
+}, "keyword"}
+
+bool    <- cap{words{'true', 'false', 'null', 'self', '$'}, "constant.bool"}
+builtin <- cap{'std' '.' word, "function.builtin"}
+field   <- cap{word, "type.attribute"} &([ \t]* [:+])
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.()\[\]{}$], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / builtin
+       / bool
+       / keyword
+       / field
+       / identifier
+       / number
+       / operator

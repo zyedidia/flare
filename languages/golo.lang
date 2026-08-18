@@ -1,0 +1,41 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape <- cap{'\\' ., "constant.string.escape"}
+tri_str <- '"""' (!'"""' .)* '"""'?
+dq_str <- '"' (escape / (!["\n] .))* '"'?
+char   <- cap{"'" (escape / (!['\n] .)) "'", "constant.string.char"}
+string <- cap{tri_str / dq_str, "constant.string"}
+
+number <- cap{(float / hex_num / integer) [lLfF_]?, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'module', 'import', 'function', 'local', 'return', 'if', 'else', 'while',
+    'for', 'foreach', 'in', 'throw', 'try', 'catch', 'finally', 'case', 'when',
+    'match', 'then', 'otherwise', 'augment', 'augmentation', 'with', 'break',
+    'continue', 'struct', 'union', 'let', 'var', 'and', 'or', 'not', 'is',
+    'isnt', 'oftype', 'pimp', 'decorator'
+}, "keyword"}
+
+bool <- cap{words{'true', 'false', 'null'}, "constant.bool"}
+
+func   <- cap{'function', "keyword"} space+ cap{word, "function"}
+struct <- cap{'struct' / 'union' / 'module' / 'augment', "keyword"} space+ cap{(alnum / [_.])+, "type.class"}
+
+macro      <- cap{'&' word ('.' word)*, "preproc"}
+identifier <- cap{word, "identifier"}
+operator   <- cap{'->' / [+\-*/%<>=!:,.()\[\]{}|], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / char
+       / func
+       / struct
+       / bool
+       / keyword
+       / macro
+       / identifier
+       / number
+       / operator

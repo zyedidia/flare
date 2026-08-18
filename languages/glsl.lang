@@ -1,0 +1,62 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+preproc <- cap{'#' [ \t]* words{
+    'define', 'elif', 'else', 'endif', 'error', 'extension', 'if', 'ifdef',
+    'ifndef', 'line', 'pragma', 'undef', 'version'
+}, "preproc"}
+
+number <- cap{(float / hex_num / integer) [uUfF]?, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'attribute', 'break', 'buffer', 'case', 'centroid', 'coherent', 'const',
+    'continue', 'default', 'discard', 'do', 'else', 'flat', 'for', 'highp',
+    'if', 'in', 'inout', 'invariant', 'layout', 'lowp', 'mediump', 'noperspective',
+    'out', 'patch', 'precise', 'precision', 'readonly', 'restrict', 'return',
+    'sample', 'shared', 'smooth', 'struct', 'subroutine', 'switch', 'uniform',
+    'varying', 'volatile', 'while', 'writeonly'
+}, "keyword"}
+
+type <- cap{words{
+    'bool', 'bvec2', 'bvec3', 'bvec4', 'double', 'dvec2', 'dvec3', 'dvec4',
+    'float', 'int', 'ivec2', 'ivec3', 'ivec4', 'mat2', 'mat2x2', 'mat2x3',
+    'mat2x4', 'mat3', 'mat3x2', 'mat3x3', 'mat3x4', 'mat4', 'mat4x2', 'mat4x3',
+    'mat4x4', 'sampler1D', 'sampler2D', 'sampler2DRect', 'sampler3D',
+    'samplerCube', 'sampler1DShadow', 'sampler2DShadow', 'samplerBuffer',
+    'isampler2D', 'usampler2D', 'image2D', 'uint', 'uvec2', 'uvec3', 'uvec4',
+    'vec2', 'vec3', 'vec4', 'void'
+}, "type"}
+
+builtin <- cap{words{
+    'abs', 'acos', 'all', 'any', 'asin', 'atan', 'ceil', 'clamp', 'cos',
+    'cross', 'degrees', 'determinant', 'dFdx', 'dFdy', 'distance', 'dot',
+    'equal', 'exp', 'exp2', 'faceforward', 'floor', 'fract', 'fwidth',
+    'greaterThan', 'inverse', 'inversesqrt', 'length', 'lessThan', 'log',
+    'log2', 'max', 'min', 'mix', 'mod', 'normalize', 'not', 'notEqual', 'pow',
+    'radians', 'reflect', 'refract', 'sign', 'sin', 'smoothstep', 'sqrt',
+    'step', 'tan', 'texture', 'texelFetch', 'textureLod', 'textureSize',
+    'transpose', 'trunc'
+}, "function.builtin"}
+
+variable <- cap{'gl_' (alnum / '_')*, "type.variable"}
+bool     <- cap{words{'true', 'false'}, "constant.bool"}
+
+func       <- cap{word, "function"} &([ \t]* '(')
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / preproc
+       / bool
+       / keyword
+       / type
+       / builtin
+       / variable
+       / func
+       / identifier
+       / number
+       / operator

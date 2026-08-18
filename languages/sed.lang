@@ -1,0 +1,22 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+label   <- cap{[:btT] [ \t]* (alnum / [_\-])+, "special"}
+address <- cap{integer '~'? integer? / '$' / '/' ('\\' . / (!('/' / '\n') .))* '/' [IM]?, "constant.number"}
+
+subst   <- cap{'s' [/|,#!:] ('\\' . / (!('\\' / '\n') .))* [/|,#!:] ('\\' . / (!('\\' / '\n') .))* [/|,#!:]? [gpiImMe0-9]*, "constant.string.regex"}
+transl  <- cap{'y' [/|,#] ('\\' . / (!('\\' / '\n') .))* [/|,#] ('\\' . / (!('\\' / '\n') .))* [/|,#]?, "constant.string.regex"}
+
+command <- cap{[aicdDeFgGhHlnNpPqQrRvwWxzF={}], "keyword"}
+
+operator <- cap{[,;!], "symbol.operator"}
+
+token <- ws
+       / comment
+       / subst
+       / transl
+       / label
+       / address
+       / command
+       / operator

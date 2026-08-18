@@ -1,0 +1,3 @@
+# arduino uses the c++ grammar
+
+token <- include{"c++"}

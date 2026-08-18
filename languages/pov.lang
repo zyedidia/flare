@@ -1,0 +1,62 @@
+# POV-Ray scene description language
+
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+directive <- cap{'#' [ \t]* words{
+    'break', 'case', 'debug', 'declare', 'default', 'else', 'end', 'error',
+    'fclose', 'fopen', 'if', 'ifdef', 'ifndef', 'include', 'local', 'macro',
+    'range', 'read', 'render', 'statistics', 'switch', 'undef', 'version',
+    'warning', 'while', 'write'
+}, "preproc"}
+
+escape <- cap{'\\' ., "constant.string.escape"}
+string <- cap{'"' (escape / (!["\n] .))* '"'?, "constant.string"}
+
+number <- cap{float / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'blob', 'box', 'camera', 'cone', 'cylinder', 'difference', 'disc',
+    'fog', 'global_settings', 'height_field', 'intersection', 'isosurface',
+    'julia_fractal', 'lathe', 'light_source', 'looks_like', 'mesh', 'mesh2',
+    'object', 'ovus', 'plane', 'polygon', 'prism', 'sky_sphere', 'sphere',
+    'sphere_sweep', 'spline', 'superellipsoid', 'text', 'torus', 'triangle',
+    'union', 'merge', 'background', 'media', 'rainbow'
+}, "keyword"}
+
+modifier <- cap{words{
+    'ambient', 'checker', 'clipped_by', 'color', 'colour', 'color_map',
+    'diffuse', 'finish', 'gradient', 'hollow', 'image_map', 'interior',
+    'inverse', 'matrix', 'no_shadow', 'normal', 'phong', 'pigment',
+    'reflection', 'refraction', 'rotate', 'roughness', 'scale', 'specular',
+    'texture', 'translate', 'transmit', 'turbulence'
+}, "type.attribute"}
+
+constant <- cap{words{
+    'x', 'y', 'z', 't', 'u', 'v', 'pi', 'on', 'off', 'yes', 'no', 'true',
+    'false', 'clock', 'version'
+}, "constant"}
+
+builtin <- cap{words{
+    'abs', 'acos', 'asin', 'atan2', 'ceil', 'cos', 'degrees', 'div', 'exp',
+    'floor', 'int', 'log', 'max', 'min', 'mod', 'pow', 'radians', 'rand',
+    'seed', 'sin', 'sqrt', 'strlen', 'sub', 'tan', 'vlength', 'vnormalize'
+}, "function.builtin"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/<>=!&|,.;()\[\]{}<>], "symbol.operator"}
+
+token <- ws
+       / comment
+       / directive
+       / string
+       / keyword
+       / modifier
+       / constant
+       / builtin
+       / identifier
+       / number
+       / operator

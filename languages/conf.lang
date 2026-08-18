@@ -1,0 +1,3 @@
+# conf uses the ini grammar
+
+token <- include{"ini"}

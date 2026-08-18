@@ -1,0 +1,3 @@
+# man uses the groff grammar
+
+token <- include{"groff"}

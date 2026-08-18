@@ -1,0 +1,43 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape   <- cap{'\\' (['"\\abfnrtv$\[\]{} ] / 'x' xdigit+ / 'u' xdigit+ / digit digit digit), "constant.string.escape"}
+variable <- cap{'$' ('{' (!'}' .)* '}' / (alnum / [_:])+ ('(' (!')' .)* ')')?), "type.variable"}
+dq_str   <- '"' (escape / variable / (!["] .))* '"'?
+string   <- cap{dq_str, "constant.string"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'after', 'append', 'apply', 'array', 'break', 'catch', 'cd', 'concat',
+    'continue', 'coroutine', 'dict', 'else', 'elseif', 'eof', 'error', 'eval',
+    'exec', 'exit', 'expr', 'file', 'fileevent', 'flush', 'for', 'foreach',
+    'format', 'gets', 'glob', 'global', 'if', 'incr', 'info', 'interp',
+    'join', 'lappend', 'lassign', 'lindex', 'linsert', 'list', 'llength',
+    'lmap', 'load', 'lrange', 'lrepeat', 'lreplace', 'lreverse', 'lsearch',
+    'lset', 'lsort', 'namespace', 'open', 'package', 'proc', 'puts', 'pwd',
+    'read', 'regexp', 'regsub', 'rename', 'return', 'scan', 'seek', 'set',
+    'socket', 'source', 'split', 'string', 'subst', 'switch', 'tell', 'then',
+    'throw', 'time', 'trace', 'try', 'unset', 'update', 'uplevel', 'upvar',
+    'variable', 'vwait', 'while', 'yield'
+}, "keyword"}
+
+proc   <- cap{'proc', "keyword"} space+ cap{(alnum / [_:.\-])+, "function"}
+option <- cap{'-' (alpha) (alnum / [_\-])*, "type.attribute"}
+
+bracket    <- cap{'[' / ']', "symbol.operator"}
+identifier <- cap{(alnum / [_:.])+, "identifier"}
+operator   <- cap{[{}();,] / [+\-*/%<>=!&|^~?:], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / variable
+       / proc
+       / keyword
+       / option
+       / bracket
+       / number
+       / identifier
+       / operator

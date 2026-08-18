@@ -1,0 +1,47 @@
+ws <- space+
+
+comment <- cap{'\\' (!'\n' .)* / '(' [ \t] (!')' .)* ')'?, "comment"}
+
+string <- cap{('s"' / '."' / 'c"' / 'abort"') (!["] .)* '"'?, "constant.string"}
+
+number <- cap{[+\-]? (digit+ '.'? / '$' xdigit+ / '#' digit+ / '%' [01]+), "constant.number"} &(space / !.)
+
+keyword <- cap{words{
+    ':', ';', 'if', 'else', 'then', 'begin', 'while', 'repeat', 'until',
+    'again', 'do', 'loop', '+loop', 'leave', 'exit', 'recurse', 'case', 'of',
+    'endof', 'endcase', 'variable', 'constant', 'create', 'does>', 'value',
+    'to', 'immediate', 'compile-only', 'postpone', 'literal', 'code',
+    'end-code', 'defer', 'is', 'code', 'include', 'require', 'marker',
+    'IF', 'ELSE', 'THEN', 'BEGIN', 'WHILE', 'REPEAT', 'UNTIL', 'AGAIN', 'DO',
+    'LOOP', 'LEAVE', 'EXIT', 'RECURSE', 'CASE', 'OF', 'ENDOF', 'ENDCASE',
+    'VARIABLE', 'CONSTANT', 'CREATE', 'VALUE', 'TO', 'IMMEDIATE', 'POSTPONE',
+    'LITERAL', 'CODE', 'DEFER', 'IS', 'INCLUDE', 'REQUIRE'
+}, "keyword"}
+
+builtin <- cap{words{
+    'dup', 'drop', 'swap', 'over', 'rot', '-rot', 'nip', 'tuck', 'pick',
+    'roll', 'depth', 'and', 'or', 'xor', 'invert', 'lshift', 'rshift', 'mod',
+    'abs', 'min', 'max', 'negate', 'emit', 'key', 'cr', 'space', 'spaces',
+    'type', 'count', 'here', 'allot', 'align', 'cells', 'chars', 'move',
+    'fill', 'words', 'see', 'bye', 'quit', 'abort', 'execute',
+    'DUP', 'DROP', 'SWAP', 'OVER', 'ROT', 'NIP', 'TUCK', 'PICK', 'ROLL',
+    'DEPTH', 'AND', 'OR', 'XOR', 'INVERT', 'LSHIFT', 'RSHIFT', 'MOD', 'ABS',
+    'MIN', 'MAX', 'NEGATE', 'EMIT', 'KEY', 'CR', 'SPACE', 'SPACES', 'TYPE',
+    'COUNT', 'HERE', 'ALLOT', 'ALIGN', 'CELLS', 'CHARS', 'MOVE', 'FILL',
+    'WORDS', 'SEE', 'BYE', 'QUIT', 'ABORT', 'EXECUTE'
+}, "function.builtin"}
+
+define <- cap{':', "keyword"} space+ cap{(!space .)+, "function"}
+
+operator <- cap{[+\-*/<>=@!,.:;\[\]()], "symbol.operator"}
+identifier <- cap{(!space .)+, "identifier"}
+
+token <- ws
+       / comment
+       / string
+       / define
+       / keyword
+       / builtin
+       / number
+       / identifier
+       / operator

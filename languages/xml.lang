@@ -1,0 +1,26 @@
+ws <- space+
+
+comment <- cap{'<!--' (!'-->' .)* '-->'?, "comment"}
+cdata   <- cap{'<![CDATA[' (!']]>' .)* ']]>'?, "constant.string"}
+doctype <- cap{'<!' (!'>' .)* '>'?, "special"}
+pi      <- cap{'<?' (!'?>' .)* '?>'?, "preproc"}
+
+name <- (alpha / [_:]) (alnum / [_:.\-])*
+
+sq_str <- "'" (!['] .)* "'"?
+dq_str <- '"' (!["] .)* '"'?
+string <- cap{sq_str / dq_str, "constant.string"}
+
+attribute <- cap{name, "type.attribute"} &([ \t\n\r]* '=')
+tag       <- cap{'<' '/'? name, "keyword.element"}
+            (attribute / string / (!('/'? '>') .))*
+            cap{'/'? '>', "keyword.element"}?
+entity    <- cap{'&' (!(space / ';') .)* ';', "preproc"}
+
+token <- ws
+       / comment
+       / cdata
+       / pi
+       / doctype
+       / tag
+       / entity

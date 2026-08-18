@@ -1,0 +1,46 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape   <- cap{'\\' ., "constant.string.escape"}
+variable <- cap{'$' '$'? ('{' (!'}' .)* '}' / (alpha / '_') (alnum / '_')* / [?$*@#]), "type.variable"}
+sq_str   <- "'" (escape / (!['] .))* "'"?
+dq_str   <- '"' (escape / variable / (!["] .))* '"'?
+string   <- cap{sq_str / dq_str, "constant.string"}
+
+number <- cap{float / integer, "constant.number"} !(alnum / [_\-.])
+
+keyword <- cap{words{
+    'and', 'begin', 'break', 'case', 'continue', 'else', 'end', 'for',
+    'function', 'if', 'in', 'not', 'or', 'return', 'switch', 'while'
+}, "keyword"}
+
+builtin <- cap{words{
+    'alias', 'bg', 'bind', 'block', 'breakpoint', 'builtin', 'cd', 'command',
+    'commandline', 'complete', 'contains', 'count', 'dirh', 'dirs', 'echo',
+    'emit', 'eval', 'exec', 'exit', 'fg', 'fish', 'fish_config', 'fish_indent',
+    'fish_prompt', 'fish_right_prompt', 'fish_update_completions', 'funced',
+    'funcsave', 'functions', 'help', 'history', 'isatty', 'jobs', 'math',
+    'nextd', 'open', 'popd', 'prevd', 'psub', 'pushd', 'pwd', 'random', 'read',
+    'set', 'set_color', 'source', 'status', 'string', 'test', 'trap', 'type',
+    'ulimit', 'umask', 'vared'
+}, "function.builtin"}
+
+func   <- cap{'function', "keyword"} space+ cap{(alnum / [_\-.])+, "function"}
+option <- cap{'-' '-'? (alnum / '_') (alnum / [_\-])*, "type.attribute"}
+
+subst      <- cap{'(', "symbol.operator"}
+identifier <- cap{(alnum / [_.\-/])+, "identifier"}
+operator   <- cap{[|&;<>=()\[\]{}*?~!], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / variable
+       / func
+       / keyword
+       / builtin
+       / option
+       / number
+       / identifier
+       / operator

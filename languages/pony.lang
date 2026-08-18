@@ -1,0 +1,55 @@
+ws <- space+
+
+doc_comment   <- '"""' (!'"""' .)* '"""'?
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+line_comment  <- '//' (!'\n' .)*
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape <- cap{'\\' (['"\\abfnrtv0] / 'x' xdigit xdigit / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+dq_str <- '"' (escape / (!["\n] .))* '"'?
+char   <- cap{"'" (escape / (!['\n] .))* "'", "constant.string.char"}
+string <- cap{doc_comment / dq_str, "constant.string"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'actor', 'as', 'be', 'break', 'class', 'compile_error', 'compile_intrinsic',
+    'continue', 'consume', 'do', 'else', 'elseif', 'embed', 'end', 'error',
+    'for', 'fun', 'if', 'ifdef', 'iftype', 'in', 'interface', 'is', 'isnt',
+    'lambda', 'let', 'match', 'new', 'object', 'primitive', 'recover',
+    'repeat', 'return', 'struct', 'then', 'this', 'trait', 'try', 'type',
+    'until', 'use', 'var', 'where', 'while', 'with', 'not', 'and', 'or', 'xor',
+    'addressof', 'digestof'
+}, "keyword"}
+
+capability <- cap{words{
+    'iso', 'trn', 'ref', 'val', 'box', 'tag'
+}, "type.annotation"}
+
+type <- cap{words{
+    'Bool', 'I8', 'I16', 'I32', 'I64', 'I128', 'ILong', 'ISize', 'U8', 'U16',
+    'U32', 'U64', 'U128', 'ULong', 'USize', 'F32', 'F64', 'String', 'Array',
+    'None', 'Any', 'Env', 'Pointer', 'Stringable', 'Seq', 'Iterator'
+} / [A-Z] (alnum / '_')*, "type"}
+
+bool <- cap{words{'true', 'false', 'None'}, "constant.bool"}
+
+define <- cap{'fun' / 'be' / 'new', "keyword"} (space+ capability)? space+ cap{word, "function"}
+class  <- cap{'class' / 'actor' / 'primitive' / 'trait' / 'interface' / 'struct', "keyword"} space+ cap{word, "type.class"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.()\[\]{}@], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / char
+       / class
+       / define
+       / bool
+       / keyword
+       / capability
+       / type
+       / identifier
+       / number
+       / operator

@@ -1,0 +1,50 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape  <- cap{'\\' (['"\\abfnrtv0$] / 'x' xdigit xdigit / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+interp  <- cap{'$' (word ('.' word)* / '{' (!'}' .)* '}'), "type.variable"}
+raw_str <- [rc]? "'" (escape / interp / (!['] .))* "'"?
+dq_str  <- '"' (escape / interp / (!["] .))* '"'?
+string  <- cap{raw_str / dq_str, "constant.string"}
+char    <- cap{'`' (escape / (!'`' .)) '`', "constant.string.char"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'as', 'asm', 'assert', 'atomic', 'break', 'const', 'continue', 'defer',
+    'else', 'enum', 'fn', 'for', 'go', 'goto', 'if', 'import', 'in',
+    'interface', 'is', 'isreftype', 'lock', 'match', 'module', 'mut', 'none',
+    'or', 'pub', 'return', 'rlock', 'select', 'shared', 'sizeof', 'spawn',
+    'static', 'struct', 'type', 'typeof', 'union', 'unsafe', 'volatile',
+    '__global', '__offsetof'
+}, "keyword"}
+
+type <- cap{words{
+    'bool', 'byte', 'byteptr', 'charptr', 'f32', 'f64', 'i8', 'i16', 'int',
+    'i64', 'i128', 'isize', 'rune', 'string', 'u8', 'u16', 'u32', 'u64',
+    'u128', 'usize', 'voidptr', 'any', 'map', 'array', 'chan', 'thread'
+} / [A-Z] (alnum / '_')*, "type"}
+
+bool      <- cap{words{'true', 'false', 'none', 'nil'}, "constant.bool"}
+attribute <- cap{'[' (alpha / '_') (alnum / [_:.\-])* (!']' .)* ']', "type.annotation"}
+fn        <- cap{'fn', "keyword"} space+ cap{word, "function"}
+struct    <- cap{'struct' / 'enum' / 'interface' / 'union', "keyword"} space+ cap{word, "type.class"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.@()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / char
+       / fn
+       / struct
+       / bool
+       / keyword
+       / type
+       / identifier
+       / number
+       / operator

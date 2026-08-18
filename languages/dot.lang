@@ -1,0 +1,47 @@
+ws <- space+
+
+line_comment  <- ('//' / '#') (!'\n' .)*
+block_comment <- '/*' (!'*/' .)* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape <- cap{'\\' ., "constant.string.escape"}
+dq_str <- '"' (escape / (!["] .))* '"'?
+string <- cap{dq_str, "constant.string"}
+
+number <- cap{float / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'digraph', 'graph', 'strict', 'node', 'edge', 'subgraph'
+}, "keyword"}
+
+attribute <- cap{words{
+    'arrowhead', 'arrowsize', 'arrowtail', 'bgcolor', 'center', 'color',
+    'colorscheme', 'comment', 'compound', 'concentrate', 'constraint',
+    'decorate', 'dir', 'distortion', 'fillcolor', 'fixedsize', 'fontcolor',
+    'fontname', 'fontpath', 'fontsize', 'group', 'headclip', 'headlabel',
+    'headport', 'height', 'href', 'label', 'labelangle', 'labeldistance',
+    'labelfloat', 'labelfontcolor', 'labelfontname', 'labelfontsize',
+    'labeljust', 'labelloc', 'layer', 'layers', 'len', 'lhead', 'ltail',
+    'margin', 'mclimit', 'minlen', 'nodesep', 'nslimit', 'ordering',
+    'orientation', 'outputorder', 'overlap', 'pack', 'page', 'pagedir',
+    'pencolor', 'penwidth', 'peripheries', 'pos', 'quantum', 'rank', 'rankdir',
+    'ranksep', 'ratio', 'rects', 'regular', 'remincross', 'rotate', 'samehead',
+    'sametail', 'samplepoints', 'searchsize', 'sep', 'shape', 'shapefile',
+    'showboxes', 'sides', 'size', 'skew', 'splines', 'start', 'style',
+    'stylesheet', 'tailclip', 'taillabel', 'tailport', 'target', 'tooltip',
+    'truecolor', 'vertices', 'voro_margin', 'weight', 'width', 'z'
+}, "type.attribute"}
+
+identifier <- cap{word, "identifier"}
+edge       <- cap{'->' / '--', "keyword"}
+operator   <- cap{[=;,:(){}\[\]], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / keyword
+       / attribute
+       / edge
+       / identifier
+       / number
+       / operator

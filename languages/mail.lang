@@ -1,0 +1,29 @@
+# RFC 822 style messages
+
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+header <- '\n' cap{words{
+    'Bcc', 'Cc', 'Content-Disposition', 'Content-Transfer-Encoding',
+    'Content-Type', 'Date', 'Delivered-To', 'DKIM-Signature', 'From',
+    'In-Reply-To', 'List-Id', 'Message-ID', 'MIME-Version', 'Received',
+    'References', 'Reply-To', 'Return-Path', 'Sender', 'Subject', 'To',
+    'User-Agent', 'X-Mailer', 'X-Originating-IP', 'X-Spam-Status'
+} ':', "keyword"}
+       / '\n' cap{'X-' (alnum / '-')+ ':', "keyword"}
+
+quote <- '\n' cap{'>' (!'\n' .)*, "comment"}
+
+email <- cap{'<' (!('>' / space) .)+ '@' (!('>' / space) .)+ '>' / (alnum / [_.+\-])+ '@' (alnum / [.\-])+, "underlined.link"}
+url   <- cap{('http' 's'? / 'ftp') '://' (!(space / '>' / '"') .)+, "underlined.link"}
+
+signature <- '\n' cap{'-- ' &'\n' (!('\n\n' / !.) .)*, "comment"}
+separator <- '\n' cap{'--' (alnum / [_\-])+ '--'?, "special"}
+
+token <- header
+       / quote
+       / signature
+       / separator
+       / ws
+       / url
+       / email

@@ -1,0 +1,26 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+alias_header <- cap{'{{' (!'}}' .)* '}}'?, "preproc"}
+action_block <- cap{'{' (!('}' / '\n') .)* '}', "keyword"}
+
+setting <- cap{[+\-] (alnum / '-')+, "type.attribute"}
+option  <- cap{'{' (!('}' / '\n') .)* '}', "constant.string"}
+
+tag <- cap{words{
+    'TAG', 'CLIENT-HEADER-TAGGER', 'SERVER-HEADER-TAGGER', 'CLIENT-HEADER-FILTER',
+    'SERVER-HEADER-FILTER', 'FILTER', 'ALIAS'
+} ':', "keyword"}
+
+pattern  <- cap{(alnum / [*.\-]) (alnum / [*.\-])* ('/' (!(space / '\n') .)*)?, "underlined.link"}
+operator <- cap{[=,:/], "symbol.operator"}
+
+token <- ws
+       / comment
+       / alias_header
+       / tag
+       / action_block
+       / setting
+       / pattern
+       / operator

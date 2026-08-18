@@ -1,0 +1,46 @@
+ws <- space+
+
+block_comment <- '###' (!'###' .)* '###'?
+line_comment  <- '#' (!'\n' .)*
+comment       <- cap{block_comment / line_comment, "comment"}
+
+escape  <- cap{'\\' (['"\\bfnrtv0] / 'u' xdigit xdigit xdigit xdigit / 'x' xdigit xdigit), "constant.string.escape"}
+interp  <- cap{'#{', "type.variable"} (!'}' .)* cap{'}', "type.variable"}
+tri_dq  <- '"""' (escape / interp / (!'"""' .))* '"""'?
+tri_sq  <- "'''" (!"'''" .)* "'''"?
+sq_str  <- "'" (escape / (!['\n] .))* "'"?
+dq_str  <- '"' (escape / interp / (!["\n] .))* '"'?
+string  <- cap{tri_dq / tri_sq / sq_str / dq_str, "constant.string"}
+regex   <- cap{'///' (!'///' .)* '///' [gimuy]* / '/' (escape / (!('/' / '\n' / ' ') .))+ '/' [gimuy]*, "constant.string.regex"}
+embed   <- cap{'`' (!'`' .)* '`'?, "special"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'and', 'await', 'break', 'by', 'catch', 'class', 'continue', 'debugger',
+    'delete', 'do', 'else', 'export', 'extends', 'finally', 'for', 'if',
+    'import', 'in', 'instanceof', 'is', 'isnt', 'loop', 'new', 'not', 'of',
+    'or', 'return', 'super', 'switch', 'then', 'this', 'throw', 'try',
+    'typeof', 'unless', 'until', 'when', 'while', 'yield'
+}, "keyword"}
+
+bool <- cap{words{'true', 'false', 'null', 'undefined', 'yes', 'no', 'on', 'off'}, "constant.bool"}
+
+variable <- cap{'@' word?, "type.variable"}
+class    <- cap{'class', "keyword"} space+ cap{word, "type.class"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{'->' / '=>' / [+\-*/%<>=!&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / regex
+       / embed
+       / class
+       / bool
+       / keyword
+       / variable
+       / identifier
+       / number
+       / operator

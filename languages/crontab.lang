@@ -1,0 +1,33 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+special <- cap{'@' words{
+    'reboot', 'yearly', 'annually', 'monthly', 'weekly', 'daily', 'midnight',
+    'hourly'
+}, "keyword"}
+
+step  <- '/' (digit+ / '*')
+range <- (digit+ / words{
+    'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct',
+    'nov', 'dec', 'sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat',
+    'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT',
+    'NOV', 'DEC', 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'
+} / '*') step? ('-' (digit+ / '*') step?)?
+field <- cap{range (',' range)*, "constant.number"} &(space / !.)
+
+variable <- cap{word, "type.attribute"} &([ \t]* '=')
+
+sq_str <- "'" (!['\n] .)* "'"?
+dq_str <- '"' (!["\n] .)* '"'?
+string <- cap{sq_str / dq_str, "constant.string"}
+
+operator <- cap{[=%], "symbol.operator"}
+
+token <- ws
+       / comment
+       / special
+       / string
+       / variable
+       / field
+       / operator

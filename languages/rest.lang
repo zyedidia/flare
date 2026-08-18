@@ -1,0 +1,42 @@
+# reStructuredText
+
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+comment <- '\n' cap{'..' [ \t]+ !(word (!('::' / '\n') .)* '::') (!'\n' .)*, "comment"}
+
+directive <- '\n' cap{'..' [ \t]+ (alnum / [_\-+.])+ '::', "keyword"}
+target    <- '\n' cap{'..' [ \t]+ '_' (!('\n' / ':') .)+ ':', "special"}
+footnote  <- '\n' cap{'..' [ \t]+ '[' (!']' .)+ ']', "special"}
+
+field   <- '\n' [ \t]* cap{':' (!(':' / '\n') .)+ ':', "type.attribute"}
+bullet  <- '\n' [ \t]* cap{[*+\-] &' ' / digit+ '.' &' ' / '#.' &' ', "keyword"}
+
+section <- '\n' cap{('=' '='+ / '-' '-'+ / '~' '~'+ / '^' '^'+ / '#' '#'+ / '*' '*'+ / '"' '"'+ / '+' '+'+ / '`' '`'+) &([ \t]* '\n'), "preproc"}
+
+literal <- cap{'``' (!'``' .)* '``', "constant.string"}
+strong  <- cap{'**' (!'**' .)* '**', "constant"}
+emph    <- cap{'*' (!('*' / '\n') .)+ '*', "constant"}
+role    <- cap{':' (alnum / [_\-+.])+ ':`' (!'`' .)* '`', "function"}
+link    <- cap{'`' (!'`' .)+ '`_' '_'?, "underlined.link"}
+ref     <- cap{(alnum / [_\-.])+ '_' '_'? &(space / [,.;:)] / !.), "underlined.link"}
+subst   <- cap{'|' (!('|' / '\n') .)+ '|', "special"}
+
+block <- cap{'::' &([ \t]* '\n'), "keyword"}
+
+token <- comment
+       / directive
+       / target
+       / footnote
+       / section
+       / field
+       / bullet
+       / ws
+       / literal
+       / role
+       / strong
+       / emph
+       / link
+       / subst
+       / block
+       / ref

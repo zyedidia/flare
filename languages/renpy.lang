@@ -1,0 +1,51 @@
+# Ren'Py, which is Python with a scripting layer on top
+
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape  <- cap{'\\' ., "constant.string.escape"}
+interp  <- cap{'[' (!(']' / '\n') .)* ']' / '{' (!('}' / '\n') .)* '}', "type.variable"}
+tri_dq  <- '"""' (!'"""' .)* '"""'?
+tri_sq  <- "'''" (!"'''" .)* "'''"?
+sq_str  <- "'" (escape / interp / (!['\n] .))* "'"?
+dq_str  <- '"' (escape / interp / (!["\n] .))* '"'?
+string  <- cap{tri_dq / tri_sq / sq_str / dq_str, "constant.string"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'label', 'menu', 'jump', 'call', 'return', 'scene', 'show', 'hide', 'with',
+    'at', 'as', 'behind', 'onlayer', 'zorder', 'play', 'stop', 'queue',
+    'pause', 'window', 'nvl', 'transform', 'image', 'screen', 'define',
+    'default', 'init', 'python', 'style', 'transclude', 'use', 'has', 'add',
+    'text', 'imagemap', 'hotspot', 'hotbar', 'if', 'elif', 'else', 'while',
+    'for', 'in', 'pass', 'and', 'or', 'not', 'is', 'None', 'True', 'False',
+    'expression', 'from', 'import', 'class', 'def', 'global', 'store'
+}, "keyword"}
+
+property <- cap{words{
+    'align', 'alpha', 'anchor', 'area', 'background', 'color', 'crop',
+    'fadein', 'fadeout', 'font', 'hover', 'idle', 'insensitive', 'linear',
+    'loop', 'offset', 'padding', 'pos', 'rotate', 'selected', 'size',
+    'spacing', 'truecenter', 'xalign', 'xanchor', 'xoffset', 'xpos', 'xsize',
+    'xzoom', 'yalign', 'yanchor', 'yoffset', 'ypos', 'ysize', 'yzoom', 'zoom'
+}, "type.attribute"}
+
+bool <- cap{words{'True', 'False', 'None'}, "constant.bool"}
+
+label <- cap{'label' / 'screen' / 'transform' / 'style', "keyword"} space+ cap{word, "function"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>=!&|^~?:;,.()\[\]{}$@], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / label
+       / bool
+       / keyword
+       / property
+       / identifier
+       / number
+       / operator

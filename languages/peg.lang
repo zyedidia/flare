@@ -1,0 +1,37 @@
+# PEG grammars (LPeg/pegged style)
+
+ws <- space+
+
+comment <- cap{('#' / '--') (!'\n' .)*, "comment"}
+
+range_        <- '[' ('\\' . / (!']' .))* ']'?
+escape        <- cap{'\\' ., "constant.string.escape"}
+sq_str        <- "'" (escape / (!['] .))* "'"?
+dq_str        <- '"' (escape / (!["] .))* '"'?
+string        <- cap{sq_str / dq_str, "constant.string"}
+class         <- cap{range_, "constant.string.regex"}
+
+number <- cap{integer, "constant.number"} !(alnum / '_')
+
+# a rule definition: name <- ... / name = ...
+definition <- cap{(alpha / '_') (alnum / [_\-])*, "type"} &([ \t]* ('<-' / '<--' / '=' / ':' / '←'))
+
+builtin <- cap{words{
+    'alpha', 'alnum', 'digit', 'xdigit', 'space', 'upper', 'lower', 'punct',
+    'cntrl', 'graph', 'print', 'word', 'any', 'eof', 'nl', 'endline', 'eol'
+}, "function.builtin"}
+
+identifier <- cap{(alpha / '_') (alnum / [_\-])*, "identifier"}
+arrow      <- cap{'<--' / '<-' / '<:' / '=' / ':', "keyword"}
+operator   <- cap{[/*+?&!()<>{}\[\].,;~^%$@], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / class
+       / definition
+       / arrow
+       / builtin
+       / identifier
+       / number
+       / operator

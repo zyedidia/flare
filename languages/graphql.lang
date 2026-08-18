@@ -1,0 +1,43 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape    <- cap{'\\' (['"\\/bfnrt] / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+block_str <- '"""' (!'"""' .)* '"""'?
+dq_str    <- '"' (escape / (!["\n] .))* '"'?
+string    <- cap{block_str / dq_str, "constant.string"}
+
+number <- cap{float / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'query', 'mutation', 'subscription', 'fragment', 'on', 'schema', 'scalar',
+    'type', 'interface', 'union', 'enum', 'input', 'implements', 'directive',
+    'extend', 'repeatable'
+}, "keyword"}
+
+type <- cap{words{'Int', 'Float', 'String', 'Boolean', 'ID'}, "type"}
+bool <- cap{words{'true', 'false', 'null'}, "constant.bool"}
+
+definition <- cap{words{'type', 'interface', 'union', 'enum', 'input', 'scalar', 'fragment'}, "keyword"}
+              space+ cap{word, "type.class"}
+
+variable  <- cap{'$' word, "type.variable"}
+directive <- cap{'@' word, "type.annotation"}
+field     <- cap{word, "type.attribute"} &([ \t]* [:(])
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[=:,!|&(){}\[\]] / '...', "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / definition
+       / keyword
+       / type
+       / bool
+       / variable
+       / directive
+       / field
+       / identifier
+       / number
+       / operator

@@ -1,0 +1,52 @@
+ws <- space+
+
+# OCaml comments nest
+comment_body <- '(*' (comment_body / (!('*)' / '(*') .))* '*)'?
+comment      <- cap{comment_body, "comment"}
+
+escape <- cap{'\\' (['"\\ntbr ] / digit digit digit / 'x' xdigit xdigit), "constant.string.escape"}
+dq_str <- '"' (escape / (!["] .))* '"'?
+quoted <- '{' [a-z_]* '|' (!('|' [a-z_]* '}') .)* '|' [a-z_]* '}'
+string <- cap{quoted / dq_str, "constant.string"}
+char   <- cap{"'" (escape / (!['\n] .)) "'", "constant.string.char"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'and', 'as', 'assert', 'asr', 'begin', 'class', 'constraint', 'do', 'done',
+    'downto', 'else', 'end', 'exception', 'external', 'for', 'fun', 'function',
+    'functor', 'if', 'in', 'include', 'inherit', 'initializer', 'land', 'lazy',
+    'let', 'lor', 'lsl', 'lsr', 'lxor', 'match', 'method', 'mod', 'module',
+    'mutable', 'new', 'nonrec', 'object', 'of', 'open', 'or', 'private', 'rec',
+    'sig', 'struct', 'then', 'to', 'try', 'type', 'val', 'virtual', 'when',
+    'while', 'with', 'raise', 'failwith'
+}, "keyword"}
+
+type <- cap{words{
+    'array', 'bool', 'bytes', 'char', 'exn', 'float', 'format', 'int',
+    'int32', 'int64', 'lazy_t', 'list', 'nativeint', 'option', 'ref', 'result',
+    'string', 'unit'
+}, "type"}
+
+bool   <- cap{words{'true', 'false'}, "constant.bool"}
+module <- cap{[A-Z] (alnum / [_'])*, "type.class"}
+label  <- cap{[~?] word, "type.attribute"}
+
+let  <- cap{'let', "keyword"} space+ ('rec' space+)? cap{word, "function"} &([ \t]* [a-z_(~?])
+
+identifier <- cap{(alpha / '_') (alnum / [_'])*, "identifier"}
+operator   <- cap{[+\-*/<>=!&|^@#~$%.,;:()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / char
+       / let
+       / bool
+       / keyword
+       / type
+       / label
+       / module
+       / identifier
+       / number
+       / operator

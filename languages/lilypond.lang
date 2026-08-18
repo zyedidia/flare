@@ -1,0 +1,39 @@
+ws <- space+
+
+block_comment <- '%{' (!'%}' .)* '%}'?
+line_comment  <- '%' (!'\n' .)*
+comment       <- cap{block_comment / line_comment, "comment"}
+
+escape <- cap{'\\' ['"\\], "constant.string.escape"}
+string <- cap{'"' (escape / (!["] .))* '"'?, "constant.string"}
+
+number <- cap{float / integer '.'*, "constant.number"} !(alpha / '_')
+
+command <- cap{'\\' (alpha)+, "keyword"}
+
+markup <- cap{'\\' words{
+    'markup', 'markuplist', 'header', 'score', 'book', 'bookpart', 'layout',
+    'midi', 'paper', 'context', 'new', 'with', 'version', 'include',
+    'language', 'relative', 'absolute', 'fixed', 'transpose', 'time', 'key',
+    'clef', 'tempo', 'repeat', 'alternative', 'set', 'unset', 'override',
+    'revert', 'once', 'tweak', 'partial', 'bar', 'break', 'grace',
+    'acciaccatura', 'appoggiatura', 'tuplet', 'times', 'voiceOne', 'voiceTwo',
+    'chordmode', 'drummode', 'lyricmode', 'lyricsto', 'addlyrics', 'figures'
+}, "preproc"}
+
+note <- cap{[a-g] ('is' / 'es')* [',\']* digit* '.'*, "constant"} !(alpha / '_')
+rest <- cap{[rRs] digit* '.'*, "constant"} !(alpha / '_')
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[{}<>()\[\]|~^_.\-=], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / markup
+       / command
+       / note
+       / rest
+       / number
+       / identifier
+       / operator

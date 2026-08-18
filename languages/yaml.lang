@@ -1,0 +1,43 @@
+ws <- space+
+
+comment   <- cap{'#' (!'\n' .)*, "comment"}
+directive <- cap{'%' (!'\n' .)*, "preproc"}
+doc       <- cap{'---' / '...', "keyword"}
+
+escape <- cap{'\\' (['"\\/bfnrt0] / 'x' xdigit xdigit / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+sq_str <- "'" (!['\n] .)* "'"?
+dq_str <- '"' (escape / (!["\n] .))* '"'?
+string <- cap{sq_str / dq_str, "constant.string"}
+
+# a plain key, i.e. the part before the ':' of a mapping entry
+key <- cap{(alpha / [_.]) (alnum / [_.\-])*, "type.attribute"} &([ \t]* ':')
+
+anchor <- cap{[&*] (alnum / [_\-])+, "special"}
+tag    <- cap{'!' '!'? (alnum / [_\-/:.])*, "type"}
+
+bool   <- cap{words{
+    'true', 'false', 'null', 'yes', 'no', 'on', 'off',
+    'True', 'False', 'Null', 'Yes', 'No', 'On', 'Off',
+    'TRUE', 'FALSE', 'NULL', 'YES', 'NO', 'ON', 'OFF'
+} / '~', "constant.bool"}
+number <- cap{float / integer, "constant.number"} !(alnum / [_.\-])
+
+# block scalar introducers: '|', '>' and their chomping/indent indicators
+block <- cap{[|>] [+\-]? digit? &([ \t]* ('#' / '\n')), "keyword"}
+
+dash     <- cap{'-' &(space / !.), "symbol.operator"}
+operator <- cap{[:,?\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / directive
+       / doc
+       / string
+       / anchor
+       / tag
+       / block
+       / key
+       / bool
+       / number
+       / dash
+       / operator

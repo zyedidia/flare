@@ -1,0 +1,63 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape <- cap{'\\' (['"\\nrt0] / 'x' xdigit xdigit / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+sq_str <- "'" (escape / (!['\n] .))* "'"?
+dq_str <- '"' (escape / (!["\n] .))* '"'?
+hex    <- 'hex' ('"' xdigit* '"' / "'" xdigit* "'")
+string <- cap{hex / sq_str / dq_str, "constant.string"}
+
+number <- cap{(float / hex_num / integer) ('e' integer)?, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'abstract', 'anonymous', 'as', 'assembly', 'break', 'calldata', 'catch',
+    'constant', 'constructor', 'continue', 'contract', 'delete', 'do', 'else',
+    'emit', 'enum', 'error', 'event', 'external', 'fallback', 'for',
+    'function', 'if', 'immutable', 'import', 'indexed', 'interface',
+    'internal', 'is', 'library', 'mapping', 'memory', 'modifier', 'new',
+    'override', 'payable', 'pragma', 'private', 'public', 'pure', 'receive',
+    'return', 'returns', 'revert', 'storage', 'struct', 'try', 'type',
+    'unchecked', 'using', 'view', 'virtual', 'while'
+}, "keyword"}
+
+type <- cap{words{
+    'address', 'bool', 'byte', 'bytes', 'bytes1', 'bytes2', 'bytes4',
+    'bytes8', 'bytes16', 'bytes32', 'int', 'int8', 'int16', 'int32', 'int64',
+    'int128', 'int256', 'string', 'uint', 'uint8', 'uint16', 'uint32',
+    'uint64', 'uint128', 'uint256', 'fixed', 'ufixed'
+}, "type"}
+
+unit <- cap{words{
+    'wei', 'gwei', 'szabo', 'finney', 'ether', 'seconds', 'minutes', 'hours',
+    'days', 'weeks', 'years'
+}, "constant"}
+
+builtin <- cap{words{
+    'msg', 'block', 'tx', 'now', 'this', 'super', 'abi', 'require', 'assert',
+    'selfdestruct', 'keccak256', 'sha256', 'ripemd160', 'ecrecover', 'addmod',
+    'mulmod', 'gasleft', 'blockhash'
+}, "function.builtin"}
+
+bool     <- cap{words{'true', 'false'}, "constant.bool"}
+contract <- cap{'contract' / 'interface' / 'library' / 'struct' / 'enum', "keyword"} space+ cap{word, "type.class"}
+func     <- cap{'function' / 'modifier' / 'event' / 'error', "keyword"} space+ cap{word, "function"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / contract
+       / func
+       / bool
+       / keyword
+       / type
+       / unit
+       / builtin
+       / identifier
+       / number
+       / operator

@@ -1,0 +1,56 @@
+ws <- space+
+
+comment <- cap{words{'REM', 'rem', 'Rem'} (!'\n' .)* / '::' (!'\n' .)*, "comment"}
+
+label    <- cap{':' (alnum / [_\-.])+, "special"}
+variable <- cap{'%' ('~'? (alnum / [_:$~*#])+ '%'? / digit / '*') / '!' (alnum / [_:])+ '!', "type.variable"}
+
+sq_str <- "'" (!['\n] .)* "'"?
+dq_str <- '"' (!["\n] .)* '"'?
+string <- cap{dq_str / sq_str, "constant.string"}
+
+number <- cap{integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'call', 'cd', 'chdir', 'cls', 'copy', 'defined', 'del', 'do', 'echo',
+    'else', 'endlocal', 'equ', 'erase', 'errorlevel', 'exist', 'exit', 'for',
+    'geq', 'goto', 'gtr', 'if', 'in', 'leq', 'lss', 'md', 'mkdir', 'move',
+    'neq', 'not', 'pause', 'popd', 'pushd', 'rd', 'ren', 'rename', 'rmdir',
+    'set', 'setlocal', 'shift', 'start', 'title', 'type', 'ver', 'verify',
+    'vol',
+    'CALL', 'CD', 'CHDIR', 'CLS', 'COPY', 'DEFINED', 'DEL', 'DO', 'ECHO',
+    'ELSE', 'ENDLOCAL', 'EQU', 'ERASE', 'ERRORLEVEL', 'EXIST', 'EXIT', 'FOR',
+    'GEQ', 'GOTO', 'GTR', 'IF', 'IN', 'LEQ', 'LSS', 'MD', 'MKDIR', 'MOVE',
+    'NEQ', 'NOT', 'PAUSE', 'POPD', 'PUSHD', 'RD', 'REN', 'RENAME', 'RMDIR',
+    'SET', 'SETLOCAL', 'SHIFT', 'START', 'TITLE', 'TYPE', 'VER', 'VERIFY',
+    'VOL'
+}, "keyword"}
+
+command <- cap{words{
+    'attrib', 'chkdsk', 'choice', 'comp', 'diskpart', 'expand', 'fc', 'find',
+    'findstr', 'format', 'ipconfig', 'more', 'net', 'ping', 'powershell',
+    'reg', 'robocopy', 'sc', 'schtasks', 'sort', 'subst', 'taskkill',
+    'tasklist', 'tree', 'where', 'xcopy',
+    'ATTRIB', 'CHKDSK', 'CHOICE', 'COMP', 'DISKPART', 'EXPAND', 'FC', 'FIND',
+    'FINDSTR', 'FORMAT', 'IPCONFIG', 'MORE', 'NET', 'PING', 'POWERSHELL',
+    'REG', 'ROBOCOPY', 'SC', 'SCHTASKS', 'SORT', 'SUBST', 'TASKKILL',
+    'TASKLIST', 'TREE', 'WHERE', 'XCOPY'
+}, "function.builtin"}
+
+at         <- cap{'@', "preproc"}
+option     <- cap{'/' (alpha / '?') (alnum / '_')*, "type.attribute"}
+identifier <- cap{word, "identifier"}
+operator   <- cap{[=<>|&()\[\]^+,;], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / label
+       / variable
+       / at
+       / keyword
+       / command
+       / option
+       / identifier
+       / number
+       / operator

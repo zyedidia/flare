@@ -1,0 +1,3 @@
+# svelte uses the html grammar
+
+token <- include{"html"}

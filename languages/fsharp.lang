@@ -1,0 +1,58 @@
+ws <- space+
+
+block_comment <- '(*' {{(!'*)' .)}}* '*)'?
+line_comment  <- '//' (!'\n' .)*
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape  <- cap{'\\' (['"\\nrtbafv0] / 'u' xdigit xdigit xdigit xdigit / 'x' xdigit xdigit), "constant.string.escape"}
+tri_str <- '"""' (!'"""' .)* '"""'?
+verb    <- '@"' (!'"' .)* '"'?
+dq_str  <- '"' (escape / (!["] .))* '"'?
+string  <- cap{tri_str / verb / dq_str, "constant.string"}
+char    <- cap{"'" (escape / (!['\n] .)) "'" 'B'?, "constant.string.char"}
+
+number <- cap{(float / hex_num / integer) ([uUlLsSyy] / 'UL' / 'LF' / 'M' / 'I')*, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'abstract', 'and', 'as', 'assert', 'base', 'begin', 'class', 'default',
+    'delegate', 'do', 'done', 'downcast', 'downto', 'elif', 'else', 'end',
+    'exception', 'extern', 'finally', 'fixed', 'for', 'fun', 'function',
+    'global', 'if', 'in', 'inherit', 'inline', 'interface', 'internal', 'lazy',
+    'let', 'match', 'member', 'module', 'mutable', 'namespace', 'new', 'not',
+    'of', 'open', 'or', 'override', 'private', 'public', 'rec', 'return',
+    'select', 'static', 'struct', 'then', 'to', 'try', 'type', 'upcast', 'use',
+    'val', 'void', 'when', 'while', 'with', 'yield', 'async', 'await', 'const',
+    'land', 'lor', 'lsl', 'lsr', 'lxor', 'mod', 'sig'
+}, "keyword"}
+
+type <- cap{words{
+    'bool', 'byte', 'sbyte', 'int16', 'uint16', 'int', 'int32', 'uint32',
+    'int64', 'uint64', 'nativeint', 'unativeint', 'char', 'string', 'decimal',
+    'unit', 'float32', 'single', 'float', 'double', 'bigint', 'obj', 'list',
+    'array', 'option', 'seq', 'Result'
+}, "type"}
+
+bool      <- cap{words{'true', 'false', 'null'}, "constant.bool"}
+attribute <- cap{'[<' (!'>]' .)* '>]', "type.annotation"}
+preproc   <- cap{'#' words{'if', 'else', 'endif', 'light', 'line', 'nowarn', 'load', 'r', 'I', 'time', 'help', 'quit'}, "preproc"}
+
+let  <- cap{'let', "keyword"} space+ ('rec' space+)? ('mutable' space+)? cap{word, "function"}
+type_def <- cap{'type', "keyword"} space+ cap{word, "type.class"}
+
+identifier <- cap{(alpha / '_') (alnum / [_'])* / '``' (!'``' .)* '``', "identifier"}
+operator   <- cap{'|>' / '<|' / '->' / '<-' / [+\-*/<>=!&|^@#~%.,;:()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / attribute
+       / preproc
+       / string
+       / char
+       / let
+       / type_def
+       / bool
+       / keyword
+       / type
+       / identifier
+       / number
+       / operator

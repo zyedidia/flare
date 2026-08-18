@@ -1,0 +1,32 @@
+# ledger / hledger / beancount journals
+
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+comment <- cap{[;#|*] (!'\n' .)* / '%' (!'\n' .)*, "comment"}
+
+date <- '\n' cap{digit digit digit digit [\-/.] digit digit? [\-/.] digit digit? ('=' digit digit digit digit [\-/.] digit digit? [\-/.] digit digit?)?, "constant.number"}
+
+directive <- '\n' cap{words{
+    'account', 'alias', 'apply', 'assert', 'bucket', 'capture', 'check',
+    'comment', 'commodity', 'define', 'end', 'expr', 'fixed', 'include',
+    'payee', 'price', 'tag', 'test', 'year',
+    'open', 'close', 'balance', 'pad', 'note', 'document', 'event', 'query',
+    'custom', 'option', 'plugin', 'pushtag', 'poptag'
+}, "keyword"}
+
+payee  <- cap{'*' / '!', "keyword"}
+amount <- cap{[\-+]? [$£€¥]? (float / integer) ([ \t]* (alpha / [_"])+)?, "constant.number"}
+account <- cap{(alpha / [_:]) (alnum / [_:\- ])* !(space* [=<>]) , "type.attribute"} &([ \t][ \t] / '\n' / '  ')
+
+tag      <- cap{(alnum / [_\-])+ ':' &(space / !.), "type.attribute"}
+operator <- cap{[=@()\[\]{}], "symbol.operator"}
+
+token <- comment
+       / date
+       / directive
+       / ws
+       / payee
+       / amount
+       / tag
+       / operator

@@ -1,0 +1,3 @@
+# micro uses the json grammar
+
+token <- include{"json"}

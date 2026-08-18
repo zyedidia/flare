@@ -1,0 +1,48 @@
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+section <- '\n' cap{'%' words{
+    'description', 'prep', 'build', 'install', 'check', 'clean', 'files',
+    'changelog', 'package', 'post', 'postun', 'pre', 'preun', 'pretrans',
+    'posttrans', 'triggerin', 'triggerun', 'triggerpostun', 'verifyscript'
+}, "keyword"}
+
+directive <- cap{'%' words{
+    'if', 'else', 'endif', 'ifarch', 'ifnarch', 'ifos', 'ifnos', 'define',
+    'global', 'undefine', 'include', 'setup', 'patch', 'configure', 'make',
+    'make_build', 'make_install', 'cmake', 'meson', 'autosetup', 'autopatch',
+    'find_lang', 'doc', 'license', 'config', 'dir', 'ghost', 'attr', 'defattr',
+    'exclude', 'verify', 'caps', 'lang', 'systemd_post', 'systemd_preun',
+    'systemd_postun'
+}, "preproc"}
+
+macro <- cap{'%' ('{' (!'}' .)* '}' / '(' (!')' .)* ')' / (alnum / '_')+), "type.variable"}
+
+tag <- '\n' cap{words{
+    'Name', 'Version', 'Release', 'Epoch', 'Summary', 'License', 'Group',
+    'URL', 'Source', 'Source0', 'Source1', 'Patch', 'Patch0', 'Patch1',
+    'BuildArch', 'BuildRoot', 'BuildRequires', 'Requires', 'Provides',
+    'Conflicts', 'Obsoletes', 'Recommends', 'Suggests', 'Supplements',
+    'Enhances', 'ExclusiveArch', 'ExcludeArch', 'Prefix', 'Packager',
+    'Vendor', 'Distribution', 'AutoReq', 'AutoProv', 'BuildConflicts'
+} (digit+)? ('(' (!')' .)* ')')? ':', "type.attribute"}
+
+string <- cap{'"' (!["\n] .)* '"'?, "constant.string"}
+number <- cap{float / integer, "constant.number"} !(alnum / [_.\-])
+
+changelog <- cap{'*' [ \t]* words{'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'} (!'\n' .)*, "special"}
+
+operator <- cap{[<>=!&|(){}\[\]], "symbol.operator"}
+
+token <- comment
+       / section
+       / tag
+       / ws
+       / changelog
+       / directive
+       / macro
+       / string
+       / number
+       / operator

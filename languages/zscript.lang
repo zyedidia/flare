@@ -1,0 +1,54 @@
+# ZScript (ZDoom/GZDoom)
+
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+preproc <- cap{'#' [ \t]* words{'include', 'define', 'ifdef', 'ifndef', 'endif', 'else', 'undef', 'pragma'}, "preproc"}
+
+escape <- cap{'\\' (['"\\cnrt0] / 'x' xdigit xdigit), "constant.string.escape"}
+sq_str <- "'" (escape / (!['\n] .))* "'"?
+dq_str <- '"' (escape / (!["\n] .))* '"'?
+string <- cap{sq_str / dq_str, "constant.string"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'abstract', 'action', 'array', 'break', 'case', 'class', 'clearscope',
+    'const', 'continue', 'default', 'deprecated', 'do', 'else', 'enum',
+    'extend', 'final', 'flagdef', 'for', 'foreach', 'goto', 'if', 'in',
+    'internal', 'let', 'loop', 'meta', 'mixin', 'native', 'new', 'null',
+    'out', 'override', 'play', 'private', 'property', 'protected', 'readonly',
+    'replaces', 'return', 'self', 'states', 'static', 'stop', 'struct',
+    'super', 'switch', 'transient', 'ui', 'until', 'version', 'virtual',
+    'virtualscope', 'vararg', 'wait', 'while'
+}, "keyword"}
+
+type <- cap{words{
+    'bool', 'color', 'double', 'float', 'int', 'int16', 'int8', 'name',
+    'sound', 'spriteid', 'state', 'statelabel', 'string', 'textureid', 'uint',
+    'uint16', 'uint8', 'vector2', 'vector3', 'void', 'Actor', 'Object',
+    'Thinker', 'Class'
+} / [A-Z] (alnum / '_')*, "type"}
+
+bool  <- cap{words{'true', 'false', 'null'}, "constant.bool"}
+class <- cap{'class' / 'struct' / 'enum' / 'mixin', "keyword"} space+ cap{word, "type.class"}
+func  <- cap{word, "function"} &([ \t]* '(')
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / preproc
+       / string
+       / class
+       / bool
+       / keyword
+       / type
+       / func
+       / identifier
+       / number
+       / operator

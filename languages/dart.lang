@@ -1,0 +1,54 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape  <- cap{'\\' (['"\\$bfnrtv] / 'u' xdigit xdigit xdigit xdigit / 'x' xdigit xdigit), "constant.string.escape"}
+interp  <- cap{'$' (word / '{' (!'}' .)* '}'), "type.variable"}
+raw3sq  <- "'''" (!"'''" .)* "'''"?
+raw3dq  <- '"""' (!'"""' .)* '"""'?
+sq_str  <- "'" (escape / interp / (!['\n] .))* "'"?
+dq_str  <- '"' (escape / interp / (!["\n] .))* '"'?
+string  <- cap{raw3sq / raw3dq / sq_str / dq_str, "constant.string"}
+
+number <- cap{float / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'abstract', 'as', 'assert', 'async', 'await', 'base', 'break', 'case',
+    'catch', 'class', 'const', 'continue', 'covariant', 'default', 'deferred',
+    'do', 'else', 'enum', 'export', 'extends', 'extension', 'external',
+    'factory', 'final', 'finally', 'for', 'get', 'hide', 'if', 'implements',
+    'import', 'in', 'interface', 'is', 'late', 'library', 'mixin', 'new',
+    'on', 'operator', 'part', 'required', 'rethrow', 'return', 'sealed', 'set',
+    'show', 'static', 'super', 'switch', 'sync', 'this', 'throw', 'try',
+    'typedef', 'var', 'when', 'while', 'with', 'yield'
+}, "keyword"}
+
+type <- cap{words{
+    'bool', 'double', 'dynamic', 'int', 'num', 'Object', 'String', 'void',
+    'List', 'Map', 'Set', 'Future', 'Stream', 'Iterable', 'Function', 'Never',
+    'Null', 'Record', 'Symbol', 'Type'
+} / [A-Z] (alnum / '_')*, "type"}
+
+bool <- cap{words{'true', 'false', 'null'}, "constant.bool"}
+
+annotation <- cap{'@' word, "type.annotation"}
+class      <- cap{'class' / 'mixin' / 'enum' / 'extension', "keyword"} space+ cap{word, "type.class"}
+func       <- cap{word, "function"} &([ \t]* [(<])
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^?~:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / annotation
+       / class
+       / bool
+       / keyword
+       / type
+       / func
+       / identifier
+       / number
+       / operator

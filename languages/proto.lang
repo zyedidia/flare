@@ -1,0 +1,43 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape <- cap{'\\' (['"\\abfnrtv] / 'x' xdigit xdigit / digit digit digit), "constant.string.escape"}
+sq_str <- "'" (escape / (!['\n] .))* "'"?
+dq_str <- '"' (escape / (!["\n] .))* '"'?
+string <- cap{sq_str / dq_str, "constant.string"}
+
+number <- cap{float / integer, "constant.number"}
+
+keyword <- cap{words{
+    'syntax', 'edition', 'import', 'weak', 'public', 'package', 'option',
+    'message', 'enum', 'service', 'rpc', 'returns', 'stream', 'extend',
+    'extensions', 'oneof', 'map', 'group', 'reserved', 'to', 'max',
+    'required', 'optional', 'repeated', 'default'
+}, "keyword"}
+
+type <- cap{words{
+    'double', 'float', 'int32', 'int64', 'uint32', 'uint64', 'sint32',
+    'sint64', 'fixed32', 'fixed64', 'sfixed32', 'sfixed64', 'bool', 'string',
+    'bytes'
+}, "type"}
+
+bool <- cap{words{'true', 'false'}, "constant.bool"}
+
+message <- cap{'message' / 'enum' / 'service', "keyword"} space+ cap{word, "type.class"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[=;,.<>(){}\[\]], "symbol.operator"}
+
+token <- ws
+       / comment
+       / message
+       / keyword
+       / type
+       / bool
+       / string
+       / identifier
+       / number
+       / operator

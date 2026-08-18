@@ -1,0 +1,23 @@
+ws <- space+
+
+comment <- cap{'!' (!'\n' .)*, "comment"}
+
+preproc <- cap{'#' [ \t]* words{'define', 'undef', 'include', 'if', 'ifdef', 'ifndef', 'else', 'elif', 'endif'}, "preproc"}
+
+resource <- cap{(alnum / [_\-]) (alnum / [_\-*.?])*, "type.attribute"} &([ \t]* ':')
+
+color  <- cap{'#' xdigit xdigit xdigit (xdigit xdigit xdigit)? (xdigit xdigit xdigit)?, "constant"} !xdigit
+        / cap{'rgb:' (xdigit / '/')+, "constant"}
+number <- cap{float / integer, "constant.number"} !(alnum / [_.])
+
+value    <- cap{'"' (!["\n] .)* '"'?, "constant.string"}
+operator <- cap{[:], "symbol.operator"}
+
+token <- ws
+       / comment
+       / preproc
+       / resource
+       / value
+       / color
+       / number
+       / operator

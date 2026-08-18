@@ -1,0 +1,62 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape   <- cap{'\\' ., "constant.string.escape"}
+interp   <- cap{'${' (!'}' .)* '}', "type.variable"}
+sq_str   <- "'" (escape / (!['] .))* "'"?
+dq_str   <- '"' (escape / interp / (!["] .))* '"'?
+heredoc  <- '@(' (!')' .)* ')'
+string   <- cap{sq_str / dq_str / heredoc, "constant.string"}
+regex    <- cap{'/' (escape / (!('/' / '\n') .))+ '/', "constant.string.regex"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+variable <- cap{'$' ('{' (!'}' .)* '}' / (alnum / [_:])+), "type.variable"}
+
+keyword <- cap{words{
+    'and', 'application', 'attr', 'case', 'class', 'consumes', 'default',
+    'define', 'elsif', 'else', 'environment', 'false', 'function', 'if',
+    'import', 'in', 'inherits', 'node', 'or', 'private', 'produces', 'site',
+    'true', 'type', 'undef', 'unless'
+}, "keyword"}
+
+type <- cap{words{
+    'Any', 'Array', 'Boolean', 'Callable', 'Catalogentry', 'Class',
+    'Collection', 'Data', 'Default', 'Enum', 'Float', 'Hash', 'Integer',
+    'Iterable', 'Iterator', 'NotUndef', 'Numeric', 'Optional', 'Pattern',
+    'Regexp', 'Resource', 'Runtime', 'Scalar', 'Sensitive', 'String',
+    'Struct', 'Tuple', 'Type', 'Undef', 'Variant'
+} / [A-Z] (alnum / '_')* ('::' [A-Z] (alnum / '_')*)*, "type"}
+
+resource <- cap{words{
+    'augeas', 'computer', 'cron', 'exec', 'file', 'filebucket', 'group',
+    'host', 'interface', 'k5login', 'macauthorization', 'mailalias',
+    'maillist', 'mcx', 'mount', 'nagios_command', 'notify', 'package',
+    'resources', 'router', 'schedule', 'scheduled_task', 'selboolean',
+    'selmodule', 'service', 'ssh_authorized_key', 'sshkey', 'stage', 'tidy',
+    'user', 'vlan', 'yumrepo', 'zfs', 'zone', 'zpool'
+}, "function.builtin"} &([ \t]* '{')
+
+bool <- cap{words{'true', 'false', 'undef'}, "constant.bool"}
+
+define     <- cap{'class' / 'define' / 'node', "keyword"} space+ cap{(alnum / [_:.\-])+, "type.class"}
+attribute  <- cap{word, "type.attribute"} &([ \t]* '=>')
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{'=>' / '->' / '~>' / [+\-*/%<>!=&|:;,.?()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / variable
+       / define
+       / bool
+       / keyword
+       / type
+       / resource
+       / attribute
+       / identifier
+       / number
+       / regex
+       / operator

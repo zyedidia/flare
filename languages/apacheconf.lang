@@ -1,0 +1,49 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+section <- cap{'<' '/'? words{
+    'AuthnProviderAlias', 'Directory', 'DirectoryMatch', 'Files', 'FilesMatch',
+    'IfDefine', 'IfModule', 'IfVersion', 'Limit', 'LimitExcept', 'Location',
+    'LocationMatch', 'Macro', 'Proxy', 'ProxyMatch', 'RequireAll', 'RequireAny',
+    'RequireNone', 'VirtualHost'
+} (!'>' .)* '>', "keyword"}
+
+variable <- cap{'$' ('{' (!'}' .)* '}' / word) / '%' ['{] (!('}' / space) .)* '}'?, "type.variable"}
+string   <- cap{'"' ('\\' . / (!["] .))* '"'?, "constant.string"}
+
+number <- cap{integer, "constant.number"} !(alnum / [_.])
+
+directive <- cap{words{
+    'AddDefaultCharset', 'AddHandler', 'AddType', 'Alias', 'AllowOverride',
+    'AuthName', 'AuthType', 'AuthUserFile', 'CustomLog', 'DefaultType',
+    'DirectoryIndex', 'DocumentRoot', 'ErrorDocument', 'ErrorLog',
+    'ExpiresActive', 'ExpiresByType', 'FallbackResource', 'Header', 'Include',
+    'IncludeOptional', 'Listen', 'LoadModule', 'LogFormat', 'LogLevel',
+    'MaxRequestWorkers', 'Options', 'Order', 'PassEnv', 'ProxyPass',
+    'ProxyPassReverse', 'ProxyPreserveHost', 'Redirect', 'RedirectMatch',
+    'Require', 'RewriteCond', 'RewriteEngine', 'RewriteRule', 'ScriptAlias',
+    'ServerAdmin', 'ServerAlias', 'ServerName', 'ServerRoot', 'ServerTokens',
+    'SetEnv', 'SetEnvIf', 'SetHandler', 'SSLCertificateFile',
+    'SSLCertificateKeyFile', 'SSLEngine', 'Timeout', 'TypesConfig', 'User',
+    'UserDir'
+}, "type.attribute"}
+
+bool <- cap{words{
+    'on', 'off', 'On', 'Off', 'ON', 'OFF', 'all', 'All', 'none', 'None',
+    'granted', 'denied', 'allow', 'deny', 'Allow', 'Deny'
+}, "constant.bool"}
+
+identifier <- cap{(alnum / [_.\-/])+, "identifier"}
+operator   <- cap{[=,:], "symbol.operator"}
+
+token <- ws
+       / comment
+       / section
+       / string
+       / variable
+       / directive
+       / bool
+       / number
+       / identifier
+       / operator

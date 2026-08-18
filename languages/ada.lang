@@ -1,0 +1,66 @@
+ws <- space+
+
+comment <- cap{'--' (!'
+' .)*, "comment"}
+
+string <- cap{'"' ('""' / (!["
+] .))* '"'?, "constant.string"}
+char   <- cap{"'" (!['
+] .) "'", "constant.string.char"}
+
+number <- cap{integer '#' (alnum / '_' / '.')+ '#' / float / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'abort', 'abs', 'abstract', 'accept', 'access', 'aliased', 'all', 'and',
+    'array', 'at', 'begin', 'body', 'case', 'constant', 'declare', 'delay',
+    'delta', 'digits', 'do', 'else', 'elsif', 'end', 'entry', 'exception',
+    'exit', 'for', 'function', 'generic', 'goto', 'if', 'in', 'interface', 'is',
+    'limited', 'loop', 'mod', 'new', 'not', 'null', 'of', 'or', 'others', 'out',
+    'overriding', 'package', 'parallel', 'pragma', 'private', 'procedure',
+    'protected', 'raise', 'range', 'record', 'rem', 'renames', 'requeue',
+    'return', 'reverse', 'select', 'separate', 'some', 'subtype',
+    'synchronized', 'tagged', 'task', 'terminate', 'then', 'type', 'until',
+    'use', 'when', 'while', 'with', 'xor', 'true', 'false', 'ABORT', 'ABS',
+    'ABSTRACT', 'ACCEPT', 'ACCESS', 'ALIASED', 'ALL', 'AND', 'ARRAY', 'AT',
+    'BEGIN', 'BODY', 'CASE', 'CONSTANT', 'DECLARE', 'DELAY', 'DELTA', 'DIGITS',
+    'DO', 'ELSE', 'ELSIF', 'END', 'ENTRY', 'EXCEPTION', 'EXIT', 'FOR',
+    'FUNCTION', 'GENERIC', 'GOTO', 'IF', 'IN', 'INTERFACE', 'IS', 'LIMITED',
+    'LOOP', 'MOD', 'NEW', 'NOT', 'NULL', 'OF', 'OR', 'OTHERS', 'OUT',
+    'OVERRIDING', 'PACKAGE', 'PARALLEL', 'PRAGMA', 'PRIVATE', 'PROCEDURE',
+    'PROTECTED', 'RAISE', 'RANGE', 'RECORD', 'REM', 'RENAMES', 'REQUEUE',
+    'RETURN', 'REVERSE', 'SELECT', 'SEPARATE', 'SOME', 'SUBTYPE',
+    'SYNCHRONIZED', 'TAGGED', 'TASK', 'TERMINATE', 'THEN', 'TYPE', 'UNTIL',
+    'USE', 'WHEN', 'WHILE', 'WITH', 'XOR', 'TRUE', 'FALSE'
+}, "keyword"}
+
+type <- cap{words{
+    'boolean', 'character', 'count', 'duration', 'float', 'integer',
+    'long_float', 'long_integer', 'priority', 'short_float', 'short_integer',
+    'string', 'BOOLEAN', 'CHARACTER', 'COUNT', 'DURATION', 'FLOAT', 'INTEGER',
+    'LONG_FLOAT', 'LONG_INTEGER', 'PRIORITY', 'SHORT_FLOAT', 'SHORT_INTEGER',
+    'STRING'
+}, "type"}
+
+bool      <- cap{words{'true', 'false', 'null', 'True', 'False', 'Null', 'TRUE', 'FALSE', 'NULL'}, "constant.bool"}
+attribute <- cap{"'" word, "type.attribute"}
+label     <- cap{'<<' word '>>', "special"}
+
+subprogram <- cap{words{'procedure', 'function', 'package', 'task', 'protected', 'PROCEDURE', 'FUNCTION', 'PACKAGE'}, "keyword"}
+              space+ cap{(alpha) (alnum / [_.])*, "function"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/<>=&|:;,.()], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / char
+       / label
+       / subprogram
+       / bool
+       / keyword
+       / type
+       / identifier
+       / number
+       / attribute
+       / operator

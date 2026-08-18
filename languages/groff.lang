@@ -1,0 +1,25 @@
+# roff/troff/groff, as used by man pages
+
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+comment <- '\n'? cap{'.' [ \t]* '\\"' (!'\n' .)* / '\\"' (!'\n' .)*, "comment"}
+
+macro <- '\n' cap{'.' [ \t]* (alnum / [_\-])+, "keyword"}
+        / '\n' cap{"'" [ \t]* (alnum / [_\-])+, "keyword"}
+
+escape <- cap{'\\' ('f' ('[' (!']' .)* ']' / .) / 's' [+\-]? digit+ / '(' . . / '[' (!']' .)* ']' / '*' ('[' (!']' .)* ']' / .) / 'n' ('[' (!']' .)* ']' / .) / .), "constant.string.escape"}
+
+string <- cap{'"' (!["\n] .)* '"'?, "constant.string"}
+
+number <- cap{float / integer, "constant.number"} !(alnum / '_')
+
+register <- cap{'\\n' ('[' (!']' .)* ']' / .), "type.variable"}
+
+token <- comment
+       / macro
+       / ws
+       / escape
+       / register
+       / string
+       / number

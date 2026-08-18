@@ -1,0 +1,3 @@
+# csharp-script uses the csharp grammar
+
+token <- include{"csharp"}

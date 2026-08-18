@@ -1,0 +1,33 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+# [table] and [[array of tables]] headers, which take up a whole line
+table <- cap{'['+ (alnum / [_.\-'" ])* ']'+, "type.class"} &([ \t]* ('#' / '\n' / !.))
+
+key <- cap{(alnum / [_\-]) (alnum / [_.\-])*, "type.attribute"} &([ \t]* '=')
+
+escape   <- cap{'\\' (['"\\bfnrt] / 'u' xdigit xdigit xdigit xdigit / 'U' xdigit xdigit xdigit xdigit xdigit xdigit xdigit xdigit), "constant.string.escape"}
+ml_basic <- '"""' (escape / (!'"""' .))* '"""'?
+ml_lit   <- "'''" (!"'''" .)* "'''"?
+sq_str   <- "'" (!['\n] .)* "'"?
+dq_str   <- '"' (escape / (!["\n] .))* '"'?
+string   <- cap{ml_basic / ml_lit / dq_str / sq_str, "constant.string"}
+
+date   <- cap{digit digit digit digit '-' digit digit '-' digit digit ([Tt ] digit digit ':' digit digit ':' digit digit ('.' digit+)? ([Zz] / [+\-] digit digit ':' digit digit)?)?, "constant.number"}
+time   <- cap{digit digit ':' digit digit ':' digit digit ('.' digit+)?, "constant.number"}
+number <- cap{(hex_num / float / integer) / words{'inf', 'nan'}, "constant.number"}
+bool   <- cap{words{'true', 'false'}, "constant.bool"}
+
+operator <- cap{[=,.\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / table
+       / string
+       / key
+       / bool
+       / date
+       / time
+       / number
+       / operator

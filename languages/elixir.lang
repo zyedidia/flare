@@ -1,0 +1,48 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape  <- cap{'\\' (['"\\abdefnrstv0] / 'x' xdigit xdigit / 'u{' xdigit+ '}'), "constant.string.escape"}
+interp  <- cap{'#{', "type.variable"} (!'}' .)* cap{'}', "type.variable"}
+heredoc <- '"""' (!'"""' .)* '"""'? / "'''" (!"'''" .)* "'''"?
+sq_str  <- "'" (escape / (!['\n] .))* "'"?
+dq_str  <- '"' (escape / interp / (!["\n] .))* '"'?
+sigil   <- '~' [a-zA-Z] ('(' (!')' .)* ')'? / '{' (!'}' .)* '}'? / '[' (!']' .)* ']'? / '<' (!'>' .)* '>'? / '/' (!'/' .)* '/'? / '|' (!'|' .)* '|'? / '"' (!'"' .)* '"'? / "'" (!"'" .)* "'"?) [a-z]*
+string  <- cap{heredoc / sigil / sq_str / dq_str, "constant.string"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+atom      <- cap{':' (word '?'? '!'? / '"' (!'"' .)* '"' / [+\-*/<>=!&|~^@]+), "constant"}
+attribute <- cap{'@' word, "preproc"}
+
+keyword <- cap{words{
+    'after', 'alias', 'and', 'case', 'catch', 'cond', 'do', 'else', 'end',
+    'fn', 'for', 'if', 'import', 'in', 'not', 'or', 'quote', 'raise',
+    'receive', 'require', 'rescue', 'send', 'super', 'throw', 'try', 'unless',
+    'unquote', 'use', 'when', 'with', 'exit', 'self'
+}, "keyword"}
+
+define <- cap{words{
+    'def', 'defp', 'defmodule', 'defprotocol', 'defimpl', 'defstruct',
+    'defrecord', 'defrecordp', 'defmacro', 'defmacrop', 'defdelegate',
+    'defcallback', 'defexception', 'defoverridable', 'defguard', 'defguardp'
+}, "keyword"} (space+ cap{word ('.' word)* '?'? '!'?, "function"})?
+
+bool <- cap{words{'true', 'false', 'nil'}, "constant.bool"}
+type <- cap{[A-Z] (alnum / '_')* ('.' [A-Z] (alnum / '_')*)*, "type"}
+
+variable   <- cap{'_'? word '?'? '!'?, "identifier"}
+operator   <- cap{'|>' / '->' / '=>' / '<-' / [+\-*/<>=!&|~^\\.,;:()\[\]{}%], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / attribute
+       / define
+       / bool
+       / keyword
+       / atom
+       / type
+       / variable
+       / number
+       / operator

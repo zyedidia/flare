@@ -1,0 +1,19 @@
+# Cython: Python plus the cdef/cimport extensions
+
+cython_keyword <- cap{words{
+    'cdef', 'cpdef', 'cimport', 'ctypedef', 'cppclass', 'nogil', 'gil',
+    'inline', 'readonly', 'public', 'api', 'extern', 'include', 'DEF', 'IF',
+    'ELIF', 'ELSE', 'except', 'namespace', 'const', 'sizeof', 'struct',
+    'union', 'enum', 'fused', 'noexcept'
+}, "keyword"}
+
+cython_type <- cap{words{
+    'bint', 'char', 'complex', 'double', 'float', 'int', 'list', 'long',
+    'object', 'Py_ssize_t', 'short', 'signed', 'size_t', 'unsigned', 'void'
+}, "type"}
+
+python <- include{"python"}
+
+token <- cython_keyword
+       / cython_type
+       / python

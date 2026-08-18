@@ -1,0 +1,65 @@
+ws <- space+
+
+line_comment  <- ('//' / '#') (!('\n' / '?>') .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+open_tag  <- cap{'<?php' / '<?=' / '<?', "preproc"}
+close_tag <- cap{'?>', "preproc"}
+
+escape   <- cap{'\\' (['"\\$nrtvef0] / 'x' xdigit xdigit / 'u{' xdigit+ '}' / [0-7][0-7]?[0-7]?), "constant.string.escape"}
+variable <- cap{'$' (word / '{' (!'}' .)* '}'), "type.variable"}
+sq_str   <- "'" ('\\' . / (!['] .))* "'"?
+dq_str   <- '"' (escape / variable / (!["] .))* '"'?
+heredoc  <- '<<<' [ \t]* ['"]? ref{word, "hd"} ['"]? (!('\n' [ \t]* back{"hd"}) .)* '\n' [ \t]* back{"hd"}
+string   <- cap{heredoc / sq_str, "constant.string"}
+          / cap{'"', "constant.string"} (escape / variable / cap{(!('"' / '\\' / '$') .)+, "constant.string"})* cap{'"', "constant.string"}?
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'abstract', 'and', 'array', 'as', 'break', 'callable', 'case', 'catch',
+    'class', 'clone', 'const', 'continue', 'declare', 'default', 'do', 'echo',
+    'else', 'elseif', 'empty', 'enddeclare', 'endfor', 'endforeach', 'endif',
+    'endswitch', 'endwhile', 'enum', 'extends', 'final', 'finally', 'fn',
+    'for', 'foreach', 'function', 'global', 'goto', 'if', 'implements',
+    'include', 'include_once', 'instanceof', 'insteadof', 'interface', 'isset',
+    'list', 'match', 'namespace', 'new', 'or', 'print', 'private', 'protected',
+    'public', 'readonly', 'require', 'require_once', 'return', 'static',
+    'switch', 'throw', 'trait', 'try', 'unset', 'use', 'var', 'while', 'xor',
+    'yield'
+}, "keyword"}
+
+type <- cap{words{
+    'bool', 'boolean', 'float', 'double', 'int', 'integer', 'iterable',
+    'mixed', 'never', 'object', 'string', 'void', 'self', 'parent'
+}, "type"}
+
+constant <- cap{words{
+    'true', 'false', 'null', 'TRUE', 'FALSE', 'NULL', 'PHP_EOL', 'PHP_INT_MAX',
+    'PHP_INT_MIN', 'PHP_VERSION', '__LINE__', '__FILE__', '__DIR__',
+    '__FUNCTION__', '__CLASS__', '__METHOD__', '__NAMESPACE__'
+}, "constant"}
+
+class <- cap{'class' / 'interface' / 'trait' / 'enum', "keyword"} space+ cap{word, "type.class"}
+func  <- cap{'function', "keyword"} space+ cap{word, "function"}
+call  <- cap{word, "function"} &([ \t]* '(')
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.@()\[\]{}] / '=>' / '->' / '::', "symbol.operator"}
+
+token <- ws
+       / comment
+       / open_tag
+       / close_tag
+       / string
+       / variable
+       / class
+       / func
+       / constant
+       / keyword
+       / type
+       / call
+       / identifier
+       / number
+       / operator

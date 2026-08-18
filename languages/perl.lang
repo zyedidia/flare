@@ -1,0 +1,51 @@
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+pod     <- '\n' cap{'=' alpha (!('\n=cut' / !.) .)* ('\n=cut' (!'\n' .)*)?, "comment"}
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape   <- cap{'\\' ., "constant.string.escape"}
+variable <- cap{[$@%] [$#]? ('{' (!'}' .)* '}' / (alpha / [_:]) (alnum / [_:])* / [0-9_!@/\\,;.&`'+^]), "type.variable"}
+sq_str   <- "'" (escape / (!['] .))* "'"?
+dq_str   <- '"' (escape / variable / (!["] .))* '"'?
+bq_str   <- '`' (escape / variable / (!'`' .))* '`'?
+qw_str   <- words{'qw', 'qq', 'q', 'qr'} [ \t]* ('(' (!')' .)* ')'? / '{' (!'}' .)* '}'? / '[' (!']' .)* ']'? / '<' (!'>' .)* '>'? / '/' (!'/' .)* '/'? / '!' (!'!' .)* '!'? / '|' (!'|' .)* '|'?)
+heredoc  <- '<<' '~'? ['"]? ref{word, "hd"} ['"]? (!('\n' [ \t]* back{"hd"}) .)* '\n' [ \t]* back{"hd"}
+string   <- cap{heredoc / qw_str / sq_str / dq_str / bq_str, "constant.string"}
+
+regex <- cap{('m' / 's' / 'tr' / 'y')? '/' (escape / (!('/' / '\n') .))* '/' (escape / (!('/' / '\n') .))* '/'? [gimsxoe]*, "constant.string.regex"}
+
+number <- cap{float / hex_num / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'BEGIN', 'END', 'and', 'cmp', 'continue', 'do', 'else', 'elsif', 'eq',
+    'eval', 'exit', 'for', 'foreach', 'ge', 'goto', 'gt', 'if', 'last', 'le',
+    'local', 'lt', 'my', 'ne', 'next', 'no', 'not', 'or', 'our', 'package',
+    'redo', 'ref', 'require', 'return', 'state', 'sub', 'unless', 'until',
+    'use', 'wantarray', 'while', 'x', 'xor', '__END__', '__DATA__'
+}, "keyword"}
+
+builtin <- cap{words{
+    'abs', 'bless', 'caller', 'chdir', 'chomp', 'chop', 'chr', 'close',
+    'defined', 'delete', 'die', 'each', 'exists', 'grep', 'index', 'join',
+    'keys', 'lc', 'length', 'map', 'open', 'ord', 'pop', 'print', 'printf',
+    'push', 'reverse', 'scalar', 'shift', 'sort', 'splice', 'split', 'sprintf',
+    'sqrt', 'substr', 'uc', 'unshift', 'values', 'warn', 'wantarray'
+}, "function.builtin"}
+
+sub <- cap{'sub', "keyword"} space+ cap{word, "function"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^~?:;,.\\()\[\]{}], "symbol.operator"}
+
+token <- pod
+       / ws
+       / comment
+       / string
+       / variable
+       / sub
+       / keyword
+       / builtin
+       / identifier
+       / number
+       / operator

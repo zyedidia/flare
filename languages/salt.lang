@@ -1,0 +1,3 @@
+# salt uses the yaml grammar
+
+token <- include{"yaml"}

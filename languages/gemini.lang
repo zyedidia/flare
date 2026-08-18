@@ -1,0 +1,17 @@
+# gemtext
+
+# not space+: a newline is what anchors the line rules below
+ws <- [ \t\r]+
+
+heading <- '\n' cap{'###' / '##' / '#', "preproc"} cap{(!'\n' .)*, "preproc"}
+link    <- '\n' cap{'=>', "keyword"} [ \t]* cap{(!(space / '\n') .)+, "underlined.link"} cap{(!'\n' .)*, "constant.string"}
+quote   <- '\n' cap{'>' (!'\n' .)*, "comment"}
+item    <- '\n' cap{'*' &' ' (!'\n' .)*, "constant"}
+pre     <- '\n' cap{'```' (!'\n' .)*, "keyword"} (!'\n```' .)* ('\n' cap{'```' (!'\n' .)*, "keyword"})?
+
+token <- pre
+       / heading
+       / link
+       / quote
+       / item
+       / ws

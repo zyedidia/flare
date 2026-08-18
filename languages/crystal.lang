@@ -1,0 +1,49 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+escape   <- cap{'\\' (['"\\abefnrstv0#] / 'x' xdigit xdigit / 'u' xdigit+ / 'u{' xdigit+ '}'), "constant.string.escape"}
+interp   <- cap{'#{', "type.variable"} (!'}' .)* cap{'}', "type.variable"}
+sq_str   <- "'" (escape / (!['\n] .))* "'"?
+dq_str   <- '"' (escape / interp / (!["] .))* '"'?
+percent  <- '%' [qQwiI]? ('(' (!')' .)* ')'? / '{' (!'}' .)* '}'? / '[' (!']' .)* ']'? / '<' (!'>' .)* '>'? / '|' (!'|' .)* '|'?)
+heredoc  <- '<<-' ref{[A-Z_]+, "hd"} (!('\n' [ \t]* back{"hd"}) .)* '\n' [ \t]* back{"hd"}
+string   <- cap{heredoc / percent / sq_str / dq_str, "constant.string"}
+regex    <- cap{'/' (escape / (!('/' / '\n') .))+ '/' [imx]*, "constant.string.regex"}
+
+number <- cap{(float / hex_num / integer) ('_' [iuf] integer)?, "constant.number"} !(alnum / '_')
+
+symbol   <- cap{':' (word [?!]? / '"' (!'"' .)* '"'), "constant"}
+variable <- cap{[@$] '@'? word, "type.variable"}
+
+keyword <- cap{words{
+    'abstract', 'alias', 'annotation', 'as', 'asm', 'begin', 'break', 'case',
+    'class', 'def', 'do', 'else', 'elsif', 'end', 'ensure', 'enum', 'extend',
+    'for', 'fun', 'if', 'include', 'instance_sizeof', 'lib', 'macro', 'module',
+    'next', 'of', 'out', 'pointerof', 'private', 'protected', 'require',
+    'rescue', 'return', 'select', 'sizeof', 'struct', 'super', 'then', 'type',
+    'typeof', 'uninitialized', 'union', 'unless', 'until', 'when', 'while',
+    'with', 'yield', 'in', 'and', 'or', 'not'
+}, "keyword"}
+
+bool <- cap{words{'true', 'false', 'nil', 'self'}, "constant.bool"}
+type <- cap{[A-Z] (alnum / '_')*, "type"}
+
+define <- cap{'def' / 'class' / 'module' / 'struct' / 'lib' / 'enum', "keyword"}
+          space+ cap{(word / [A-Z] (alnum / '_')*) ('.' word)* [?!=]?, "function"}
+
+identifier <- cap{word [?!]?, "identifier"}
+operator   <- cap{[+\-*/%<>=!&|^~?:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / define
+       / bool
+       / keyword
+       / symbol
+       / variable
+       / type
+       / identifier
+       / number
+       / operator

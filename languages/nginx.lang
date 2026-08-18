@@ -1,0 +1,44 @@
+ws <- space+
+
+comment <- cap{'#' (!'\n' .)*, "comment"}
+
+variable <- cap{'$' ('{' (!'}' .)* '}' / word), "type.variable"}
+string   <- cap{'"' ('\\' . / variable / (!["] .))* '"'? / "'" ('\\' . / (!['] .))* "'"?, "constant.string"}
+
+number <- cap{integer [kKmMgGdhms]?, "constant.number"} !(alnum / [_.])
+
+block <- cap{words{
+    'events', 'geo', 'http', 'if', 'limit_except', 'location', 'map', 'mail',
+    'server', 'split_clients', 'stream', 'types', 'upstream'
+}, "keyword"}
+
+directive <- cap{words{
+    'access_log', 'add_header', 'alias', 'allow', 'autoindex', 'break',
+    'charset', 'client_body_buffer_size', 'client_max_body_size', 'daemon',
+    'default_type', 'deny', 'error_log', 'error_page', 'expires', 'fastcgi_pass',
+    'fastcgi_param', 'gzip', 'gzip_types', 'include', 'index', 'internal',
+    'keepalive_timeout', 'limit_req', 'listen', 'log_format', 'proxy_buffering',
+    'proxy_cache', 'proxy_pass', 'proxy_redirect', 'proxy_set_header',
+    'return', 'rewrite', 'root', 'sendfile', 'server_name', 'server_tokens',
+    'set', 'ssl_certificate', 'ssl_certificate_key', 'ssl_ciphers',
+    'ssl_protocols', 'try_files', 'upstream', 'user', 'worker_connections',
+    'worker_processes'
+}, "type.attribute"}
+
+bool <- cap{words{'on', 'off'}, "constant.bool"}
+
+regex      <- cap{'~' '*'?, "symbol.operator"}
+identifier <- cap{(alnum / [_.\-/])+, "identifier"}
+operator   <- cap{[{};=], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / variable
+       / block
+       / directive
+       / bool
+       / regex
+       / number
+       / identifier
+       / operator

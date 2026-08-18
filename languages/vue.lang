@@ -1,0 +1,3 @@
+# vue uses the html grammar
+
+token <- include{"html"}

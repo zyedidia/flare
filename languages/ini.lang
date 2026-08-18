@@ -1,0 +1,31 @@
+ws <- space+
+
+comment <- cap{[;#] (!'\n' .)*, "comment"}
+section <- cap{'[' (!(']' / '\n') .)* ']', "type.class"}
+
+key <- cap{(alpha / [_.\-]) (alnum / [_.\-])*, "type.attribute"} &([ \t]* [=:])
+
+sq_str <- "'" (!['\n] .)* "'"?
+dq_str <- '"' (!["\n] .)* '"'?
+string <- cap{sq_str / dq_str, "constant.string"}
+
+bool <- cap{words{
+    'true', 'false', 'yes', 'no', 'on', 'off',
+    'True', 'False', 'Yes', 'No', 'On', 'Off',
+    'TRUE', 'FALSE', 'YES', 'NO', 'ON', 'OFF'
+}, "constant.bool"}
+number <- cap{float / integer, "constant.number"} !(alnum / [_.\-])
+
+variable <- cap{'$' ('{' (!('}' / '\n') .)* '}' / word) / '%' word '%', "type.variable"}
+
+operator <- cap{[=:,], "symbol.operator"}
+
+token <- ws
+       / comment
+       / section
+       / string
+       / key
+       / bool
+       / number
+       / variable
+       / operator

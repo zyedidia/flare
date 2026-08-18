@@ -1,0 +1,51 @@
+ws <- space+
+
+block_comment <- '#|' {{(!'|#' .)}}* '|#'?
+line_comment  <- ';' (!'\n' .)*
+comment       <- cap{block_comment / line_comment, "comment"}
+
+escape <- cap{'\\' ., "constant.string.escape"}
+dq_str <- '"' (escape / (!["] .))* '"'?
+string <- cap{dq_str, "constant.string"}
+char   <- cap{'#\\' (words{'Space', 'Newline', 'Tab', 'Rubout', 'Page', 'Linefeed', 'Return', 'Backspace'} / .), "constant.string.char"}
+
+number <- cap{float / integer / '#' [xXoObB] (alnum / [+\-])+, "constant.number"} !(alnum / [_\-])
+
+symbol_char <- alnum / [*+!\-_?<>=/.:$%&~^]
+
+keyword <- cap{words{
+    'defun', 'defmacro', 'defvar', 'defparameter', 'defconstant', 'defstruct',
+    'defclass', 'defmethod', 'defgeneric', 'defpackage', 'define',
+    'define-syntax', 'lambda', 'let', 'let*', 'letrec', 'flet', 'labels',
+    'if', 'cond', 'case', 'when', 'unless', 'and', 'or', 'not', 'do', 'dolist',
+    'dotimes', 'loop', 'return', 'return-from', 'block', 'progn', 'prog1',
+    'setq', 'setf', 'quote', 'function', 'in-package', 'require', 'provide',
+    'eval-when', 'declare', 'declaim', 'the', 'catch', 'throw',
+    'unwind-protect', 'handler-case', 'multiple-value-bind', 'destructuring-bind',
+    'begin', 'set!', 'delay', 'force', 'else'
+}, "keyword"}
+
+builtin <- cap{words{
+    'car', 'cdr', 'cons', 'list', 'append', 'length', 'nth', 'nthcdr', 'last',
+    'reverse', 'member', 'assoc', 'mapcar', 'mapc', 'apply', 'funcall', 'eq',
+    'eql', 'equal', 'equalp', 'null', 'atom', 'consp', 'listp', 'numberp',
+    'stringp', 'symbolp', 'zerop', 'print', 'princ', 'format', 'read', 'error',
+    'display', 'newline', 'string-append', 'vector', 'make-array', 'aref',
+    'gethash', 'make-hash-table', 'sort', 'remove', 'find', 'position'
+}, "function.builtin"}
+
+bool <- cap{words{'t', 'nil'} / '#t' / '#f', "constant.bool"}
+
+identifier <- cap{symbol_char+, "identifier"}
+operator   <- cap{[()\[\]'`,@#], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / char
+       / bool
+       / keyword
+       / builtin
+       / identifier
+       / number
+       / operator

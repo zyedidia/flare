@@ -1,0 +1,51 @@
+# Jinja2/Twig/Django templates, which wrap another markup language
+
+ws <- space+
+
+comment <- cap{'{#' (!'#}' .)* '#}'?, "comment"}
+
+escape <- cap{'\\' ., "constant.string.escape"}
+sq_str <- "'" (escape / (!['] .))* "'"?
+dq_str <- '"' (escape / (!["] .))* '"'?
+string <- cap{sq_str / dq_str, "constant.string"}
+
+number <- cap{float / integer, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'and', 'as', 'autoescape', 'block', 'blocktrans', 'break', 'call',
+    'comment', 'continue', 'csrf_token', 'cycle', 'do', 'elif', 'else',
+    'embed', 'empty', 'endautoescape', 'endblock', 'endcall', 'endcomment',
+    'endembed', 'endfilter', 'endfor', 'endif', 'endmacro', 'endraw',
+    'endset', 'endspaceless', 'endtrans', 'endverbatim', 'endwith', 'extends',
+    'filter', 'firstof', 'flush', 'for', 'from', 'if', 'ifchanged', 'ignore',
+    'import', 'in', 'include', 'is', 'load', 'macro', 'missing', 'not', 'now',
+    'or', 'raw', 'regroup', 'sandbox', 'set', 'spaceless', 'ssi', 'templatetag',
+    'trans', 'url', 'use', 'verbatim', 'widthratio', 'with', 'without'
+}, "keyword"}
+
+filter <- cap{words{
+    'abs', 'attr', 'batch', 'capitalize', 'center', 'default', 'dictsort',
+    'escape', 'filesizeformat', 'first', 'float', 'forceescape', 'format',
+    'groupby', 'indent', 'int', 'join', 'last', 'length', 'list', 'lower',
+    'map', 'max', 'min', 'pprint', 'random', 'reject', 'rejectattr',
+    'replace', 'reverse', 'round', 'safe', 'select', 'selectattr', 'slice',
+    'sort', 'string', 'striptags', 'sum', 'title', 'tojson', 'trim',
+    'truncate', 'unique', 'upper', 'urlencode', 'urlize', 'wordcount',
+    'wordwrap', 'xmlattr'
+}, "function.builtin"}
+
+bool <- cap{words{'true', 'false', 'none', 'True', 'False', 'None'}, "constant.bool"}
+
+expr_item <- ws / string / keyword / filter / bool / number
+           / cap{word, "identifier"}
+           / cap{[|.,()\[\]{}=<>!+\-*/%~:], "symbol.operator"}
+
+statement <- cap{'{%' '-'?, "preproc"} (!('-'? '%}') expr_item)* cap{'-'? '%}', "preproc"}
+expression <- cap{'{{' '-'?, "preproc"} (!('-'? '}}') expr_item)* cap{'-'? '}}', "preproc"}
+
+html <- include{"html"}
+
+token <- comment
+       / statement
+       / expression
+       / html

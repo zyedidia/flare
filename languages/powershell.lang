@@ -1,0 +1,48 @@
+ws <- space+
+
+block_comment <- '<#' {{(!'#>' .)}}* '#>'?
+line_comment  <- '#' (!'\n' .)*
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape   <- cap{'`' ., "constant.string.escape"}
+variable <- cap{'$' ('{' (!'}' .)* '}' / words{'true', 'false', 'null', 'True', 'False', 'Null'} / (alpha / '_') (alnum / [_:])*), "type.variable"}
+here_dq  <- '@"' (!'"@' .)* '"@'?
+here_sq  <- "@'" (!"'@" .)* "'@"?
+sq_str   <- "'" ("''" / (!['] .))* "'"?
+dq_str   <- '"' (escape / variable / (!["] .))* '"'?
+string   <- cap{here_dq / here_sq / sq_str / dq_str, "constant.string"}
+
+number <- cap{(float / hex_num / integer) [kKmMgGtTpP]? [bB]?, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'begin', 'break', 'catch', 'class', 'continue', 'data', 'define', 'do',
+    'dynamicparam', 'else', 'elseif', 'end', 'enum', 'exit', 'filter',
+    'finally', 'for', 'foreach', 'from', 'function', 'hidden', 'if', 'in',
+    'inlinescript', 'param', 'process', 'return', 'static', 'switch', 'throw',
+    'trap', 'try', 'until', 'using', 'var', 'while', 'workflow',
+    'Begin', 'Break', 'Catch', 'Continue', 'Do', 'Else', 'ElseIf', 'End',
+    'Exit', 'Finally', 'For', 'ForEach', 'Function', 'If', 'In', 'Param',
+    'Process', 'Return', 'Switch', 'Throw', 'Try', 'Until', 'While'
+}, "keyword"}
+
+type <- cap{'[' [a-zA-Z] (alnum / [_.\[\]])* ']', "type"}
+
+# -eq, -like, -not and friends, and cmdlet parameters like -Path
+option <- cap{'-' (alpha / '_') (alnum / '_')*, "type.attribute"}
+
+cmdlet <- cap{[A-Z] (alpha)* '-' [A-Z] (alnum / '_')*, "function"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+*/%<>=!&|^,;:.@()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / variable
+       / type
+       / cmdlet
+       / keyword
+       / option
+       / identifier
+       / number
+       / operator

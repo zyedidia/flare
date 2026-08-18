@@ -1,0 +1,55 @@
+ws <- space+
+
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+escape     <- cap{'\\' (['"\\$bnrt] / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+interp     <- cap{'$' (word / '{' (!'}' .)* '}'), "type.variable"}
+raw_str    <- '"""' (!'"""' .)* '"""'?
+dq_str     <- '"' (escape / interp / (!["\n] .))* '"'?
+string     <- cap{raw_str, "constant.string"} / cap{'"', "constant.string"} (escape / interp / cap{(!('"' / '\\' / '$' / '\n') .)+, "constant.string"})* cap{'"', "constant.string"}?
+char       <- cap{"'" (escape / (!['\n] .)) "'", "constant.string.char"}
+
+number <- cap{(float / integer) [uUlLfF]*, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'as', 'break', 'class', 'continue', 'do', 'else', 'false', 'for', 'fun',
+    'if', 'in', 'interface', 'is', 'null', 'object', 'package', 'return',
+    'super', 'this', 'throw', 'true', 'try', 'typealias', 'typeof', 'val',
+    'var', 'when', 'while', 'by', 'catch', 'constructor', 'delegate',
+    'dynamic', 'field', 'file', 'finally', 'get', 'import', 'init', 'param',
+    'property', 'receiver', 'set', 'setparam', 'value', 'where', 'actual',
+    'abstract', 'annotation', 'companion', 'const', 'crossinline', 'data',
+    'enum', 'expect', 'external', 'final', 'infix', 'inline', 'inner',
+    'internal', 'lateinit', 'noinline', 'open', 'operator', 'out', 'override',
+    'private', 'protected', 'public', 'reified', 'sealed', 'suspend', 'tailrec',
+    'vararg'
+}, "keyword"}
+
+bool <- cap{words{'true', 'false', 'null'}, "constant.bool"}
+
+type <- cap{[A-Z] (alnum / '_')*, "type"}
+
+annotation <- cap{'@' word, "type.annotation"}
+label      <- cap{word '@', "special"}
+
+fun   <- cap{'fun', "keyword"} space+ cap{word, "function"}
+class <- cap{'class' / 'object' / 'interface', "keyword"} space+ cap{word, "type.class"}
+
+identifier <- cap{word / '`' (!('`' / '\n') .)* '`', "identifier"}
+operator   <- cap{[+\-*/%<>!=&|^?:;,.()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / char
+       / annotation
+       / fun
+       / class
+       / bool
+       / keyword
+       / type
+       / identifier
+       / number
+       / operator

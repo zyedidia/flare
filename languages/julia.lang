@@ -1,0 +1,57 @@
+ws <- space+
+
+block_comment <- '#=' {{(!'=#' .)}}* '=#'?
+line_comment  <- '#' (!'\n' .)*
+comment       <- cap{block_comment / line_comment, "comment"}
+
+escape  <- cap{'\\' (['"\\$abfnrtv0] / 'x' xdigit xdigit / 'u' xdigit+), "constant.string.escape"}
+interp  <- cap{'$' (word / '(' (!')' .)* ')'), "type.variable"}
+tri_str <- '"""' (!'"""' .)* '"""'?
+dq_str  <- '"' (escape / interp / (!["\n] .))* '"'?
+char    <- cap{"'" (escape / (!['\n] .)) "'", "constant.string.char"}
+string  <- cap{tri_str / dq_str, "constant.string"}
+regex   <- cap{'r"' (escape / (!["] .))* '"' [imsx]*, "constant.string.regex"}
+
+number <- cap{(float / hex_num / integer) 'im'? / integer 'im', "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'baremodule', 'begin', 'break', 'catch', 'const', 'continue', 'do', 'else',
+    'elseif', 'end', 'export', 'false', 'finally', 'for', 'function', 'global',
+    'if', 'import', 'in', 'isa', 'let', 'local', 'macro', 'module', 'mutable',
+    'outer', 'primitive', 'quote', 'return', 'struct', 'true', 'try', 'using',
+    'where', 'while', 'abstract', 'type'
+}, "keyword"}
+
+type <- cap{words{
+    'Any', 'Array', 'Bool', 'Char', 'Complex', 'Dict', 'Float16', 'Float32',
+    'Float64', 'Function', 'Int', 'Int8', 'Int16', 'Int32', 'Int64', 'Int128',
+    'Integer', 'Nothing', 'Number', 'Pair', 'Rational', 'Real', 'Ref', 'Set',
+    'String', 'Symbol', 'Tuple', 'UInt', 'UInt8', 'UInt16', 'UInt32', 'UInt64',
+    'Union', 'Vector', 'Matrix', 'Missing', 'AbstractString', 'AbstractArray'
+} / [A-Z] (alnum / '_')*, "type"}
+
+bool  <- cap{words{'true', 'false', 'nothing', 'missing', 'pi', 'Inf', 'NaN'}, "constant.bool"}
+macro <- cap{'@' word ('.' word)*, "preproc"}
+symbol<- cap{':' (alpha / '_') (alnum / [_!])*, "constant"}
+
+func  <- cap{'function' / 'macro', "keyword"} space+ cap{word ('.' word)*, "function"}
+call  <- cap{word '!'?, "function"} &([ \t]* [(!])
+
+identifier <- cap{word '!'?, "identifier"}
+operator   <- cap{[+\-*/\\%<>!=&|^~?:;,.'()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / regex
+       / string
+       / char
+       / macro
+       / func
+       / bool
+       / keyword
+       / type
+       / symbol
+       / call
+       / identifier
+       / number
+       / operator

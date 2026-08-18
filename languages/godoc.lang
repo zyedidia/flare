@@ -1,0 +1,3 @@
+# godoc uses the go grammar
+
+token <- include{"go"}

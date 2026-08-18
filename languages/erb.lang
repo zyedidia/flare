@@ -1,0 +1,13 @@
+# ERB/RHTML: Ruby embedded in HTML
+
+ruby <- include{"ruby"}
+html <- include{"html"}
+
+erb_comment <- cap{'<%#' (!'%>' .)* '%>'?, "comment"}
+erb_block   <- cap{'<%' [=\-]?, "preproc"}
+               (!('-'? '%>') (ruby / (. (!ruby .)*)))*
+               cap{'-'? '%>', "preproc"}?
+
+token <- erb_comment
+       / erb_block
+       / html

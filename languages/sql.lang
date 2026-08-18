@@ -1,0 +1,121 @@
+ws <- space+
+
+line_comment  <- ('--' / '#') (!'
+' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
+
+# a doubled quote is how a quote is escaped inside a string
+sq_str <- "'" ("''" / (!"'" .))* "'"?
+dq_str <- '"' ('""' / (!'"' .))* '"'?
+bq_str <- "`" (!"`" .)* "`"?
+string <- cap{sq_str / dq_str, "constant.string"}
+quoted <- cap{bq_str, "identifier"}
+
+number <- cap{float / integer, "constant.number"} !(alnum / '_')
+
+variable <- cap{'@' '@'? word / [:?] word, "type.variable"}
+
+keyword <- cap{words{
+    'add', 'all', 'alter', 'analyze', 'and', 'as', 'asc', 'asensitive',
+    'before', 'between', 'both', 'by', 'call', 'cascade', 'case', 'change',
+    'check', 'collate', 'column', 'condition', 'connection', 'constraint',
+    'continue', 'convert', 'create', 'cross', 'current_user', 'cursor',
+    'database', 'databases', 'day_hour', 'day_microsecond', 'day_minute',
+    'day_second', 'declare', 'default', 'delayed', 'delete', 'desc', 'describe',
+    'deterministic', 'distinct', 'distinctrow', 'div', 'drop', 'dual', 'each',
+    'else', 'elseif', 'enclosed', 'escaped', 'exists', 'exit', 'explain',
+    'false', 'fetch', 'for', 'force', 'foreign', 'from', 'fulltext', 'goto',
+    'grant', 'group', 'having', 'high_priority', 'hour_microsecond',
+    'hour_minute', 'hour_second', 'if', 'ignore', 'in', 'index', 'infile',
+    'inner', 'inout', 'insensitive', 'insert', 'into', 'is', 'iterate', 'join',
+    'key', 'keys', 'kill', 'leading', 'leave', 'left', 'like', 'limit', 'lines',
+    'load', 'localtime', 'localtimestamp', 'lock', 'long', 'loop',
+    'low_priority', 'match', 'middleint', 'minute_microsecond', 'minute_second',
+    'mod', 'modifies', 'natural', 'not', 'no_write_to_binlog', 'null', 'on',
+    'optimize', 'option', 'optionally', 'or', 'order', 'out', 'outer',
+    'outfile', 'precision', 'primary', 'procedure', 'purge', 'read', 'reads',
+    'references', 'regexp', 'rename', 'repeat', 'replace', 'require',
+    'restrict', 'return', 'revoke', 'right', 'rlike', 'schema', 'schemas',
+    'second_microsecond', 'select', 'sensitive', 'separator', 'set', 'show',
+    'soname', 'spatial', 'specific', 'sql', 'sqlexception', 'sqlstate',
+    'sqlwarning', 'sql_big_result', 'sql_calc_found_rows', 'sql_small_result',
+    'ssl', 'starting', 'straight_join', 'table', 'terminated', 'then', 'to',
+    'trailing', 'trigger', 'true', 'undo', 'union', 'unique', 'unlock',
+    'unsigned', 'update', 'usage', 'use', 'using', 'utc_date', 'utc_time',
+    'utc_timestamp', 'values', 'varcharacter', 'varying', 'when', 'where',
+    'while', 'with', 'write', 'xor', 'year_month', 'zerofill', 'ADD', 'ALL',
+    'ALTER', 'ANALYZE', 'AND', 'AS', 'ASC', 'ASENSITIVE', 'BEFORE', 'BETWEEN',
+    'BOTH', 'BY', 'CALL', 'CASCADE', 'CASE', 'CHANGE', 'CHECK', 'COLLATE',
+    'COLUMN', 'CONDITION', 'CONNECTION', 'CONSTRAINT', 'CONTINUE', 'CONVERT',
+    'CREATE', 'CROSS', 'CURRENT_USER', 'CURSOR', 'DATABASE', 'DATABASES',
+    'DAY_HOUR', 'DAY_MICROSECOND', 'DAY_MINUTE', 'DAY_SECOND', 'DECLARE',
+    'DEFAULT', 'DELAYED', 'DELETE', 'DESC', 'DESCRIBE', 'DETERMINISTIC',
+    'DISTINCT', 'DISTINCTROW', 'DIV', 'DROP', 'DUAL', 'EACH', 'ELSE', 'ELSEIF',
+    'ENCLOSED', 'ESCAPED', 'EXISTS', 'EXIT', 'EXPLAIN', 'FALSE', 'FETCH', 'FOR',
+    'FORCE', 'FOREIGN', 'FROM', 'FULLTEXT', 'GOTO', 'GRANT', 'GROUP', 'HAVING',
+    'HIGH_PRIORITY', 'HOUR_MICROSECOND', 'HOUR_MINUTE', 'HOUR_SECOND', 'IF',
+    'IGNORE', 'IN', 'INDEX', 'INFILE', 'INNER', 'INOUT', 'INSENSITIVE',
+    'INSERT', 'INTO', 'IS', 'ITERATE', 'JOIN', 'KEY', 'KEYS', 'KILL', 'LEADING',
+    'LEAVE', 'LEFT', 'LIKE', 'LIMIT', 'LINES', 'LOAD', 'LOCALTIME',
+    'LOCALTIMESTAMP', 'LOCK', 'LONG', 'LOOP', 'LOW_PRIORITY', 'MATCH',
+    'MIDDLEINT', 'MINUTE_MICROSECOND', 'MINUTE_SECOND', 'MOD', 'MODIFIES',
+    'NATURAL', 'NOT', 'NO_WRITE_TO_BINLOG', 'NULL', 'ON', 'OPTIMIZE', 'OPTION',
+    'OPTIONALLY', 'OR', 'ORDER', 'OUT', 'OUTER', 'OUTFILE', 'PRECISION',
+    'PRIMARY', 'PROCEDURE', 'PURGE', 'READ', 'READS', 'REFERENCES', 'REGEXP',
+    'RENAME', 'REPEAT', 'REPLACE', 'REQUIRE', 'RESTRICT', 'RETURN', 'REVOKE',
+    'RIGHT', 'RLIKE', 'SCHEMA', 'SCHEMAS', 'SECOND_MICROSECOND', 'SELECT',
+    'SENSITIVE', 'SEPARATOR', 'SET', 'SHOW', 'SONAME', 'SPATIAL', 'SPECIFIC',
+    'SQL', 'SQLEXCEPTION', 'SQLSTATE', 'SQLWARNING', 'SQL_BIG_RESULT',
+    'SQL_CALC_FOUND_ROWS', 'SQL_SMALL_RESULT', 'SSL', 'STARTING',
+    'STRAIGHT_JOIN', 'TABLE', 'TERMINATED', 'THEN', 'TO', 'TRAILING', 'TRIGGER',
+    'TRUE', 'UNDO', 'UNION', 'UNIQUE', 'UNLOCK', 'UNSIGNED', 'UPDATE', 'USAGE',
+    'USE', 'USING', 'UTC_DATE', 'UTC_TIME', 'UTC_TIMESTAMP', 'VALUES',
+    'VARCHARACTER', 'VARYING', 'WHEN', 'WHERE', 'WHILE', 'WITH', 'WRITE', 'XOR',
+    'YEAR_MONTH', 'ZEROFILL'
+}, "keyword"}
+
+type <- cap{words{
+    'bigint', 'binary', 'bit', 'blob', 'bool', 'boolean', 'char', 'character',
+    'date', 'datetime', 'dec', 'decimal', 'double', 'enum', 'float', 'int',
+    'int2', 'int4', 'int8', 'integer', 'interval', 'json', 'jsonb', 'longblob',
+    'longtext', 'mediumblob', 'mediumint', 'mediumtext', 'money', 'numeric',
+    'nvarchar', 'real', 'serial', 'smallint', 'text', 'time', 'timestamp',
+    'tinyblob', 'tinyint', 'tinytext', 'uuid', 'varbinary', 'varchar', 'xml',
+    'BIGINT', 'BINARY', 'BIT', 'BLOB', 'BOOL', 'BOOLEAN', 'CHAR', 'CHARACTER',
+    'DATE', 'DATETIME', 'DEC', 'DECIMAL', 'DOUBLE', 'ENUM', 'FLOAT', 'INT',
+    'INT2', 'INT4', 'INT8', 'INTEGER', 'INTERVAL', 'JSON', 'JSONB', 'LONGBLOB',
+    'LONGTEXT', 'MEDIUMBLOB', 'MEDIUMINT', 'MEDIUMTEXT', 'MONEY', 'NUMERIC',
+    'NVARCHAR', 'REAL', 'SERIAL', 'SMALLINT', 'TEXT', 'TIME', 'TIMESTAMP',
+    'TINYBLOB', 'TINYINT', 'TINYTEXT', 'UUID', 'VARBINARY', 'VARCHAR', 'XML'
+}, "type"}
+
+function <- cap{words{
+    'avg', 'cast', 'ceil', 'coalesce', 'concat', 'count', 'current_date',
+    'current_time', 'current_timestamp', 'date_add', 'date_sub', 'floor',
+    'greatest', 'group_concat', 'ifnull', 'least', 'length', 'lower', 'ltrim',
+    'max', 'min', 'now', 'nullif', 'round', 'rtrim', 'substring', 'sum', 'trim',
+    'upper', 'AVG', 'CAST', 'CEIL', 'COALESCE', 'CONCAT', 'COUNT',
+    'CURRENT_DATE', 'CURRENT_TIME', 'CURRENT_TIMESTAMP', 'DATE_ADD', 'DATE_SUB',
+    'FLOOR', 'GREATEST', 'GROUP_CONCAT', 'IFNULL', 'LEAST', 'LENGTH', 'LOWER',
+    'LTRIM', 'MAX', 'MIN', 'NOW', 'NULLIF', 'ROUND', 'RTRIM', 'SUBSTRING',
+    'SUM', 'TRIM', 'UPPER'
+}, "function"} &([ 	]* '(')
+
+bool <- cap{words{'null', 'true', 'false', 'NULL', 'TRUE', 'FALSE'}, "constant.bool"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>=!|&^~.,;:()\[\]], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / quoted
+       / bool
+       / function
+       / keyword
+       / type
+       / variable
+       / identifier
+       / number
+       / operator

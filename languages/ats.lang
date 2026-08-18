@@ -1,0 +1,54 @@
+# ATS
+
+ws <- space+
+
+block_comment <- '(*' {{(!'*)' .)}}* '*)'?
+rest_comment  <- '////' (!(!.) .)*
+line_comment  <- '//' (!'\n' .)*
+comment       <- cap{rest_comment / line_comment / block_comment, "comment"}
+
+escape <- cap{'\\' ., "constant.string.escape"}
+string <- cap{'"' (escape / (!["\n] .))* '"'?, "constant.string"}
+char   <- cap{"'" (escape / (!['\n] .)) "'", "constant.string.char"}
+
+number <- cap{float / hex_num / integer [uUlL]*, "constant.number"} !(alnum / '_')
+
+keyword <- cap{words{
+    'abstype', 'abst0ype', 'absprop', 'absview', 'absvtype', 'absviewtype',
+    'and', 'as', 'assume', 'begin', 'break', 'case', 'classdec', 'continue',
+    'datasort', 'datatype', 'dataprop', 'dataview', 'datavtype', 'do',
+    'dynload', 'else', 'end', 'exception', 'extern', 'extype', 'extvar',
+    'fix', 'fn', 'fnx', 'for', 'fun', 'if', 'implement', 'import', 'in',
+    'infix', 'infixl', 'infixr', 'lam', 'let', 'local', 'macdef', 'nonfix',
+    'of', 'op', 'overload', 'praxi', 'prefix', 'prfn', 'prfun', 'propdef',
+    'prval', 'rec', 'sif', 'sortdef', 'sta', 'stacst', 'stadef', 'staload',
+    'symelim', 'symintr', 'then', 'try', 'tkindef', 'type', 'typedef', 'val',
+    'var', 'viewdef', 'viewtypedef', 'when', 'where', 'while', 'with',
+    'withtype'
+}, "keyword"}
+
+type <- cap{words{
+    'bool', 'char', 'double', 'float', 'int', 'llint', 'lint', 'ptr', 'ptrk',
+    'ref', 'size_t', 'ssize_t', 'string', 'strptr', 'uint', 'ullint', 'ulint',
+    'uchar', 'void', 'arrayptr', 'list', 'option', 'tuple'
+}, "type"}
+
+bool <- cap{words{'true', 'false'}, "constant.bool"}
+
+define <- cap{'fun' / 'fn' / 'val' / 'implement' / 'praxi' / 'prfun', "keyword"}
+          space+ cap{word, "function"}
+
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/<>=!&|^~?:;,.@$#()\[\]{}], "symbol.operator"}
+
+token <- ws
+       / comment
+       / string
+       / char
+       / define
+       / bool
+       / keyword
+       / type
+       / identifier
+       / number
+       / operator
