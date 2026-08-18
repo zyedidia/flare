@@ -68,6 +68,14 @@ var (
 		p.Or(alpha, p.Literal("_")),
 		p.Star(p.Or(alnum, p.Literal("_"))),
 	)
+
+	// wideWord is what 'words{...}' matches before checking the match against
+	// the word list. It is wider than 'word' because some languages have
+	// keywords and attributes that contain '.' or '-' (e.g. 'http-equiv').
+	wideWord = p.Concat(
+		p.Or(alpha, p.Literal("_")),
+		p.Star(p.Or(alnum, p.Literal("_"), p.Literal("."), p.Literal("-"))),
+	)
 )
 
 func wordMatch(words ...string) p.Pattern {
@@ -77,10 +85,5 @@ func wordMatch(words ...string) p.Pattern {
 		m[w] = struct{}{}
 	}
 
-	word = p.Concat(
-		p.Or(alpha, p.Literal("_")),
-		p.Star(p.Or(alnum, p.Literal("_"), p.Literal("."), p.Literal("-"))),
-	)
-
-	return p.Check(word, isa.MapChecker(m))
+	return p.Check(wideWord, isa.MapChecker(m))
 }

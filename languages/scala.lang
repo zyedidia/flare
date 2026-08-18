@@ -1,71 +1,71 @@
 ws <- space+
 
-block_comment <- '/*' (!'*/' .)* '*/'?
-line_comment <- '//' (!'\n' .)*
-comment <- cap{block_comment / line_comment, "comment"}
+line_comment  <- '//' (!'\n' .)*
+block_comment <- '/*' {{(!'*/' .)}}* '*/'?
+comment       <- cap{line_comment / block_comment, "comment"}
 
-string <- cap{('"''""''"' (!('"''""''"' .)* ('"''""''"' / !(space* '"' space*))) '"'), "constant.string"}
+# strings, including the s"..." style interpolators and triple quotes
+escape        <- cap{'\\' (['"tnbfr\\] / 'u' xdigit xdigit xdigit xdigit), "constant.string.escape"}
+interp        <- word &'"'
+triple_str    <- '"""' {{(!'"""' .)}}* '"""'?
+dq_str        <- '"' (escape / (!["\n] .))* '"'?
+string        <- cap{interp? (triple_str / dq_str), "constant.string"}
+char          <- cap{"'" (escape / (!['\n] .)) "'", "constant.string.char"}
+symbol        <- cap{"'" word, "constant"}
 
-symbol <- cap{'''/'* ('\\.' / (!'''.)) '\''/'*}
-
-number <- cap{(hex_num / dec_num / oct_num) float_suffix?, "constant.number"}
+number        <- cap{(float / integer) [LlFfDd]?, "constant.number"}
 
 keyword <- cap{
     words{
-        'if', 'else', 'for', 'while', 'do', 'match', 'case', 'try', 'catch', 'finally',
-        'yield', 'return', 'throw', 'new', 'import', 'package', 'class', 'trait',
-        'object', 'extends', 'with', 'super', 'val', 'var', 'def', 'type', 'this',
-        'private', 'protected', 'public', 'abstract', 'final', 'sealed', 'implicit',
-        'lazy', 'override', 'inline', 'native', 'synchronized', 'volatile'
+        "abstract", "case", "catch", "class", "def", "derives", "do", "else",
+        "end", "enum", "export", "extends", "extension", "final", "finally",
+        "for", "forSome", "given", "if", "implicit", "import", "inline", "lazy",
+        "match", "new", "object", "opaque", "override", "package", "private",
+        "protected", "return", "sealed", "super", "then", "this", "throw",
+        "trait", "transparent", "try", "type", "using", "val", "var", "while",
+        "with", "yield"
     },
     "keyword"
 }
 
-scala_keyword <- cap{
-    words{
-        'some', 'none', 'true', 'false', 'unit', 'Any', 'AnyRef', 'AnyVal', 'Boolean',
-        'Byte', 'Char', 'Double', 'Float', 'Int', 'Long', 'Short', 'String', 'Unit',
-        'Nothing', 'Null', 'Option', 'Some', 'None'
-    },
-    "keyword"
+bool <- cap{
+    words{"true", "false", "null"},
+    "constant.bool"
 }
 
-built_in <- cap{
+builtin <- cap{
     words{
-        'Predef', 'assert', 'assume', 'require', 'print', 'println', 'readLine',
-        'readBoolean', 'readByte', 'readShort', 'readChar', 'readInt', 'readLong',
-        'readFloat', 'readDouble', 'readf', 'printf', 'Console',
-        'List', 'Nil', 'Seq', 'Set', 'Map', 'Array', 'Vector', 'Stream', 'Range',
-        'Some', 'None', 'Option', 'Left', 'Right', 'Either', 'Tuple', 'Function'
+        "assert", "assume", "implicitly", "print", "printf", "println",
+        "readBoolean", "readByte", "readChar", "readDouble", "readFloat",
+        "readInt", "readLine", "readLong", "readShort", "readf", "require"
     },
     "function.builtin"
 }
 
-annotation <- cap{"@" (ident_symbol / ident), "type.annotation"}
+# any capitalized name is a type, object or case class constructor
+type       <- cap{[A-Z] (alnum / '_')*, "type"}
+annotation <- cap{'@' word, "type.annotation"}
+identifier <- cap{word, "identifier"}
+operator   <- cap{[+\-*/%<>!=^&|?~:;.,@#()\[\]{}], "symbol.operator"}
 
-identifier <- cap{ident, "identifier"}
-
-operator <- cap{
-    [+\-*/%<>&|^!?:=]+ / (('.' / ':')+ | ['.'])
-    !(ident_symbol / ident),
-    "symbol.operator"
-}
-
-type <- cap{((ident_symbol / ident) '.' (ident_symbol / ident))+, "type"}
-
-implicit_param <- cap{"implicit", !(ident_symbol / ident), "type.annotation"}
+# definitions, with the name being defined
+def   <- cap{'def', "keyword"} space+ cap{word, "function"}
+class <- cap{'class' / 'trait' / 'object' / 'enum', "keyword"} space+ cap{word, "type.class"}
+func  <- cap{word, "function"} '('
 
 token <- ws
        / comment
        / string
-       / number
+       / char
+       / symbol
+       / def
+       / class
        / keyword
-       / scala_keyword
-       / built_in
-       / annotation
-       / implicit_param
+       / bool
+       / builtin
        / type
+       / func
        / identifier
+       / number
+       / annotation
        / operator
-
-

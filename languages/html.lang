@@ -9,6 +9,9 @@ string <- cap{sq_str / dq_str, "constant.string"}
 
 in_tag <- &((!'><' .)* '>')
 
+# element and attribute names, which may contain '-' or '.'
+name <- (alpha / '_') (alnum / [_.\-])*
+
 number <- cap{digit+ '%'?, "constant.number"} in_tag
 
 js <- include{"javascript"}
@@ -16,7 +19,7 @@ css <- include{"css"}
 
 js_tag <- cap{'<script', "keyword.element"} (attribute / string / (!'>' .))* cap{'>', "keyword.element"} (!'</script>' (js / (. (!js .)*)))* cap{'</script>', "keyword.element"}?
 css_tag <- cap{'<style', "keyword.element"} (attribute / string / (!'>' .))* cap{'>', "keyword.element"} (!'</style>' (css / (. (!css .)*)))* cap{'</style>', "keyword.element"}?
-any_tag <- cap{'<' '/'? (known_element / word), "keyword.element"} (attribute / string / (!('/'? '>') .))* cap{'/'? '>', "keyword.element"}
+any_tag <- cap{'<' '/'? (known_element / name), "keyword.element"} (attribute / string / (!('/'? '>') .))* cap{'/'? '>', "keyword.element"}
 
 known_element <- words{
   'a', 'abbr', 'address', 'area', 'article', 'aside', 'audio', 'b', 'base',
@@ -53,7 +56,7 @@ known_attribute <- words{
   'step', 'style', 'summary', 'tabindex', 'target', 'title', 'type', 'usemap',
   'value', 'width', 'wrap'
 } / (('data-' / 'aria-') (alnum / '-')+)
-unknown_attribute <- word
+unknown_attribute <- name
 attribute <- cap{(known_attribute / unknown_attribute) &(space* '='), "type.attribute"}
 
 tag_close <- cap{'/'? '>', "keyword.element"}
