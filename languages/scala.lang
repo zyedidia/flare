@@ -1,0 +1,71 @@
+ws <- space+
+
+block_comment <- '/*' (!'*/' .)* '*/'?
+line_comment <- '//' (!'\n' .)*
+comment <- cap{block_comment / line_comment, "comment"}
+
+string <- cap{('"''""''"' (!('"''""''"' .)* ('"''""''"' / !(space* '"' space*))) '"'), "constant.string"}
+
+symbol <- cap{'''/'* ('\\.' / (!'''.)) '\''/'*}
+
+number <- cap{(hex_num / dec_num / oct_num) float_suffix?, "constant.number"}
+
+keyword <- cap{
+    words{
+        'if', 'else', 'for', 'while', 'do', 'match', 'case', 'try', 'catch', 'finally',
+        'yield', 'return', 'throw', 'new', 'import', 'package', 'class', 'trait',
+        'object', 'extends', 'with', 'super', 'val', 'var', 'def', 'type', 'this',
+        'private', 'protected', 'public', 'abstract', 'final', 'sealed', 'implicit',
+        'lazy', 'override', 'inline', 'native', 'synchronized', 'volatile'
+    },
+    "keyword"
+}
+
+scala_keyword <- cap{
+    words{
+        'some', 'none', 'true', 'false', 'unit', 'Any', 'AnyRef', 'AnyVal', 'Boolean',
+        'Byte', 'Char', 'Double', 'Float', 'Int', 'Long', 'Short', 'String', 'Unit',
+        'Nothing', 'Null', 'Option', 'Some', 'None'
+    },
+    "keyword"
+}
+
+built_in <- cap{
+    words{
+        'Predef', 'assert', 'assume', 'require', 'print', 'println', 'readLine',
+        'readBoolean', 'readByte', 'readShort', 'readChar', 'readInt', 'readLong',
+        'readFloat', 'readDouble', 'readf', 'printf', 'Console',
+        'List', 'Nil', 'Seq', 'Set', 'Map', 'Array', 'Vector', 'Stream', 'Range',
+        'Some', 'None', 'Option', 'Left', 'Right', 'Either', 'Tuple', 'Function'
+    },
+    "function.builtin"
+}
+
+annotation <- cap{"@" (ident_symbol / ident), "type.annotation"}
+
+identifier <- cap{ident, "identifier"}
+
+operator <- cap{
+    [+\-*/%<>&|^!?:=]+ / (('.' / ':')+ | ['.'])
+    !(ident_symbol / ident),
+    "symbol.operator"
+}
+
+type <- cap{((ident_symbol / ident) '.' (ident_symbol / ident))+, "type"}
+
+implicit_param <- cap{"implicit", !(ident_symbol / ident), "type.annotation"}
+
+token <- ws
+       / comment
+       / string
+       / number
+       / keyword
+       / scala_keyword
+       / built_in
+       / annotation
+       / implicit_param
+       / type
+       / identifier
+       / operator
+
+
