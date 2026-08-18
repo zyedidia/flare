@@ -23,7 +23,7 @@ function <- cap{
         "append", "cap", "close", "complex", "copy", "delete", "imag", "len", "make", "new", "panic", "print", "println",
         "real", "recover"
     },
-    "function"
+    "function.builtin"
 }
 
 identifier    <- cap{word, "identifier"}
