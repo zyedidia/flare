@@ -16,6 +16,9 @@ var custom map[string]func() ([]byte, error)
 type Theme map[string]Style
 
 func AddTheme(name string, loader func() ([]byte, error)) {
+	if custom == nil {
+		custom = make(map[string]func() ([]byte, error))
+	}
 	custom[name] = loader
 }
 

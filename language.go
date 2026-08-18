@@ -12,6 +12,10 @@ import (
 var builtin func(name string) ([]byte, error)
 var custom map[string]func() ([]byte, error)
 
+// SetLoader sets the function used to load highlighting grammars by name,
+// replacing the loader for the built-in highlighters (see BuiltinLoader) that
+// is installed by default. The loader is also what resolves 'include'
+// directives within grammars.
 func SetLoader(loader func(name string) ([]byte, error)) {
 	builtin = loader
 }
@@ -19,6 +23,9 @@ func SetLoader(loader func(name string) ([]byte, error)) {
 // AddLanguage adds support for a new language. The 'loader' should return the
 // highlighting grammar when called.
 func AddLanguage(name string, loader func() ([]byte, error)) {
+	if custom == nil {
+		custom = make(map[string]func() ([]byte, error))
+	}
 	custom[name] = loader
 }
 
@@ -42,7 +49,9 @@ func loadData(name string) ([]byte, error) {
 	return nil, fmt.Errorf("no highlighter for language: %s", name)
 }
 
-// LoadHighlighter loads a highlighter from some data.
+// LoadHighlighter loads a highlighter from some data. Note that 'include'
+// directives within the data are resolved with the loader (see SetLoader), and
+// not from the given data.
 func LoadHighlighter(lang string, data []byte, memo bool) (*Highlighter, error) {
 	capid := 0
 	refid := 0
