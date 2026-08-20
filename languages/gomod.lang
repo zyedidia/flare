@@ -1,0 +1,37 @@
+# go.mod files. '//' is the only comment form; there are no block comments.
+
+ws <- space+
+
+comment <- cap{'//' (!'\n' .)*, "comment"}
+
+directive <- cap{words{
+    'module', 'go', 'toolchain', 'godebug', 'require', 'exclude', 'replace',
+    'retract'
+}, "keyword"}
+
+# v1.2.3, v0.0.0-20211003024042-9cc4d4b8aa0d, v2.0.0+incompatible
+version <- cap{'v' digit+ ('.' digit+)* ('-' (alnum / [.\-])+)? ('+' (alnum / [.\-])+)?, "constant.version"}
+           !(alnum / [_/])
+# the language version of a 'go' or 'toolchain' line
+goversion <- cap{'go'? digit+ '.' digit+ ('.' digit+)? ((alpha)+ digit+)?, "constant.number"}
+             !(alnum / [_/])
+
+escape <- cap{'\\' ., "constant.string.escape"}
+string <- cap{'"' (escape / (!["\n] .))* '"'? / '`' (!'`' .)* '`'?, "constant.string"}
+
+number <- cap{integer, "constant.number"} !(alnum / [_./])
+path   <- cap{(alnum / [_.~]) (alnum / [_.\-~/])*, "identifier"}
+
+arrow    <- cap{'=>', "symbol.operator"}
+operator <- cap{[(),\[\]=], "symbol.operator"}
+
+token <- ws
+       / comment
+       / directive
+       / string
+       / version
+       / goversion
+       / number
+       / path
+       / arrow
+       / operator
