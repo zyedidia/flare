@@ -8,6 +8,8 @@ github.com/jwalton/go-supportscolor v1.0.0 h1:Do3OE2y/iUibg79+QhkRE6G2evYKEv2bwi
 github.com/jwalton/go-supportscolor v1.0.0/go.mod h1:hFVUAZV2cWg+WFFC4v8pT2X/S2qUUBYMioBD9AINXGs=
 github.com/zyedidia/ftdetect v0.0.0-20211003024042-9cc4d4b8aa0d h1:WYybJNC4z5dKzBvJGHZEmJTLW/VMu9v2ug0Ya67kYTg=
 github.com/zyedidia/ftdetect v0.0.0-20211003024042-9cc4d4b8aa0d/go.mod h1:EdZlkR1FBdsrJH2f+08QoLCSZ35oNMFZzPdCt5d9rYE=
+github.com/zyedidia/ftdetect v0.1.1-0.20260905054707-68b7355d2f37 h1:Xq+z3jlj2JuQOD9P7tWSlqPfzNom5zZqA1MYlU10eco=
+github.com/zyedidia/ftdetect v0.1.1-0.20260905054707-68b7355d2f37/go.mod h1:EdZlkR1FBdsrJH2f+08QoLCSZ35oNMFZzPdCt5d9rYE=
 github.com/zyedidia/gpeg v0.0.0-20211003220203-241091abc9c8 h1:FgMxAqSLBFVc5YujbGAG9JvwxG0dUOIE9YdzLctyGxQ=
 github.com/zyedidia/gpeg v0.0.0-20211003220203-241091abc9c8/go.mod h1:JUfbyVutLbiMWcCx6HhDyRS+D7Umm76+m0UlCykX0Zs=
 github.com/zyedidia/gpeg v0.0.0-20260819234325-d601f967c6a3 h1:TNLNOU2lbxNTHR9fw3AiI1gp4gtqc72WhsO86SpiNw0=
