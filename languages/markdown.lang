@@ -39,11 +39,16 @@ block <- '```' (!"\n" .)* (!'```' .)* '```'?
 
 code <- goblock / cblock / javablock / pythonblock / rubyblock / rustblock / shellblock / texblock / block
 
+# Inline code spans: their contents are verbatim, so they must be matched
+# before any of the rules that would highlight the text inside them.
+inline_code <- cap{'``' (!('``' / "\n") .)* '``' / '`' (!('`' / "\n") .)* '`', "constant.string"}
+
 token <- ws
+       / code
+       / inline_code
        / header
        / href
        / html
        / keyword
        / string
        / latex
-       / code
